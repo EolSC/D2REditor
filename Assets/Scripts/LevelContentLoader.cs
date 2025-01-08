@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,5 +18,14 @@ public class LevelContentLoader
         Debug.Log("Ds1 content length " + old_content.Length);
 
 
+    }
+
+    public bool TestLevelLoading(byte[] ds1Content, string jsonContent)
+    {
+        string resultJson = JsonUtility.ToJson(preset);
+        byte[] resultDS1 = old_content;
+        bool oldContentEqual = resultDS1.Equals(ds1Content);
+        bool jsonEqual = resultJson.Equals(jsonContent);
+        return oldContentEqual && jsonEqual;
     }
 }

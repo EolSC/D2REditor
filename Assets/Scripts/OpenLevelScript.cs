@@ -1,3 +1,5 @@
+using NUnit.Framework;
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -20,6 +22,39 @@ public class OpenLevelScript : MonoBehaviour
     void Update()
     {
         
+    }
+
+    [MenuItem("Diablo Level Editor/Test loading")]
+    private static void TestLoading()
+    {
+        string pathToLevel = "E:\\work\\d2_assets\\global\\tiles\\act1\\barracks\\barew.ds1";
+        string fileName = Path.GetFileNameWithoutExtension(pathToLevel);
+        string pathToJson = System.IO.Path.Combine(rootFolder, presetFolder, fileName + ".json");
+        byte[] dsContent = { };
+        string jsonContent = "";
+        if (File.Exists(pathToLevel))
+        {
+
+            dsContent = File.ReadAllBytes(pathToLevel);
+        }
+        if (File.Exists(pathToJson))
+        {
+
+            jsonContent = File.ReadAllText(pathToJson);
+        }
+
+        LevelContentLoader loader = new LevelContentLoader();
+        loader.LoadLevel(fileName, dsContent, jsonContent);
+        bool loadingResult = loader.TestLevelLoading(dsContent, jsonContent);
+        if (loadingResult)
+        {
+            Debug.Log("Test loading: success");
+        }
+        else
+        {
+            Debug.Log("Test loading: failure");
+        }
+
     }
 
     [MenuItem("Diablo Level Editor/Open level")]
@@ -45,5 +80,7 @@ public class OpenLevelScript : MonoBehaviour
         loader.LoadLevel(fileName, dsContent, jsonContent);
 
     }
+
+
 
 }

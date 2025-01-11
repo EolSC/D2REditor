@@ -47,7 +47,7 @@ namespace Diablo2Editor
             return json.AsFloat;
         }
 
-        protected float SerializeFloat(float value)
+        protected float SerializeFloat(float value, string format = "{0:f}")
         {
             return value;
         }
@@ -162,6 +162,137 @@ namespace Diablo2Editor
     {
 
     }
+
+    public class TerrainDecalDefinitionComponent : LevelEntityComponent
+    {
+        public string albedo;
+        public string normal;
+        public string orm;
+        public int stomp;
+        public int snapOptions;
+        public float parallaxScale;
+        public string biomeName;
+        public int layerIndex;
+        public override void Deserialize(JSONObject json)
+        {
+            base.Deserialize(json);
+            albedo = json["albedo"];
+            normal = json["normal"];
+            orm = json["orm"];
+            stomp = json["stomp"];
+            snapOptions = json["snapOptions"];
+            parallaxScale = DeserializeFloat(json["parallaxScale"]);
+            biomeName = json["biomeName"];
+            layerIndex = json["layerIndex"];
+
+        }
+
+        public override JSONObject Serialize()
+        {
+            JSONObject result = base.Serialize();
+            result["albedo"] = albedo;
+            result["normal"] = normal;
+            result["orm"] = orm;
+            result["stomp"] = stomp;
+            result["snapOptions"] = snapOptions;
+            result["parallaxScale"] = SerializeFloat(parallaxScale);
+            result["biomeName"] = biomeName;
+            result["layerIndex"] = layerIndex;
+
+            return result;
+        }
+    }
+    public class PointLightDefinitionComponent : LevelEntityComponent
+    {
+        public UnityEngine.Color color = UnityEngine.Color.white;
+        public float power = 0.0f;
+        public float radius = 0.0f;
+        public float attenuation = 0.0f;
+        public int lightMask = 0;
+        public bool isLocalLight = false;
+        public float diffuseContribution = 1.0f;
+        public float specularContribution = 0.0f;
+        public override void Deserialize(JSONObject json)
+        {
+            base.Deserialize(json);
+            JSONObject color_obj = json["color"].AsObject;
+            color.r = color_obj["x"];
+            color.g = color_obj["y"];
+            color.b = color_obj["z"];
+
+            power = DeserializeFloat(json["power"]);
+            radius = DeserializeFloat(json["radius"]);
+            attenuation = DeserializeFloat(json["attenuation"]);
+
+            lightMask = json["lightMask"];
+            isLocalLight = json["isLocalLight"];
+
+            diffuseContribution = DeserializeFloat(json["diffuseContribution"]);
+            specularContribution = DeserializeFloat(json["specularContribution"]);
+        }
+
+        public override JSONObject Serialize()
+        {
+            JSONObject result = base.Serialize();
+            JSONObject color_obj = new JSONObject();
+            color_obj["x"] = color.r;
+            color_obj["y"] = color.g;
+            color_obj["z"] = color.b;
+            result["color"] = color_obj;
+
+            result["power"] = SerializeFloat(power);
+            result["radius"] = SerializeFloat(radius);
+            result["attenuation"] = SerializeFloat(attenuation);
+
+            result["lightMask"] = lightMask;
+            result["isLocalLight"] = isLocalLight;
+
+            result["diffuseContribution"] = SerializeFloat(diffuseContribution);
+            result["specularContribution"] = SerializeFloat(specularContribution);
+
+            return result;
+        }
+    }
+
+    public class VfxDefinitionComponent : LevelEntityComponent
+    {
+        public string filename;
+        public bool hardKillOnDestroy = false;
+        public override void Deserialize(JSONObject json)
+        {
+            base.Deserialize(json);
+            filename = json["filename"];
+            hardKillOnDestroy = json["hardKillOnDestroy"];
+        }
+
+        public override JSONObject Serialize()
+        {
+            JSONObject result = base.Serialize();
+            result["filename"] = filename;
+            result["hardKillOnDestroy"] = hardKillOnDestroy;
+
+            return result;
+        }
+
+    }
+    public class PrefabPlacementDefinitionComponent : LevelEntityComponent
+    {
+        public string prefab;
+
+        public override void Deserialize(JSONObject json)
+        {
+            base.Deserialize(json);
+            prefab = json["prefab"];
+        }
+
+        public override JSONObject Serialize()
+        {
+            JSONObject result = base.Serialize();
+            result["prefab"] = prefab;
+            return result;
+        }
+    }
+
     public class WallTransparencyComponent : LevelEntityComponent
     {
         public int drawOrder = 0;
@@ -242,8 +373,16 @@ namespace Diablo2Editor
 
         public override JSONObject Serialize()
         {
-            JSONObject result = model.Serialize();
+            JSONObject result = base.Serialize();
             result["weight"] = SerializeFloat(weight);
+            result["filename"] = model.filename;
+            result["visibleLayers"] = model.visibleLayers;
+            result["lightMask"] = model.lightMask;
+            result["shadowMask"] = model.shadowMask;
+            result["ghostShadows"] = model.ghostShadows;
+            result["floorModel"] = model.floorModel;
+            result["terrainBlendEnableYUpBlend"] = model.terrainBlendEnableYUpBlend;
+            result["terrainBlendMode"] = model.terrainBlendMode;
             return result;
         }
 
@@ -573,8 +712,23 @@ namespace Diablo2Editor
             {
                 return new WallTransparencyComponent();
             }
-
-
+            if (type == "PrefabPlacementDefinitionComponent")
+            {
+                return new PrefabPlacementDefinitionComponent();
+            }
+            if (type == "VfxDefinitionComponent")
+            {
+                return new VfxDefinitionComponent();
+            }
+            if (type == "TerrainDecalDefinitionComponent")
+            {
+                return new TerrainDecalDefinitionComponent();
+            }
+            if (type == "PointLightDefinitionComponent")
+            {
+                return new PointLightDefinitionComponent();
+            }
+            Debug.Log("Unknown component: " + type);
             return new LevelEntityUnknown();
         }
 
@@ -631,7 +785,7 @@ namespace Diablo2Editor
         public LevelEntity terrain = new LevelEntity();
         public string biomeFilename;
         public List<TileBiomeOverrides> perTileBiomeOverrides = new List<TileBiomeOverrides>();
-        public List<SpecialTile> specialTiles = new List<SpecialTile>();
+        SpecialTile specialTiles = new SpecialTile();
 
         public override void Deserialize(JSONObject json)
         {
@@ -642,7 +796,7 @@ namespace Diablo2Editor
             terrain.Deserialize(json["terrain"].AsObject);
             biomeFilename = json["biomeFilename"];
             perTileBiomeOverrides = DeserializeList<TileBiomeOverrides>(json, "perTileBiomeOverrides");
-            specialTiles = DeserializeList<SpecialTile>(json, "specialTiles");
+            specialTiles.Deserialize(json["specialTiles"].AsObject);
 
         }
     
@@ -657,7 +811,7 @@ namespace Diablo2Editor
             result["terrain"] = terrain.Serialize();
             result["biomeFilename"] = biomeFilename;
             result["perTileBiomeOverrides"] = SerializeList(perTileBiomeOverrides);
-            result["specialTiles"] = SerializeList(specialTiles);
+            result["specialTiles"] = specialTiles.Serialize();
 
             return result;
         }

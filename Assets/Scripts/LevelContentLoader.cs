@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using SimpleJSON;
 using UnityEditor;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ using UnityEngine;
 public class LevelContentLoader 
 {
 
-    private LevelPreset preset = null;
+    private Diablo2Editor.LevelPreset preset = null;
     private byte[] old_content = { }; 
 
     public void LoadLevel(string levelName, byte[] ds1Content, string jsonContent)
@@ -23,8 +24,9 @@ public class LevelContentLoader
 
     private void LoadJsonPreset(string jsonContent)
     {
-        preset = JsonUtility.FromJson<LevelPreset>(jsonContent);
-        preset.CreateComponents(jsonContent);
+        JSONNode root = JSON.Parse(jsonContent);
+        preset = new Diablo2Editor.LevelPreset();
+        preset.Deserialize(root.AsObject);
     }
 
 
@@ -36,7 +38,7 @@ public class LevelContentLoader
 
     public bool TestLevelLoading(byte[] ds1Content, string jsonContent)
     {
-        string resultJson = JsonUtility.ToJson(preset);
+        string resultJson = preset.Serialize().ToString();
         byte[] resultDS1 = old_content;
         bool oldContentEqual = resultDS1.Equals(ds1Content);
         bool jsonEqual = resultJson.Equals(jsonContent);

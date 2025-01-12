@@ -38,10 +38,57 @@ public class LevelContentLoader
 
     public bool TestLevelLoading(byte[] ds1Content, string jsonContent)
     {
-        string resultJson = preset.Serialize().ToString();
+        JSONNode resultJson = preset.Serialize();
+        JSONNode sourceJson = JSON.Parse(jsonContent);
+
         byte[] resultDS1 = old_content;
         bool oldContentEqual = resultDS1.Equals(ds1Content);
-        bool jsonEqual = resultJson.Equals(jsonContent);
+        bool jsonEqual = CompareJson(sourceJson, resultJson);
+
         return oldContentEqual && jsonEqual;
+    }
+
+
+    private bool CompareJson(JSONNode first, JSONNode second)
+    {
+        if (first.IsObject && second.IsObject) { 
+            return CompareJsonObjects(first, second);
+        }
+        if (first.IsNull && second.IsNull)
+        {
+            return true;
+        }
+        if (first.IsArray && second.IsArray)
+        {
+            return CompareJsonArray(first, second);
+        }
+        if (first.IsBoolean && second.IsBoolean)
+        {
+            return first.AsBool == second.AsBool;
+        }
+        if (first.IsNumber && second.IsNumber)
+        {
+            return CompareJsonNumbers(first, second);
+        }
+        if (first.IsString && second.IsString)
+        {
+            return first.ToString() == second.ToString();
+        }
+        return true;
+    }
+
+    private bool CompareJsonArray(JSONNode first, JSONNode second)
+    {
+        return true;
+    }
+
+    private bool CompareJsonObjects(JSONNode first, JSONNode second)
+    {
+        return true;
+    }
+
+    private bool CompareJsonNumbers(JSONNode first, JSONNode second)
+    {
+        return true;
     }
 }

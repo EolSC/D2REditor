@@ -202,6 +202,56 @@ namespace Diablo2Editor
             return result;
         }
     }
+
+    public class TerrainStampDefinitionComponent : LevelEntityComponent
+    {
+        public string mask;
+        public float stomp;
+        public float stompG;
+        public float stompB;
+        public int snapOptions;
+        public string biomeName;
+        public int layerIndexR;
+        public int layerIndexG;
+        public int layerIndexB;
+        public override void Deserialize(JSONObject json)
+        {
+            base.Deserialize(json);
+            mask = json["mask"];
+
+            stomp = DeserializeFloat(json["stomp"]);
+            stompG = DeserializeFloat(json["stompG"]);
+            stompB = DeserializeFloat(json["stompB"]);
+
+            snapOptions = json["snapOptions"];
+            biomeName = json["biomeName"];
+
+            layerIndexR = json["layerIndexR"];
+            layerIndexG = json["layerIndexG"];
+            layerIndexB = json["layerIndexB"];
+
+        }
+
+        public override JSONObject Serialize()
+        {
+            JSONObject result = base.Serialize();
+            result["mask"] = mask;
+
+            result["stomp"] = SerializeFloat(stomp); 
+            result["stompG"] = SerializeFloat(stompG); 
+            result["stompB"] = SerializeFloat(stompB); 
+
+            result["snapOptions"] = snapOptions;
+            result["biomeName"] = biomeName;
+
+            result["layerIndexR"] = layerIndexR;
+            result["layerIndexG"] = layerIndexG;
+            result["layerIndexB"] = layerIndexB;
+
+            return result;
+        }
+    }
+
     public class PointLightDefinitionComponent : LevelEntityComponent
     {
         public UnityEngine.Color color = UnityEngine.Color.white;
@@ -723,6 +773,10 @@ namespace Diablo2Editor
             if (type == "TerrainDecalDefinitionComponent")
             {
                 return new TerrainDecalDefinitionComponent();
+            }
+            if (type == "TerrainStampDefinitionComponent")
+            {
+                return new TerrainStampDefinitionComponent();
             }
             if (type == "PointLightDefinitionComponent")
             {

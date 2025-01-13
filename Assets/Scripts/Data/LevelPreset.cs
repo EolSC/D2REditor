@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using SimpleJSON;
+using UnityEngine;
 
 namespace Diablo2Editor
 {
-   public class LevelPreset : ISerializable
+   public class LevelPreset : ISerializable, IEditable
    {
         public string type;
         public string name;
@@ -39,6 +40,14 @@ namespace Diablo2Editor
             result["specialTiles"] = specialTiles.Serialize();
 
             return result;
+        }
+
+        public void OnSceneLoaded(GameObject gameObject)
+        {
+            foreach(var entity in entities)
+            {
+                entity.OnSceneLoaded(gameObject);
+            }
         }
     }
 }

@@ -5,12 +5,33 @@ using System;
 
 namespace Diablo2Editor
 {
-    public class LevelEntity : ISerializable
+    public class LevelEntity : ISerializable, IEditable
     {
         public string type;
         public string name;
         public Int64 id;
         public List<LevelEntityComponent> components;
+
+        public void OnSceneLoaded(GameObject gameObject)
+        {
+            GameObject childObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            childObj.name = name;
+
+            childObj.transform.SetParent(gameObject.transform);
+
+            if (components.Count > 0 && components[0] is TransformDefinitionComponent)
+            {
+                TransformDefinitionComponent comp = components[0] as TransformDefinitionComponent;
+                SetTransform(childObj, comp);
+
+            }
+        }
+
+        private void SetTransform(GameObject obj, TransformDefinitionComponent transform)
+        {
+            obj.transform.SetLocalPositionAndRotation(transform.position, transform.orientation);
+            obj.transform.localScale = transform.scale;
+        }
 
         public override void Deserialize(JSONObject json)
         {

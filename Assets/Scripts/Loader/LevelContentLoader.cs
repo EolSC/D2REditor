@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 public class LevelContentLoader 
@@ -16,7 +17,8 @@ public class LevelContentLoader
     {
         LoadJsonPreset(jsonContent);
         LoadDS1Content(ds1Content);
-
+        GameObject obj = new GameObject();
+        preset.OnSceneLoaded(obj);
         Debug.Log("Level loaded " + levelName);
         Debug.Log("Preset name is " + preset.biomeFilename);
         Debug.Log("Ds1 content length " + old_content.Length);

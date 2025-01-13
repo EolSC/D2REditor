@@ -172,7 +172,7 @@ namespace Diablo2Editor
         public int snapOptions;
         public float parallaxScale;
         public string biomeName;
-        public int layerIndex;
+        public long layerIndex;
         public override void Deserialize(JSONObject json)
         {
             base.Deserialize(json);
@@ -211,9 +211,9 @@ namespace Diablo2Editor
         public float stompB;
         public int snapOptions;
         public string biomeName;
-        public int layerIndexR;
-        public int layerIndexG;
-        public int layerIndexB;
+        public long layerIndexR;
+        public long layerIndexG;
+        public long layerIndexB;
         public override void Deserialize(JSONObject json)
         {
             base.Deserialize(json);

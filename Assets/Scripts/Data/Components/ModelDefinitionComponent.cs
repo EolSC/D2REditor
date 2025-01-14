@@ -50,7 +50,7 @@ namespace Diablo2Editor
 
         public void LoadModel()
         {
-            string full_path = OpenLevelScript.GetAbsolutePath(filename);
+            string full_path = PathMapper.GetAbsolutePath(filename);
             full_path = full_path.Replace(".model", lod_level);
             if (File.Exists(full_path))
             {
@@ -68,7 +68,7 @@ namespace Diablo2Editor
 
         public void LoadTexture(String txt, MeshRenderer mr, String type = "_MainTex")
         {
-            var path = "\\" + txt;
+            string path = PathMapper.GetAbsolutePath(txt);
             if (File.Exists(path))
             {
                 var bytes = File.ReadAllBytes(path);

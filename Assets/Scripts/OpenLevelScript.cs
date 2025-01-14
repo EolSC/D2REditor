@@ -1,3 +1,4 @@
+using Diablo2Editor;
 using NUnit.Framework;
 using System;
 using System.IO;
@@ -8,83 +9,49 @@ using UnityEngine;
 public class OpenLevelScript : MonoBehaviour
 {
 
-    public static string rootFolder = "E:\\work\\d2_assets";
-    public static string presetFolder = "data\\hd\\env\\preset\\act1\\barracks";
+    private PathMapper pathMapper;
 
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private static void OpenLevel(string absolute_path, bool test_serialization)
     {
-        
-    }
+        string fileName = Path.GetFileNameWithoutExtension(absolute_path);
+        string local_path = PathMapper.GetLocalPath(absolute_path);
+        string pathToJson = PathMapper.GetPresetForLevel(local_path);
+        byte[] dsContent = { };
+        string jsonContent = "";
+        if (File.Exists(absolute_path))
+        {
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+            dsContent = File.ReadAllBytes(absolute_path);
+        }
+        if (File.Exists(pathToJson))
+        {
 
-    public static string GetAbsolutePath(string fileName)
-    {
-        var canonical_path = Path.GetFullPath(Path.Combine(rootFolder, fileName));
-        return canonical_path;
+            jsonContent = File.ReadAllText(pathToJson);
+        }
+
+        LevelContentLoader loader = new LevelContentLoader();
+        loader.LoadLevel(fileName, dsContent, jsonContent);
+        if (test_serialization)
+        {
+            loader.TestLevelLoading(dsContent, jsonContent);
+        }
     }
 
     [MenuItem("Diablo Level Editor/Test loading")]
     private static void TestLoading()
     {
-        string pathToLevel = GetAbsolutePath("data\\global\\tiles\\act1\\barracks\\barew.ds1");
-        string fileName = Path.GetFileNameWithoutExtension(pathToLevel);
-        string pathToJson = System.IO.Path.Combine(rootFolder, presetFolder, fileName + ".json");
-        byte[] dsContent = { };
-        string jsonContent = "";
-        if (File.Exists(pathToLevel))
-        {
-
-            dsContent = File.ReadAllBytes(pathToLevel);
-        }
-        if (File.Exists(pathToJson))
-        {
-
-            jsonContent = File.ReadAllText(pathToJson);
-        }
-
-        LevelContentLoader loader = new LevelContentLoader();
-        loader.LoadLevel(fileName, dsContent, jsonContent);
-        bool loadingResult = loader.TestLevelLoading(dsContent, jsonContent);
-        if (loadingResult)
-        {
-            Debug.Log("Test loading: success");
-        }
-        else
-        {
-            Debug.Log("Test loading: failure");
-        }
-
+        PathMapper.InitBaseFolder();
+        string pathToLevel = PathMapper.GetTestLevel();
+        string absolute_path = PathMapper.GetAbsolutePath(pathToLevel);
+        OpenLevel(absolute_path, true);
     }
 
     [MenuItem("Diablo Level Editor/Open level")]
     private static void OpenLevel()
     {
-        string pathToLevel = EditorUtility.OpenFilePanel("Open Diablo 2 Ressurected level", "", "ds1");
-        string fileName = Path.GetFileNameWithoutExtension(pathToLevel);
-        string pathToJson = System.IO.Path.Combine(rootFolder, presetFolder, fileName + ".json");
-        byte[] dsContent = {};
-        string jsonContent = "";
-        if (File.Exists(pathToLevel))
-        {
-            
-            dsContent = File.ReadAllBytes(pathToLevel);
-        }
-        if (File.Exists(pathToJson))
-        {
-
-            jsonContent = File.ReadAllText(pathToJson);
-        }
-
-        LevelContentLoader loader = new LevelContentLoader();
-        loader.LoadLevel(fileName, dsContent, jsonContent);
-
+        PathMapper.InitBaseFolder();
+        string absolute_path = EditorUtility.OpenFilePanel("Open Diablo 2 Ressurected level", "", "ds1");
+        OpenLevel(absolute_path, false);
     }
 
 

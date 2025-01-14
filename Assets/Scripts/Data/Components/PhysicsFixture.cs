@@ -19,22 +19,22 @@ namespace Diablo2Editor
         public int boneindex = -1;
 
 
-        private PhysicsShapeType LoadShape(JSONObject json)
+        private PhysicsShapeType LoadShape(JSONObject json , GameObject owner)
         {
             string type = json["type"];
             if (type == "PhysicsBoxDefinition")
             {
-                PhysicsShapeType box = new PhysicsShapeBox();
+                PhysicsShapeType box = owner.AddComponent<PhysicsShapeBox>();
                 box.Deserialize(json);
                 return box;
             }
             if (type == "PhysicsFileDefinition")
             {
-                PhysicsFileDefinition file = new PhysicsFileDefinition();
+                PhysicsFileDefinition file = owner.AddComponent<PhysicsFileDefinition>();
                 file.Deserialize(json);
                 return file;
             }
-            return new PhysicsShapeType();
+            return owner.AddComponent<PhysicsShapeType>();
 
         }
 
@@ -43,17 +43,17 @@ namespace Diablo2Editor
             base.Deserialize(json);
             JSONObject shape_object = json["shapetype"].AsObject;
 
-            shapeType = LoadShape(shape_object);
-            friction = DeserializeFloat(json["friction"]);
-            restitution = DeserializeFloat(json["restitution"]);
-            rollingresistance = DeserializeFloat(json["rollingresistance"]);
-            impulsefactor = DeserializeFloat(json["impulsefactor"]);
-            explosionfactor = DeserializeFloat(json["explosionfactor"]);
-            explosionliftfactor = DeserializeFloat(json["explosionliftfactor"]);
-            windfactor = DeserializeFloat(json["windfactor"]);
-            dragfactor = DeserializeFloat(json["dragfactor"]);
-            liftfactor = DeserializeFloat(json["liftfactor"]);
-            density = DeserializeFloat(json["density"]);
+            shapeType = LoadShape(shape_object, gameObject);
+            friction = ISerializable.DeserializeFloat(json["friction"]);
+            restitution = ISerializable.DeserializeFloat(json["restitution"]);
+            rollingresistance = ISerializable.DeserializeFloat(json["rollingresistance"]);
+            impulsefactor = ISerializable.DeserializeFloat(json["impulsefactor"]);
+            explosionfactor = ISerializable.DeserializeFloat(json["explosionfactor"]);
+            explosionliftfactor = ISerializable.DeserializeFloat(json["explosionliftfactor"]);
+            windfactor = ISerializable.DeserializeFloat(json["windfactor"]);
+            dragfactor = ISerializable.DeserializeFloat(json["dragfactor"]);
+            liftfactor = ISerializable.DeserializeFloat(json["liftfactor"]);
+            density = ISerializable.DeserializeFloat(json["density"]);
             boneindex = json["boneindex"];
         }
 
@@ -62,16 +62,16 @@ namespace Diablo2Editor
             JSONObject result = base.Serialize();
 
             result["shapetype"] = shapeType.Serialize();
-            result["friction"] = SerializeFloat(friction);
-            result["restitution"] = SerializeFloat(restitution);
-            result["rollingresistance"] = SerializeFloat(rollingresistance);
-            result["impulsefactor"] = SerializeFloat(impulsefactor);
-            result["explosionfactor"] = SerializeFloat(explosionfactor);
-            result["explosionliftfactor"] = SerializeFloat(explosionliftfactor);
-            result["windfactor"] = SerializeFloat(windfactor);
-            result["dragfactor"] = SerializeFloat(dragfactor);
-            result["liftfactor"] = SerializeFloat(liftfactor);
-            result["density"] = SerializeFloat(density);
+            result["friction"] = ISerializable.SerializeFloat(friction);
+            result["restitution"] = ISerializable.SerializeFloat(restitution);
+            result["rollingresistance"] = ISerializable.SerializeFloat(rollingresistance);
+            result["impulsefactor"] = ISerializable.SerializeFloat(impulsefactor);
+            result["explosionfactor"] = ISerializable.SerializeFloat(explosionfactor);
+            result["explosionliftfactor"] = ISerializable.SerializeFloat(explosionliftfactor);
+            result["windfactor"] = ISerializable.SerializeFloat(windfactor);
+            result["dragfactor"] = ISerializable.SerializeFloat(dragfactor);
+            result["liftfactor"] = ISerializable.SerializeFloat(liftfactor);
+            result["density"] = ISerializable.SerializeFloat(density);
             result["boneindex"] = boneindex;
             return result;
         }

@@ -21,7 +21,7 @@ namespace Diablo2Editor
             orm = json["orm"];
             stomp = json["stomp"];
             snapOptions = json["snapOptions"];
-            parallaxScale = DeserializeFloat(json["parallaxScale"]);
+            parallaxScale = ISerializable.DeserializeFloat(json["parallaxScale"]);
             biomeName = json["biomeName"];
             layerIndex = json["layerIndex"];
 
@@ -35,7 +35,7 @@ namespace Diablo2Editor
             result["orm"] = orm;
             result["stomp"] = stomp;
             result["snapOptions"] = snapOptions;
-            result["parallaxScale"] = SerializeFloat(parallaxScale);
+            result["parallaxScale"] = ISerializable.SerializeFloat(parallaxScale);
             result["biomeName"] = biomeName;
             result["layerIndex"] = layerIndex;
 

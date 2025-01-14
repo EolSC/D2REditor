@@ -6,18 +6,17 @@ namespace Diablo2Editor
 {
     public class ModelVariationDefinitionComponent : LevelEntityComponent
     {
-        public List<ModelVariationComponent> variations = new List<ModelVariationComponent>();
+        public List<ModelVariationComponent> variations;
         public override void Deserialize(JSONObject json)
         {
             base.Deserialize(json);
-            variations = DeserializeList<ModelVariationComponent>(json, "variations");
+            variations = ISerializable.DeserializeComponentList<ModelVariationComponent>(json, gameObject, "variations");
         }
 
         public override JSONObject Serialize()
         {
-            // TODO - весериализовать базу, вес, моедль именно в таком порядке
             JSONObject result = base.Serialize();
-            result["variations"] = SerializeList(variations);
+            result["variations"] = ISerializable.SerializeList(variations);
             return result;
         }
     }

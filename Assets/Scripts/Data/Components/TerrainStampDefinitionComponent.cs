@@ -19,9 +19,9 @@ namespace Diablo2Editor
             base.Deserialize(json);
             mask = json["mask"];
 
-            stomp = DeserializeFloat(json["stomp"]);
-            stompG = DeserializeFloat(json["stompG"]);
-            stompB = DeserializeFloat(json["stompB"]);
+            stomp = ISerializable.DeserializeFloat(json["stomp"]);
+            stompG = ISerializable.DeserializeFloat(json["stompG"]);
+            stompB = ISerializable.DeserializeFloat(json["stompB"]);
 
             snapOptions = json["snapOptions"];
             biomeName = json["biomeName"];
@@ -37,9 +37,9 @@ namespace Diablo2Editor
             JSONObject result = base.Serialize();
             result["mask"] = mask;
 
-            result["stomp"] = SerializeFloat(stomp);
-            result["stompG"] = SerializeFloat(stompG);
-            result["stompB"] = SerializeFloat(stompB);
+            result["stomp"] = ISerializable.SerializeFloat(stomp);
+            result["stompG"] = ISerializable.SerializeFloat(stompG);
+            result["stompB"] = ISerializable.SerializeFloat(stompB);
 
             result["snapOptions"] = snapOptions;
             result["biomeName"] = biomeName;

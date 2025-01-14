@@ -7,12 +7,12 @@ namespace Diablo2Editor
     {
         public string path;
 
-        public override void Deserialize(JSONObject json)
+        public void Deserialize(JSONObject json)
         {
             path = json["path"];
         }
 
-        public override JSONObject Serialize()
+        public JSONObject Serialize()
         {
             JSONObject result = new JSONObject();
             result["path"] = path;

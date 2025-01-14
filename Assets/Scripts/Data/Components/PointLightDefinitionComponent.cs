@@ -21,15 +21,15 @@ namespace Diablo2Editor
             color.g = color_obj["y"];
             color.b = color_obj["z"];
 
-            power = DeserializeFloat(json["power"]);
-            radius = DeserializeFloat(json["radius"]);
-            attenuation = DeserializeFloat(json["attenuation"]);
+            power = ISerializable.DeserializeFloat(json["power"]);
+            radius = ISerializable.DeserializeFloat(json["radius"]);
+            attenuation = ISerializable.DeserializeFloat(json["attenuation"]);
 
             lightMask = json["lightMask"];
             isLocalLight = json["isLocalLight"];
 
-            diffuseContribution = DeserializeFloat(json["diffuseContribution"]);
-            specularContribution = DeserializeFloat(json["specularContribution"]);
+            diffuseContribution = ISerializable.DeserializeFloat(json["diffuseContribution"]);
+            specularContribution = ISerializable.DeserializeFloat(json["specularContribution"]);
         }
 
         public override JSONObject Serialize()
@@ -41,15 +41,15 @@ namespace Diablo2Editor
             color_obj["z"] = color.b;
             result["color"] = color_obj;
 
-            result["power"] = SerializeFloat(power);
-            result["radius"] = SerializeFloat(radius);
-            result["attenuation"] = SerializeFloat(attenuation);
+            result["power"] = ISerializable.SerializeFloat(power);
+            result["radius"] = ISerializable.SerializeFloat(radius);
+            result["attenuation"] = ISerializable.SerializeFloat(attenuation);
 
             result["lightMask"] = lightMask;
             result["isLocalLight"] = isLocalLight;
 
-            result["diffuseContribution"] = SerializeFloat(diffuseContribution);
-            result["specularContribution"] = SerializeFloat(specularContribution);
+            result["diffuseContribution"] = ISerializable.SerializeFloat(diffuseContribution);
+            result["specularContribution"] = ISerializable.SerializeFloat(specularContribution);
 
             return result;
         }

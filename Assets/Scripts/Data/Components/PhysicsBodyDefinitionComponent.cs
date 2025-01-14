@@ -22,29 +22,29 @@ namespace Diablo2Editor
         {
             base.Deserialize(json);
             bodytype = json["bodytype"];
-            fixturedefs = DeserializeList<PhysicsFixture>(json, "fixturedefs");
+            fixturedefs = ISerializable.DeserializeComponentList<PhysicsFixture>(json, gameObject, "fixturedefs");
             filter = json["filter"];
             allowTransition = json["allowTransition"];
             removeOnDeath = json["removeOnDeath"];
 
-            lineardamping = DeserializeFloat(json["lineardamping"]);
-            angulardamping = DeserializeFloat(json["angulardamping"]);
-            gravityscale = DeserializeFloat(json["gravityscale"]);
+            lineardamping = ISerializable.DeserializeFloat(json["lineardamping"]);
+            angulardamping = ISerializable.DeserializeFloat(json["angulardamping"]);
+            gravityscale = ISerializable.DeserializeFloat(json["gravityscale"]);
         }
 
         public override JSONObject Serialize()
         {
             JSONObject result = base.Serialize();
             result["bodytype"] = bodytype;
-            result["fixturedefs"] = SerializeList(fixturedefs);
+            result["fixturedefs"] = ISerializable.SerializeList(fixturedefs);
 
             result["filter"] = filter;
             result["allowTransition"] = allowTransition;
             result["removeOnDeath"] = removeOnDeath;
 
-            result["lineardamping"] = SerializeFloat(lineardamping);
-            result["angulardamping"] = SerializeFloat(angulardamping);
-            result["gravityscale"] = SerializeFloat(gravityscale);
+            result["lineardamping"] = ISerializable.SerializeFloat(lineardamping);
+            result["angulardamping"] = ISerializable.SerializeFloat(angulardamping);
+            result["gravityscale"] = ISerializable.SerializeFloat(gravityscale);
             return result;
         }
     }

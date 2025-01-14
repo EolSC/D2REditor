@@ -17,8 +17,6 @@ public class LevelContentLoader
     {
         LoadJsonPreset(jsonContent);
         LoadDS1Content(ds1Content);
-        GameObject obj = new GameObject();
-        preset.OnSceneLoaded(obj);
         Debug.Log("Level loaded " + levelName);
         Debug.Log("Preset name is " + preset.biomeFilename);
         Debug.Log("Ds1 content length " + old_content.Length);
@@ -28,10 +26,10 @@ public class LevelContentLoader
 
     private void LoadJsonPreset(string jsonContent)
     {
-        JSONNode root = JSON.Parse(jsonContent);
-        preset = new Diablo2Editor.LevelPreset();
-        preset.Deserialize(root.AsObject);
-    }
+        GameObject rootGameObject = new GameObject();
+        JSONNode jsonNode = JSON.Parse(jsonContent);
+        preset = new Diablo2Editor.LevelPreset(jsonNode.AsObject, rootGameObject);
+      }
 
 
 

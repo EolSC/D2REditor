@@ -22,34 +22,34 @@ namespace Diablo2Editor
 
 
 
-        public override void Deserialize(JSONObject obj)
+        public void Deserialize(JSONObject obj)
         {
-            particles = DeserializeList<LevelPresetDependency>(obj, "particles");
-            models = DeserializeList<LevelPresetDependency>(obj, "models");
-            skeletons = DeserializeList<LevelPresetDependency>(obj, "skeletons");
-            animations = DeserializeList<LevelPresetDependency>(obj, "animations");
-            textures = DeserializeList<LevelPresetDependency>(obj, "textures");
-            physics = DeserializeList<LevelPresetDependency>(obj, "physics");
-            json = DeserializeList<LevelPresetDependency>(obj, "json");
-            variantdata = DeserializeList<LevelPresetDependency>(obj, "variantdata");
-            objecteffects = DeserializeList<LevelPresetDependency>(obj, "objecteffects");
-            other = DeserializeList<LevelPresetDependency>(obj, "other");
+            particles = ISerializable.DeserializeList<LevelPresetDependency>(obj, "particles");
+            models = ISerializable.DeserializeList<LevelPresetDependency>(obj, "models");
+            skeletons = ISerializable.DeserializeList<LevelPresetDependency>(obj, "skeletons");
+            animations = ISerializable.DeserializeList<LevelPresetDependency>(obj, "animations");
+            textures = ISerializable.DeserializeList<LevelPresetDependency>(obj, "textures");
+            physics = ISerializable.DeserializeList<LevelPresetDependency>(obj, "physics");
+            json = ISerializable.DeserializeList<LevelPresetDependency>(obj, "json");
+            variantdata = ISerializable.DeserializeList<LevelPresetDependency>(obj, "variantdata");
+            objecteffects = ISerializable.DeserializeList<LevelPresetDependency>(obj, "objecteffects");
+            other = ISerializable.DeserializeList<LevelPresetDependency>(obj, "other");
         }
 
 
-        public override JSONObject Serialize()
+        public JSONObject Serialize()
         {
             JSONObject result = new JSONObject();
-            result["particles"] = SerializeList(particles);
-            result["models"] = SerializeList(models);
-            result["skeletons"] = SerializeList(skeletons);
-            result["animations"] = SerializeList(animations);
-            result["textures"] = SerializeList(textures);
-            result["physics"] = SerializeList(physics);
-            result["json"] = SerializeList(json);
-            result["variantdata"] = SerializeList(variantdata);
-            result["objecteffects"] = SerializeList(objecteffects);
-            result["other"] = SerializeList(other);
+            result["particles"] = ISerializable.SerializeList(particles);
+            result["models"] = ISerializable.SerializeList(models);
+            result["skeletons"] = ISerializable.SerializeList(skeletons);
+            result["animations"] = ISerializable.SerializeList(animations);
+            result["textures"] = ISerializable.SerializeList(textures);
+            result["physics"] = ISerializable.SerializeList(physics);
+            result["json"] = ISerializable.SerializeList(json);
+            result["variantdata"] = ISerializable.SerializeList(variantdata);
+            result["objecteffects"] = ISerializable.SerializeList(objecteffects);
+            result["other"] = ISerializable.SerializeList(other);
             return result;
         }
     }

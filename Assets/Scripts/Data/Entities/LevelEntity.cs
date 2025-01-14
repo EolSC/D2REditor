@@ -5,108 +5,98 @@ using System;
 
 namespace Diablo2Editor
 {
-    public class LevelEntity : ISerializable, IEditable
+    public class LevelEntity : ISerializable
     {
         public string type;
         public string name;
         public Int64 id;
         public List<LevelEntityComponent> components;
+        private GameObject owner;
 
-        public void OnSceneLoaded(GameObject gameObject)
-        {
-            GameObject childObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            childObj.name = name;
-
-            childObj.transform.SetParent(gameObject.transform);
-
-            if (components.Count > 0 && components[0] is TransformDefinitionComponent)
-            {
-                TransformDefinitionComponent comp = components[0] as TransformDefinitionComponent;
-                SetTransform(childObj, comp);
-
-            }
+        public LevelEntity(GameObject gameObject) {
+            owner = gameObject;
         }
 
-        private void SetTransform(GameObject obj, TransformDefinitionComponent transform)
-        {
-            obj.transform.SetLocalPositionAndRotation(transform.position, transform.orientation);
-            obj.transform.localScale = transform.scale;
-        }
 
-        public override void Deserialize(JSONObject json)
+        public void Deserialize(JSONObject json)
         {
             type = json["type"];
             name = json["name"];
             id = json["id"];
+
+            GameObject childObj = new GameObject();
+            childObj.name = name;
+            childObj.transform.SetParent(owner.transform);
 
             JSONNode components = json["components"];
             this.components = new List<LevelEntityComponent>();
             foreach (JSONNode component in components)
             {
                 var component_type = component["type"];
-                var obj = CreateComponentByType(component_type);
+                var obj = CreateComponentByType(component_type, childObj);
                 obj.Deserialize(component.AsObject);
+                obj.OnLoaded();
                 this.components.Add(obj);
             }
         }
 
-        private LevelEntityComponent CreateComponentByType(string type)
+        private LevelEntityComponent CreateComponentByType(string type, GameObject gameObject)
         {
             if (type == "TransformDefinitionComponent")
             {
-                return new TransformDefinitionComponent();
+                return gameObject.AddComponent<TransformDefinitionComponent>();
             }
             if (type == "TerrainDefinitionComponent")
             {
-                return new TerrainDefinitionComponent();
+                return gameObject.AddComponent<TerrainDefinitionComponent>(); 
             }
             if (type == "ModelDefinitionComponent")
             {
-                return new ModelDefinitionComponent();
+                return gameObject.AddComponent<ModelDefinitionComponent>();
             }
             if (type == "ModelVariationDefinitionComponent")
             {
-                return new ModelVariationDefinitionComponent();
+                return gameObject.AddComponent<ModelVariationDefinitionComponent>();
             }
             if (type == "PhysicsBodyDefinitionComponent")
             {
-                return new PhysicsBodyDefinitionComponent();
+                return gameObject.AddComponent<PhysicsBodyDefinitionComponent>();
             }
             if (type == "WallTransparencyComponent")
             {
-                return new WallTransparencyComponent();
+                return gameObject.AddComponent<WallTransparencyComponent>();
             }
             if (type == "PrefabPlacementDefinitionComponent")
             {
-                return new PrefabPlacementDefinitionComponent();
+                return gameObject.AddComponent<PrefabPlacementDefinitionComponent>();
             }
             if (type == "VfxDefinitionComponent")
             {
-                return new VfxDefinitionComponent();
+                return gameObject.AddComponent<VfxDefinitionComponent>();
             }
             if (type == "TerrainDecalDefinitionComponent")
             {
-                return new TerrainDecalDefinitionComponent();
+                return gameObject.AddComponent<TerrainDecalDefinitionComponent>();
             }
             if (type == "TerrainStampDefinitionComponent")
             {
-                return new TerrainStampDefinitionComponent();
+                return gameObject.AddComponent<TerrainStampDefinitionComponent>();
             }
             if (type == "PointLightDefinitionComponent")
             {
-                return new PointLightDefinitionComponent();
+                return gameObject.AddComponent<PointLightDefinitionComponent>();
             }
             Debug.Log("Unknown component: " + type);
-            return new LevelComponentUnknown();
+            return gameObject.AddComponent<LevelComponentUnknown>();
         }
 
-        public override JSONObject Serialize()
+        public JSONObject Serialize()
         {
             JSONObject result = new JSONObject();
             result["type"] = type;
             result["name"] = name;
             result["id"] = id;
-            result["components"] = SerializeList(components);
+            result["components"] = ISerializable.SerializeList(components);
             return result;
         }
     }

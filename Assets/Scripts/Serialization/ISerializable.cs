@@ -1,15 +1,16 @@
 using SimpleJSON;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Diablo2Editor
 {
 
-    public abstract class ISerializable
+    public interface ISerializable
     {
         public abstract JSONObject Serialize();
         public abstract void Deserialize(JSONObject json);
 
-        protected List<T> DeserializeList<T>(JSONObject json, string depType) where T : ISerializable, new()
+        public static List<T> DeserializeList<T>(JSONObject json, string depType) where T : ISerializable, new()
         {
             List<T> result = new List<T>();
             foreach (JSONObject item in json[depType])
@@ -21,7 +22,19 @@ namespace Diablo2Editor
             return result;
         }
 
-        protected JSONArray SerializeList<T>(List<T> list) where T : ISerializable
+        public static List<T> DeserializeComponentList<T>(JSONObject json, GameObject gameObject, string depType) where T : Component, ISerializable
+        {
+            List<T> result = new List<T>();
+            foreach (JSONObject item in json[depType])
+            {
+                T serializable = gameObject.AddComponent<T>();
+                serializable.Deserialize(item);
+                result.Add(serializable);
+            }
+            return result;
+        }
+
+        public static JSONArray SerializeList<T>(List<T> list) where T : ISerializable
         {
             JSONArray result = new JSONArray();
             foreach (T item in list)
@@ -32,12 +45,12 @@ namespace Diablo2Editor
             return result;
         }
 
-        protected float DeserializeFloat(JSONNode json)
+        public static float DeserializeFloat(JSONNode json)
         {
             return json.AsFloat;
         }
 
-        protected float SerializeFloat(float value, string format = "{0:f}")
+        public static float SerializeFloat(float value, string format = "{0:f}")
         {
             return value;
         }

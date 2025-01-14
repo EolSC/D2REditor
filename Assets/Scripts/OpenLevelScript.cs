@@ -8,8 +8,8 @@ using UnityEngine;
 public class OpenLevelScript : MonoBehaviour
 {
 
-    private static string rootFolder = "E:\\work\\d2_assets";
-    private static string presetFolder = "hd\\env\\preset\\act1\\barracks";
+    public static string rootFolder = "E:\\work\\d2_assets";
+    public static string presetFolder = "data\\hd\\env\\preset\\act1\\barracks";
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -24,10 +24,16 @@ public class OpenLevelScript : MonoBehaviour
         
     }
 
+    public static string GetAbsolutePath(string fileName)
+    {
+        var canonical_path = Path.GetFullPath(Path.Combine(rootFolder, fileName));
+        return canonical_path;
+    }
+
     [MenuItem("Diablo Level Editor/Test loading")]
     private static void TestLoading()
     {
-        string pathToLevel = "E:\\work\\d2_assets\\global\\tiles\\act1\\barracks\\barew.ds1";
+        string pathToLevel = GetAbsolutePath("data\\global\\tiles\\act1\\barracks\\barew.ds1");
         string fileName = Path.GetFileNameWithoutExtension(pathToLevel);
         string pathToJson = System.IO.Path.Combine(rootFolder, presetFolder, fileName + ".json");
         byte[] dsContent = { };

@@ -71,3 +71,5 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 obj/Debug
+/Assets/Settings/PathSettings.json
+/Assets/Settings/PathSettings.json.meta

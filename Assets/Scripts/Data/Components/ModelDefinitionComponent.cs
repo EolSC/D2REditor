@@ -4,13 +4,17 @@ using System.Linq;
 using System;
 using System.IO;
 using UnityEditor;
+using static LSLib.Granny.GR2.Magic;
+using LSLib.Granny.Model;
+using Unity.VisualScripting;
+using System.Collections.Generic;
 
 
 namespace Diablo2Editor
 {
     public class ModelDefinitionComponent : LevelEntityComponent
     {
-        public static string lod_level = "_lod4.model";
+        public static string lod_level = "_lod1.model";
 
         public string filename;
         public int visibleLayers;
@@ -66,7 +70,8 @@ namespace Diablo2Editor
             LoadModel();
         }
 
-        public void LoadTexture(String txt, MeshRenderer mr, String type = "_MainTex")
+
+        public void LoadTexture(string txt, UnityEngine.Material material, string type = "_MainTex")
         {
             string path = PathMapper.GetAbsolutePath(txt);
             if (File.Exists(path))
@@ -80,12 +85,15 @@ namespace Diablo2Editor
                 var sizeSection1 = BitConverter.ToInt32(bytes, 0x24);
                 var startFirstSection = BitConverter.ToInt32(bytes, 0x28);
                 var format = formatVal == 31 ? TextureFormat.RGBA32 : formatVal <= 58 ? TextureFormat.DXT1 : formatVal <= 62 ? TextureFormat.DXT5 : TextureFormat.BC4;
-
                 var tex = new Texture2D(width, height, format, mipLevels, mipLevels > 0);
                 tex.LoadRawTextureData(bytes.Skip(0x28 + startFirstSection).ToArray());
                 tex.Apply();
-                mr.material.SetTexture(type, tex);
+                material.SetTexture(type, tex);
 
+            }
+            else
+            {
+                Debug.Log("Texture is not found " + path);
             }
         }
 
@@ -94,11 +102,8 @@ namespace Diablo2Editor
             foreach (var m in root.Meshes)
             {
                 var meshObj = new GameObject(m.Name);
-                var meshRenderer = meshObj.AddComponent<MeshRenderer>();
-                meshRenderer.sharedMaterial = new Material(Shader.Find("Standard"));
-
                 var meshFilter = meshObj.AddComponent<MeshFilter>();
-                var mesh = new Mesh();
+                var mesh = new UnityEngine.Mesh();
                 mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
                 // Flip mesh x and mesh normal x.  Unity scene did not match in-game objects
                 mesh.vertices = m.PrimaryVertexData.Vertices.Select(v => new Vector3(-1 * v.Position.X, v.Position.Y, v.Position.Z)).ToArray();
@@ -113,32 +118,57 @@ namespace Diablo2Editor
                     int b = tris[i * 3 + 1];
                     int c = tris[i * 3 + 2];
                     tris[i * 3 + 0] = c;
-                    // tris[i * 3 + 1] = b;  // is this needed? b is kept the same?
                     tris[i * 3 + 2] = a;
                 }
                 mesh.triangles = tris;
+                var groups = m.PrimaryTopology.Groups;
+
+                /*
+                 * Pass Group data from GR2 model to Unity mesh
+                 */
+                List<UnityEngine.Rendering.SubMeshDescriptor> submeshes = new List<UnityEngine.Rendering.SubMeshDescriptor>();
+                foreach( var group in groups)
+                {
+                    UnityEngine.Rendering.SubMeshDescriptor descriptor = new UnityEngine.Rendering.SubMeshDescriptor();
+                    descriptor.indexStart = group.TriFirst * 3;
+                    descriptor.indexCount = group.TriCount * 3;
+                    descriptor.baseVertex = 0;
+                    descriptor.topology = MeshTopology.Triangles;
+                    submeshes.Add(descriptor);
+
+                }
+                mesh.SetSubMeshes(submeshes);
                 meshFilter.mesh = mesh;
 
                 meshObj.transform.localScale = new Vector3(m.ExtendedData.VertexScale, m.ExtendedData.VertexScale, m.ExtendedData.VertexScale);
-
+                var meshRenderer = meshObj.AddComponent<MeshRenderer>();
                 if (loadTextures == true)
                 {
-                    if (meshRenderer.material == null) meshRenderer.material = new Material(Shader.Find("Standard"));
-                    meshRenderer.material.EnableKeyword("_NORMALMAP");
-                    meshRenderer.material.EnableKeyword("_METALLICGLOSSMAP");
-
-                    if (m.MaterialBindings.Count > 0)
+                    List<UnityEngine.Material> materials = new List<UnityEngine.Material>();
+                    foreach( var binding in m.MaterialBindings)
                     {
-                        var albedo = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "AlbedoTexture");
-                        if (albedo != null) LoadTexture(albedo.Map.Texture.FromFileName, meshRenderer);
-                        var normal = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "NormalTexture");
-                        if (normal != null) LoadTexture(normal.Map.Texture.FromFileName, meshRenderer, "_BumpMap");
-                        var orm = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "ORMTexture");
-                        if (orm != null) LoadTexture(orm.Map.Texture.FromFileName, meshRenderer, "_MetallicGlossMap");
+                        var material = new UnityEngine.Material(Shader.Find("Standard"));
+                        material.EnableKeyword("_NORMALMAP");
+                        material.EnableKeyword("_METALLICGLOSSMAP");
+
+                        var albedo = binding.Material?.Maps?.FirstOrDefault(map => map.Usage == "AlbedoTexture");
+                        if (albedo != null) LoadTexture(albedo.Map.Texture.FromFileName, material);
+
+
+                           var normal = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "NormalTexture");
+                            if (normal != null) LoadTexture(normal.Map.Texture.FromFileName, material, "_BumpMap");
+                            var orm = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "ORMTexture");
+                            if (orm != null) LoadTexture(orm.Map.Texture.FromFileName, material, "_MetallicGlossMap");
+                        materials.Add(material);
+
                     }
+                    meshRenderer.SetSharedMaterials(materials);
+
                 }
 
                 meshObj.transform.parent = transform;
+                meshObj.transform.localPosition = Vector3.zero;
+                meshObj.transform.localRotation = Quaternion.identity;
             }
         }
     }

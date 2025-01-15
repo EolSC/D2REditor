@@ -11,22 +11,19 @@ public class LevelContentLoader
 {
 
     private Diablo2Editor.LevelPreset preset = null;
-    private byte[] old_content = { }; 
+    private byte[] oldContent = { }; 
 
     public void LoadLevel(string levelName, byte[] ds1Content, string jsonContent)
     {
-        LoadJsonPreset(jsonContent);
+        LoadJsonPreset(levelName, jsonContent);
         LoadDS1Content(ds1Content);
-        Debug.Log("Level loaded " + levelName);
-        Debug.Log("Preset name is " + preset.biomeFilename);
-        Debug.Log("Ds1 content length " + old_content.Length);
-
-
+        Debug.Log("Level loaded: " + levelName);
     }
 
-    private void LoadJsonPreset(string jsonContent)
+    private void LoadJsonPreset(string levelName, string jsonContent)
     {
         GameObject rootGameObject = new GameObject();
+        rootGameObject.name = levelName;
         JSONNode jsonNode = JSON.Parse(jsonContent);
         preset = new Diablo2Editor.LevelPreset(jsonNode.AsObject, rootGameObject);
       }
@@ -35,7 +32,7 @@ public class LevelContentLoader
 
     private void LoadDS1Content(byte[] ds1Content)
     {
-        old_content = ds1Content;
+        oldContent = ds1Content;
     }
 
     public bool TestLevelLoading(byte[] ds1Content, string jsonContent)
@@ -43,7 +40,7 @@ public class LevelContentLoader
         JSONNode resultJson = preset.Serialize();
         JSONNode sourceJson = JSON.Parse(jsonContent);
 
-        byte[] resultDS1 = old_content;
+        byte[] resultDS1 = oldContent;
         bool oldContentEqual = resultDS1.Equals(ds1Content);
         bool jsonEqual = CompareJson(sourceJson, resultJson);
 

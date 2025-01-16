@@ -3,6 +3,11 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+    * Terrain stamp component. Not implemented in Unity
+    * 
+    */
+
     public class TerrainStampDefinitionComponent : LevelEntityComponent
     {
         public string mask;

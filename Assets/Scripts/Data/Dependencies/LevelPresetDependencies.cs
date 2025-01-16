@@ -4,6 +4,10 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+     * Container to hold all level dependencies
+     * TODO: make it coherent with edits
+     */
 
     public class LevelPresetDependencies : ISerializable
     {

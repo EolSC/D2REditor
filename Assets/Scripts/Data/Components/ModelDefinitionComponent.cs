@@ -12,8 +12,14 @@ using System.Collections.Generic;
 
 namespace Diablo2Editor
 {
+    /*
+    * Model component. Contains all 3d models for D2R with textures and materials 
+    * 
+    */
     public class ModelDefinitionComponent : LevelEntityComponent
     {
+        // Hardcoded LOD
+        // TODO: transfer it to editor settings, support different LODS
         public static string lod_level = "_lod1.model";
 
         public string filename;
@@ -54,11 +60,15 @@ namespace Diablo2Editor
 
         public void LoadModel()
         {
+            // Find absolute path to model file
             string full_path = PathMapper.GetAbsolutePath(filename);
+            // Apply lod level
             full_path = full_path.Replace(".model", lod_level);
             if (File.Exists(full_path))
             {
+                // Create GR2 model
                 var root = LSLib.Granny.GR2Utils.LoadModel(full_path);
+                // Instantiate model to Unity
                 Load(root, true);
             }
 
@@ -70,8 +80,8 @@ namespace Diablo2Editor
             LoadModel();
         }
 
-
-        public void LoadTexture(string txt, UnityEngine.Material material, string type = "_MainTex")
+        // Loads textures for mesh materials
+        private void LoadTexture(string txt, UnityEngine.Material material, string type = "_MainTex")
         {
             string path = PathMapper.GetAbsolutePath(txt);
             if (File.Exists(path))
@@ -81,8 +91,6 @@ namespace Diablo2Editor
                 var width = BitConverter.ToInt32(bytes, 8);
                 var height = BitConverter.ToInt32(bytes, 0xC);
                 var mipLevels = BitConverter.ToInt32(bytes, 0x1C);
-                var channels = BitConverter.ToInt32(bytes, 0x20);
-                var sizeSection1 = BitConverter.ToInt32(bytes, 0x24);
                 var startFirstSection = BitConverter.ToInt32(bytes, 0x28);
                 var format = formatVal == 31 ? TextureFormat.RGBA32 : formatVal <= 58 ? TextureFormat.DXT1 : formatVal <= 62 ? TextureFormat.DXT5 : TextureFormat.BC4;
                 var tex = new Texture2D(width, height, format, mipLevels, mipLevels > 0);
@@ -142,6 +150,8 @@ namespace Diablo2Editor
 
                 meshObj.transform.localScale = new Vector3(m.ExtendedData.VertexScale, m.ExtendedData.VertexScale, m.ExtendedData.VertexScale);
                 var meshRenderer = meshObj.AddComponent<MeshRenderer>();
+
+                // Load materials textures
                 if (loadTextures == true)
                 {
                     List<UnityEngine.Material> materials = new List<UnityEngine.Material>();
@@ -166,6 +176,7 @@ namespace Diablo2Editor
 
                 }
 
+                //Setup transform for child object
                 meshObj.transform.parent = transform;
                 meshObj.transform.localPosition = Vector3.zero;
                 meshObj.transform.localRotation = Quaternion.identity;

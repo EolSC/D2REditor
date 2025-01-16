@@ -3,6 +3,10 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+     * Point light component. Not implemented in Unity
+     * 
+     */
     public class PointLightDefinitionComponent : LevelEntityComponent
     {
         public UnityEngine.Color color = UnityEngine.Color.white;

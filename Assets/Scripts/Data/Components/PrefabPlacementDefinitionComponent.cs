@@ -3,6 +3,11 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+     * Prefab link component. Not implemented in Unity
+     * 
+     */
+
     public class PrefabPlacementDefinitionComponent : LevelEntityComponent
     {
         public string prefab;

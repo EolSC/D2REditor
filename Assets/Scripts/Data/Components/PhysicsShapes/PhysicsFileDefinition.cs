@@ -3,6 +3,9 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+    * Mesh collider
+    */
     public class PhysicsFileDefinition : PhysicsShapeType
     {
         public string filename;

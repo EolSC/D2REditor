@@ -3,6 +3,10 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+    * Model variatiom component. Used for weighted random models in ModelVariationDefinitionComponent
+    * 
+    */
     public class ModelVariationComponent : LevelEntityComponent
     {
         public float weight = 0.0f;

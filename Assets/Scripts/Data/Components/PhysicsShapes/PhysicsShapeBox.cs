@@ -3,6 +3,10 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+    * Box collider
+    */
+
     public class PhysicsShapeBox : PhysicsShapeType
     {
         public UnityEngine.Vector3 center;

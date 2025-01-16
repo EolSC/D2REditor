@@ -3,6 +3,9 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+     * Link to any file used in level
+     */
     public class LevelPresetDependency : ISerializable
     {
         public string path;

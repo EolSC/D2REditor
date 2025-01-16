@@ -3,6 +3,10 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+    * Transform component. Passes transform data to Unity via gameObject.transform
+    * 
+    */
     public class TransformDefinitionComponent : LevelEntityComponent
     {
         public UnityEngine.Vector3 position;

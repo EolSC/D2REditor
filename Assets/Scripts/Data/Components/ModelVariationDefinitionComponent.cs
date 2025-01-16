@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace Diablo2Editor
 {
+    /*
+    * Instances 1 random model from list
+    * 
+    */
     public class ModelVariationDefinitionComponent : LevelEntityComponent
     {
         public List<ModelVariationComponent> variations;

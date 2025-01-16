@@ -1,11 +1,15 @@
-using System;
 using System.Collections.Generic;
 using SimpleJSON;
-using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
 
 namespace Diablo2Editor
 {
+    /*
+     * Base class for all .json level data.
+     * Contains all the components from preset. Can be constructed from .json and
+     * serialized back to .json
+     * 
+     */
    public class LevelPreset : ISerializable
    {
         public string type;
@@ -21,6 +25,7 @@ namespace Diablo2Editor
 
         public LevelPreset(JSONObject json, GameObject owner)
         {
+            // Keep link to gameObject to instantiate level data after Deserialization
             this.owner = owner;
             Deserialize(json);
         }

@@ -5,6 +5,9 @@ using System;
 
 namespace Diablo2Editor
 {
+    /*
+     * Class for any ingame entity contained in json preset.
+     */
     public class LevelEntity : ISerializable
     {
         public string type;
@@ -40,6 +43,8 @@ namespace Diablo2Editor
             }
         }
 
+
+        // TODO: move it to some factory class
         private LevelEntityComponent CreateComponentByType(string type, GameObject gameObject)
         {
             if (type == "TransformDefinitionComponent")

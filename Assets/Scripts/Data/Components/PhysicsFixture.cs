@@ -3,6 +3,10 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+   * Physics fixture component. Used for object physics.
+   * 
+   */
     public class PhysicsFixture : LevelEntityComponent
     {
         public PhysicsShapeType shapeType = null;

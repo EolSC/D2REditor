@@ -3,6 +3,10 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+    * WallTransparencyComponent component. Not rendered in unity but can be edited.
+    * 
+    */
     public class WallTransparencyComponent : LevelEntityComponent
     {
         public int drawOrder = 0;

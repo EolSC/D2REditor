@@ -4,7 +4,10 @@ using UnityEngine;
 
 namespace Diablo2Editor
 {
-
+    /*
+     * Basic serialzation via Simple JSON
+     * Contains some utility functions to work with lists
+     */
     public interface ISerializable
     {
         public abstract JSONObject Serialize();
@@ -22,6 +25,10 @@ namespace Diablo2Editor
             return result;
         }
 
+        /*
+         * Unity components require gameObject to be properly instanced so we need separate function for
+         * component list
+         */
         public static List<T> DeserializeComponentList<T>(JSONObject json, GameObject gameObject, string depType) where T : Component, ISerializable
         {
             List<T> result = new List<T>();
@@ -50,7 +57,7 @@ namespace Diablo2Editor
             return json.AsFloat;
         }
 
-        public static float SerializeFloat(float value, string format = "{0:f}")
+        public static float SerializeFloat(float value)
         {
             return value;
         }

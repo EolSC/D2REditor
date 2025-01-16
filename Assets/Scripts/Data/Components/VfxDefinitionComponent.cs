@@ -3,6 +3,10 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+    * VfxDefinitionComponent component. Not rendered in unity but can be edited.
+    * 
+    */
     public class VfxDefinitionComponent : LevelEntityComponent
     {
         public string filename;

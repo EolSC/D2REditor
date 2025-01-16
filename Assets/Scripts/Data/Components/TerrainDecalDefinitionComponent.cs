@@ -3,6 +3,11 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
+    /*
+     * Terrain Decal component. Not implemented in Unity
+     * 
+     */
+
     public class TerrainDecalDefinitionComponent : LevelEntityComponent
     {
         public string albedo;

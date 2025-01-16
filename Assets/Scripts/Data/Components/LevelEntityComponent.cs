@@ -3,7 +3,11 @@ using SimpleJSON;
 
 namespace Diablo2Editor
 {
-
+    /*
+     * Base class for any ingame component. 
+     * OnLoaded method is called after Deserialization. Any work related to 
+     * instancing component in Scene should be done there
+     */
     public class LevelEntityComponent : MonoBehaviour, ISerializable
     {
         public string component_type;

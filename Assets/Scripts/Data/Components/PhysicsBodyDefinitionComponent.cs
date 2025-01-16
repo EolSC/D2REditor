@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace Diablo2Editor
 {
+    /*
+     * Physics body component. Used for object physics.
+     * 
+     */
     public class PhysicsBodyDefinitionComponent : LevelEntityComponent
     {
         public string bodytype;

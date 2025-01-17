@@ -6,54 +6,83 @@ namespace Diablo2Editor
 {
     /*
      * Container to hold all level dependencies
-     * TODO: make it coherent with edits
+     * Holds actual resources data and passes it to compoonents for instancing
      */
 
     public class LevelPresetDependencies : ISerializable
     {
-        public List<LevelPresetDependency> particles;
-        public List<LevelPresetDependency> models;
-        public List<LevelPresetDependency> skeletons;
-        public List<LevelPresetDependency> animations;
-        public List<LevelPresetDependency> textures;
-        public List<LevelPresetDependency> physics;
-        public List<LevelPresetDependency> json;
-        public List<LevelPresetDependency> variantdata;
-        public List<LevelPresetDependency> objecteffects;
-        public List<LevelPresetDependency> other;
+        public Dictionary<string, List<LevelPresetDependency>> dependencies = new Dictionary<string, List<LevelPresetDependency>>();
 
 
+        public Object GetResource(string resourcePath, DependencyType type)
+        {
+            return null;
+        }
 
+        private string GetJsonAttributeName(DependencyType type)
+        {
+            string result = type.ToString().ToLower();
+            return result;
+        }
 
+        private List<LevelPresetDependency> LoadDependencyList(JSONObject obj, DependencyType type)
+        {
+            switch (type)
+            {
+                case DependencyType.Texture:
+                    {
+                        return ISerializable.DeserializeList<DependencyTexture, LevelPresetDependency>(obj, GetJsonAttributeName(type));
+                    };
+                case DependencyType.Model:
+                    {
+                        return ISerializable.DeserializeList<DependencyModel, LevelPresetDependency>(obj, GetJsonAttributeName(type));
+                    };
+                default:
+                    {
+                        return ISerializable.DeserializeList<LevelPresetDependency>(obj, GetJsonAttributeName(type));
+                    };
+            }
+        }
 
         public void Deserialize(JSONObject obj)
         {
-            particles = ISerializable.DeserializeList<LevelPresetDependency>(obj, "particles");
-            models = ISerializable.DeserializeList<LevelPresetDependency>(obj, "models");
-            skeletons = ISerializable.DeserializeList<LevelPresetDependency>(obj, "skeletons");
-            animations = ISerializable.DeserializeList<LevelPresetDependency>(obj, "animations");
-            textures = ISerializable.DeserializeList<LevelPresetDependency>(obj, "textures");
-            physics = ISerializable.DeserializeList<LevelPresetDependency>(obj, "physics");
-            json = ISerializable.DeserializeList<LevelPresetDependency>(obj, "json");
-            variantdata = ISerializable.DeserializeList<LevelPresetDependency>(obj, "variantdata");
-            objecteffects = ISerializable.DeserializeList<LevelPresetDependency>(obj, "objecteffects");
-            other = ISerializable.DeserializeList<LevelPresetDependency>(obj, "other");
+            dependencies.Clear();
+            foreach (DependencyType depType in System.Enum.GetValues(typeof(DependencyType)))
+            {
+                string name = GetJsonAttributeName(depType);
+                JSONObject source = obj[name] as JSONObject;
+                if (source)
+                {
+                    dependencies[name] = LoadDependencyList(source, depType);
+                    foreach (var dep in dependencies[name])
+                    {
+                        dep.dependencies = this;
+                    }
+                }
+            }
+        }
+
+        public void LoadResources()
+        {
+            foreach (var value in dependencies.Values)
+            {
+                foreach(var item in value)
+                {
+                    item.LoadResource();
+                }
+            }
         }
 
 
         public JSONObject Serialize()
         {
             JSONObject result = new JSONObject();
-            result["particles"] = ISerializable.SerializeList(particles);
-            result["models"] = ISerializable.SerializeList(models);
-            result["skeletons"] = ISerializable.SerializeList(skeletons);
-            result["animations"] = ISerializable.SerializeList(animations);
-            result["textures"] = ISerializable.SerializeList(textures);
-            result["physics"] = ISerializable.SerializeList(physics);
-            result["json"] = ISerializable.SerializeList(json);
-            result["variantdata"] = ISerializable.SerializeList(variantdata);
-            result["objecteffects"] = ISerializable.SerializeList(objecteffects);
-            result["other"] = ISerializable.SerializeList(other);
+            foreach (var pair in  dependencies)
+            {
+                string name = pair.Key;
+                List<LevelPresetDependency> deps = pair.Value;
+                result[name] = ISerializable.SerializeList(deps);
+            }
             return result;
         }
     }

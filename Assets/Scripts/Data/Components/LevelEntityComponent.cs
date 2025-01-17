@@ -12,6 +12,7 @@ namespace Diablo2Editor
     {
         public string component_type;
         public string component_name;
+        public LevelPreset preset;
 
         public virtual void Deserialize(JSONObject json)
         {
@@ -19,7 +20,7 @@ namespace Diablo2Editor
             component_name = json["name"];
         }
 
-        public virtual void OnLoaded()
+        public virtual void Instantiate(LevelPresetDependencies dependencies)
         {
 
         }

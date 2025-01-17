@@ -1,5 +1,8 @@
 using UnityEngine;
 using SimpleJSON;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace Diablo2Editor
 {
@@ -9,6 +12,8 @@ namespace Diablo2Editor
     public class LevelPresetDependency : ISerializable
     {
         public string path;
+        public LevelPresetDependencies dependencies;
+        protected object resource;
 
         public void Deserialize(JSONObject json)
         {
@@ -21,5 +26,17 @@ namespace Diablo2Editor
             result["path"] = path;
             return result;
         }
+
+        public virtual void LoadResource()
+        {
+
+        }
+
+        public object GetResource()
+        {
+            return resource;
+        }
     }
+
+
 }

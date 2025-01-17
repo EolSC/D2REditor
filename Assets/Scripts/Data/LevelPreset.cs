@@ -51,6 +51,19 @@ namespace Diablo2Editor
             specialTiles.Deserialize(json["specialTiles"].AsObject);
         }
 
+        public void Instantiate()
+        {
+            dependencies.LoadResources();
+
+            foreach (var entity in entities)
+            {
+                entity.Instantiate(dependencies);
+            }
+            terrain.Instantiate(dependencies);
+        }
+
+
+
         public JSONObject Serialize()
         {
             JSONObject result = new JSONObject();

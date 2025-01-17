@@ -14,7 +14,7 @@ public class OpenLevelScript : MonoBehaviour
 
     private PathMapper pathMapper;
 
-    private static void OpenLevel(string absolute_path, bool test_serialization)
+    private static void OpenLevel(string absolute_path, bool test_serialization, bool instantiate)
     {
         /*
          * D2R uses hybid level data so we need both ds1 and json preset to load level properly
@@ -42,6 +42,10 @@ public class OpenLevelScript : MonoBehaviour
         {
             loader.TestLevelLoading(dsContent, jsonContent);
         }
+        if (instantiate)
+        { // instantiate it
+            loader.Instantiate();
+        }
     }
 
     [MenuItem("Diablo Level Editor/Test loading")]
@@ -51,7 +55,7 @@ public class OpenLevelScript : MonoBehaviour
         // Use path from settings without opening Browse dialog
         string pathToLevel = PathMapper.GetTestLevel();
         string absolute_path = PathMapper.GetAbsolutePath(pathToLevel);
-        OpenLevel(absolute_path, true);
+        OpenLevel(absolute_path, true, true);
     }
 
     [MenuItem("Diablo Level Editor/Open level")]
@@ -61,7 +65,7 @@ public class OpenLevelScript : MonoBehaviour
         // Open file dialog
         string absolute_path = EditorUtility.OpenFilePanel("Open Diablo 2 Ressurected level", "", "ds1");
         // Load level with no tests
-        OpenLevel(absolute_path, false);
+        OpenLevel(absolute_path, true, false);
     }
 
 

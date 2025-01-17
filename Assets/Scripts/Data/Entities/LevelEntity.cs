@@ -38,7 +38,6 @@ namespace Diablo2Editor
                 var component_type = component["type"];
                 var obj = CreateComponentByType(component_type, childObj);
                 obj.Deserialize(component.AsObject);
-                obj.OnLoaded();
                 this.components.Add(obj);
             }
         }
@@ -103,6 +102,14 @@ namespace Diablo2Editor
             result["id"] = id;
             result["components"] = ISerializable.SerializeList(components);
             return result;
+        }
+
+        public void Instantiate(LevelPresetDependencies dependencies)
+        {
+            foreach (var comp in components)
+            {
+                comp.Instantiate(dependencies);
+            }
         }
     }
 }

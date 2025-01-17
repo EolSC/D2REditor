@@ -56,6 +56,14 @@ public class LevelContentLoader
         return oldContentEqual && jsonEqual;
     }
 
+    public void Instantiate()
+    {
+        if (preset != null)
+        {
+            preset.Instantiate();
+        }
+    }
+
 
 
 

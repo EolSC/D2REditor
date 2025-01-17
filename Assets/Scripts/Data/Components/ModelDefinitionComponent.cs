@@ -54,10 +54,11 @@ namespace Diablo2Editor
             return result;
         }
 
-        public override void Instantiate(LevelPresetDependencies dependencies)
+        public override void Instantiate()
         {
-            base.Instantiate(dependencies);
-            System.Object obj = dependencies.GetResource(filename, DependencyType.Model);
+            base.Instantiate();
+            var resourceManager = GetDependencies();
+            object obj = resourceManager.GetResource(filename, DependencyType.Models);
             if (obj != null)
             {
 
@@ -79,7 +80,5 @@ namespace Diablo2Editor
                 }
             }
         }
-
-        // Loads textures for mesh materials
     }
 }

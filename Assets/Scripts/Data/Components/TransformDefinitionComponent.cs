@@ -19,9 +19,9 @@ namespace Diablo2Editor
             gameObject.transform.localScale = this.scale;
         }
 
-        public override void Instantiate(LevelPresetDependencies dependencies)
+        public override void Instantiate()
         {
-            base.Instantiate(dependencies);
+            base.Instantiate();
             UpdateTransform();
         }
 

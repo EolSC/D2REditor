@@ -26,7 +26,7 @@ namespace Diablo2Editor
         {
             base.Deserialize(json);
             bodytype = json["bodytype"];
-            fixturedefs = ISerializable.DeserializeComponentList<PhysicsFixture>(json, gameObject, "fixturedefs");
+            fixturedefs = ISerializable.DeserializeComponentList<PhysicsFixture>(json, this.entity, "fixturedefs");
             filter = json["filter"];
             allowTransition = json["allowTransition"];
             removeOnDeath = json["removeOnDeath"];

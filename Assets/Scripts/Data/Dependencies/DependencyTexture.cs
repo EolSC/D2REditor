@@ -11,10 +11,15 @@ namespace Diablo2Editor
     {
         public override void LoadResource()
         {
+            LoadTexture();
+        }
+
+        public void LoadTexture()
+        {
             string abs_path = PathMapper.GetAbsolutePath(this.path);
             if (File.Exists(abs_path))
             {
-                var bytes = File.ReadAllBytes(path);
+                var bytes = File.ReadAllBytes(abs_path);
                 var formatVal = BitConverter.ToInt16(bytes, 4);
                 var width = BitConverter.ToInt32(bytes, 8);
                 var height = BitConverter.ToInt32(bytes, 0xC);
@@ -25,10 +30,6 @@ namespace Diablo2Editor
                 tex.LoadRawTextureData(bytes.Skip(0x28 + startFirstSection).ToArray());
                 tex.Apply();
                 resource = tex;
-            }
-            else
-            {
-                Debug.LogError("Texture is not found " + path);
             }
         }
     }

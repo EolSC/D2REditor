@@ -1,6 +1,7 @@
 using Diablo2Editor;
 using SimpleJSON;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 /*
@@ -11,6 +12,8 @@ public class LevelContentLoader
 {
     // Loaded LevelPreset(D2R json data)
     private Diablo2Editor.LevelPreset preset = null;
+    // Random seed for level preset
+    private int seed = 0;
     // Old DS1 data(not handled yet)
     private byte[] oldContent = { };
     
@@ -31,7 +34,7 @@ public class LevelContentLoader
         GameObject rootGameObject = new GameObject();
         rootGameObject.name = levelName;
         JSONNode jsonNode = JSON.Parse(jsonContent);
-        preset = new Diablo2Editor.LevelPreset(jsonNode.AsObject, rootGameObject);
+        preset = new Diablo2Editor.LevelPreset(rootGameObject, jsonNode.AsObject, seed);
       }
 
 
@@ -60,7 +63,14 @@ public class LevelContentLoader
     {
         if (preset != null)
         {
+            EditorUtility.DisplayProgressBar("Loading level", "Loding resources...", 0.0f);
+            preset.LoadResources();
+
+
+            EditorUtility.DisplayProgressBar("Loading level", "Instantiating objects...", 0.8f);
             preset.Instantiate();
+            EditorUtility.ClearProgressBar();
+
         }
     }
 

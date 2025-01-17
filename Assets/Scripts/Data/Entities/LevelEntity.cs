@@ -14,10 +14,11 @@ namespace Diablo2Editor
         public string name;
         public Int64 id;
         public List<LevelEntityComponent> components;
-        private GameObject owner;
+        public LevelPreset preset;
+        public GameObject gameObject;
 
-        public LevelEntity(GameObject gameObject) {
-            owner = gameObject;
+        public LevelEntity(LevelPreset parent) {
+            this.preset = parent;
         }
 
 
@@ -27,16 +28,17 @@ namespace Diablo2Editor
             name = json["name"];
             id = json["id"];
 
-            GameObject childObj = new GameObject();
-            childObj.name = name;
-            childObj.transform.SetParent(owner.transform);
+            gameObject = new GameObject();
+            gameObject.name = name;
+            gameObject.transform.SetParent(preset.gameObject.transform);
 
             JSONNode components = json["components"];
             this.components = new List<LevelEntityComponent>();
             foreach (JSONNode component in components)
             {
                 var component_type = component["type"];
-                var obj = CreateComponentByType(component_type, childObj);
+                var obj = CreateComponentByType(component_type, gameObject);
+                obj.entity = this;
                 obj.Deserialize(component.AsObject);
                 this.components.Add(obj);
             }
@@ -104,11 +106,11 @@ namespace Diablo2Editor
             return result;
         }
 
-        public void Instantiate(LevelPresetDependencies dependencies)
+        public void Instantiate()
         {
             foreach (var comp in components)
             {
-                comp.Instantiate(dependencies);
+                comp.Instantiate();
             }
         }
     }

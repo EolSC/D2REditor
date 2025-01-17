@@ -36,6 +36,8 @@ public class OpenLevelScript : MonoBehaviour
         }
         // Load preset
         LevelContentLoader loader = new LevelContentLoader();
+
+        EditorUtility.DisplayProgressBar("Loading level", "Reading json...", 0.0f);
         loader.LoadLevel(fileName, dsContent, jsonContent);
         //Perform some tests if they are needed
         if (test_serialization)

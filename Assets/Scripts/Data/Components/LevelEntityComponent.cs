@@ -12,7 +12,7 @@ namespace Diablo2Editor
     {
         public string component_type;
         public string component_name;
-        public LevelPreset preset;
+        public LevelEntity entity;
 
         public virtual void Deserialize(JSONObject json)
         {
@@ -20,9 +20,35 @@ namespace Diablo2Editor
             component_name = json["name"];
         }
 
-        public virtual void Instantiate(LevelPresetDependencies dependencies)
+        public virtual void Instantiate()
         {
 
+        }
+
+        protected LevelPresetDependencies GetDependencies()
+        {
+            if (entity != null)
+            {
+                if (entity.preset != null)
+                {
+                    return entity.preset.dependencies;
+                }
+                else
+                {
+                    Debug.LogError("Preset not set");
+                }
+            }
+            else
+            {
+                Debug.LogError("Entity not set");
+            }
+            return null;
+        }
+
+
+        protected LevelPreset GetPreset()
+        {
+            return entity.preset;
         }
 
         public virtual JSONObject Serialize()

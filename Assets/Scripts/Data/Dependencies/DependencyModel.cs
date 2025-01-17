@@ -1,5 +1,7 @@
 using Diablo2Editor;
+using LSLib.Granny;
 using LSLib.Granny.GR2;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,27 +21,45 @@ namespace Diablo2Editor
     {
         // Hardcoded LOD
         // TODO: transfer it to editor settings, support different LODS
-        public static string lod_level = "_lod1.model";
+        public static string lod_level = "_lod0.model";
 
         public override void LoadResource()
         {
-            // Find absolute path to model file
-            string full_path = PathMapper.GetAbsolutePath(path);
-            // Apply lod level
-            full_path = full_path.Replace(".model", lod_level);
-            if (File.Exists(full_path))
+            if (path.Contains("terrain"))
             {
-                // Create GR2 model
-                var root = LSLib.Granny.GR2Utils.LoadModel(full_path);
-                // Instantiate model to Unity
-                Load(this.dependencies, root, true);
+                Debug.Log("Skipping terrain model: " + path);
+            }
+            else
+            {
+                // Find absolute path to model file
+                string full_path = PathMapper.GetAbsolutePath(path);
+                // Apply lod level
+                full_path = full_path.Replace(".model", lod_level);
+                if (File.Exists(full_path))
+                {
+                    // Create GR2 model
+                    try
+                    {
+                        var root = LSLib.Granny.GR2Utils.LoadModel(full_path);
+                        if (root != null)
+                        {
+                            // Instantiate model to Unity
+                            Load(this.dependencies, root, false);
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogError("Error loading model " + full_path + e.Message);
+                    }
+                }
+
             }
         }
 
         private void LoadTexture(LevelPresetDependencies dependencies, string txt, UnityEngine.Material material, string type = "_MainTex")
         {
-            string path = PathMapper.GetAbsolutePath(txt);
-            UnityEngine.Object resource = dependencies.GetResource(txt, DependencyType.Texture);
+            object resource = dependencies.GetResource(txt, DependencyType.Textures);
             if (resource != null)
             {
                 Texture2D tex = resource as Texture2D;
@@ -47,7 +67,7 @@ namespace Diablo2Editor
             }
         }
 
-        public void Load(LevelPresetDependencies dependencies, LSLib.Granny.Model.Root root, bool loadTextures)
+        public void Load(LevelPresetDependencies dependencies, LSLib.Granny.Model.Root root, bool skipTextures)
         {
             List<MeshData> meshes = new List<MeshData>();
 
@@ -57,14 +77,43 @@ namespace Diablo2Editor
                 var mesh = new UnityEngine.Mesh();
                 mesh.name = m.Name;
                 mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                int i = 0;
+                
+                int vertCount = m.PrimaryVertexData.Vertices.Count;
+
+                Vector3[] verts = new Vector3[vertCount];
+                Vector3[] normals = new Vector3[vertCount];
+                Vector2[] uv = new Vector2[vertCount];
+                var source_array = m.PrimaryVertexData.Vertices.ToArray();
+
+                for (i = 0; i < vertCount; i++) 
+                {
+                    var v = source_array[i];
+                    verts[i].x = -v.Position.X;
+                    verts[i].y = v.Position.Y;
+                    verts[i].z = v.Position.Z;
+
+                    normals[i].x = v.Normal.X;
+                    normals[i].y = v.Normal.Y;
+                    normals[i].z = v.Normal.Z;
+                    uv[i].x = v.TextureCoordinates0.X;
+                    uv[i].y = v.TextureCoordinates0.Y;
+                }
+
+                mesh.vertices = verts;
+                mesh.normals = normals;
+                mesh.uv = uv;
+                
+
                 // Flip mesh x and mesh normal x.  Unity scene did not match in-game objects
-                mesh.vertices = m.PrimaryVertexData.Vertices.Select(v => new Vector3(-1 * v.Position.X, v.Position.Y, v.Position.Z)).ToArray();
-                mesh.normals = m.PrimaryVertexData.Vertices.Select(v => new Vector3(v.Normal.X, v.Normal.Y, v.Normal.Z)).ToArray();
-                mesh.uv = m.PrimaryVertexData.Vertices.Select(v => new Vector2(v.TextureCoordinates0.X, v.TextureCoordinates0.Y)).ToArray();
-                mesh.triangles = m.PrimaryTopology.Indices.ToArray();
-                int[] tris = mesh.triangles;
+                //mesh.vertices = m.PrimaryVertexData.Vertices.Select(v => new Vector3(-1 * v.Position.X, v.Position.Y, v.Position.Z)).ToArray();
+                //mesh.normals = m.PrimaryVertexData.Vertices.Select(v => new Vector3(v.Normal.X, v.Normal.Y, v.Normal.Z)).ToArray();
+                //mesh.uv = m.PrimaryVertexData.Vertices.Select(v => new Vector2(v.TextureCoordinates0.X, v.TextureCoordinates0.Y)).ToArray();
+                
+                int[] tris = m.PrimaryTopology.Indices.ToArray();
+
                 // flip normals https://stackoverflow.com/questions/51100346/flipping-3d-gameobjects-in-unity3d/51100522
-                for (int i = 0; i < tris.Length / 3; i++)
+                for (i = 0; i < tris.Length / 3; i++)
                 {
                     int a = tris[i * 3 + 0];
                     int b = tris[i * 3 + 1];
@@ -72,7 +121,9 @@ namespace Diablo2Editor
                     tris[i * 3 + 0] = c;
                     tris[i * 3 + 2] = a;
                 }
+ 
                 mesh.triangles = tris;
+               
                 var groups = m.PrimaryTopology.Groups;
 
                 /*
@@ -95,22 +146,26 @@ namespace Diablo2Editor
 
 
                 // Load materials textures
-                if (loadTextures == true)
+                meshData.materials = new List<UnityEngine.Material>();
+                if (m.MaterialBindings.Count > 0 )
                 {
+                    
                     foreach (var binding in m.MaterialBindings)
                     {
                         var material = new UnityEngine.Material(Shader.Find("Standard"));
                         material.EnableKeyword("_NORMALMAP");
                         material.EnableKeyword("_METALLICGLOSSMAP");
+                        material.SetFloat("_GlossMapScale", 0.0f);
+                        if (!skipTextures)
+                        {
+                            var albedo = binding.Material?.Maps?.FirstOrDefault(map => map.Usage == "AlbedoTexture");
+                            if (albedo != null) LoadTexture(dependencies, albedo.Map.Texture.FromFileName, material);
+                            var normal = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "NormalTexture");
+                            if (normal != null) LoadTexture(dependencies, normal.Map.Texture.FromFileName, material, "_BumpMap");
+                            var orm = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "ORMTexture");
+                            if (orm != null) LoadTexture(dependencies, orm.Map.Texture.FromFileName, material, "_MetallicGlossMap");
 
-                        var albedo = binding.Material?.Maps?.FirstOrDefault(map => map.Usage == "AlbedoTexture");
-                        if (albedo != null) LoadTexture(dependencies, albedo.Map.Texture.FromFileName, material);
-
-
-                        var normal = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "NormalTexture");
-                        if (normal != null) LoadTexture(dependencies, normal.Map.Texture.FromFileName, material, "_BumpMap");
-                        var orm = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "ORMTexture");
-                        if (orm != null) LoadTexture(dependencies, orm.Map.Texture.FromFileName, material, "_MetallicGlossMap");
+                        }
                         meshData.materials.Add(material);
 
                     }

@@ -12,6 +12,7 @@ namespace Diablo2Editor
      */
    public class LevelPreset : ISerializable
    {
+        public int seed = 0;
         public string type;
         public string name;
         public LevelPresetDependencies dependencies;
@@ -20,13 +21,13 @@ namespace Diablo2Editor
         public string biomeFilename;
         public List<TileBiomeOverrides> perTileBiomeOverrides;
         SpecialTile specialTiles;
-        private GameObject owner;
+        public GameObject gameObject;
 
 
-        public LevelPreset(JSONObject json, GameObject owner)
+        public LevelPreset(GameObject gameObject, JSONObject json, int seed)
         {
-            // Keep link to gameObject to instantiate level data after Deserialization
-            this.owner = owner;
+            this.seed = seed;
+            this.gameObject = gameObject;
             Deserialize(json);
         }
 
@@ -39,11 +40,11 @@ namespace Diablo2Editor
             entities = new List<LevelEntity>();
             foreach (JSONObject item in json["entities"])
             {
-                LevelEntity entity = new LevelEntity(owner);
+                LevelEntity entity = new LevelEntity(this);
                 entity.Deserialize(item);
                 entities.Add(entity);
             }
-            terrain = new LevelEntity(owner);
+            terrain = new LevelEntity(this);
             terrain.Deserialize(json["terrain"].AsObject);
             biomeFilename = json["biomeFilename"];
             perTileBiomeOverrides = ISerializable.DeserializeList<TileBiomeOverrides>(json, "perTileBiomeOverrides");
@@ -51,15 +52,18 @@ namespace Diablo2Editor
             specialTiles.Deserialize(json["specialTiles"].AsObject);
         }
 
-        public void Instantiate()
+        public void LoadResources()
         {
             dependencies.LoadResources();
+        }
 
+        public void Instantiate()
+        {
             foreach (var entity in entities)
             {
-                entity.Instantiate(dependencies);
+                entity.Instantiate();
             }
-            terrain.Instantiate(dependencies);
+            terrain.Instantiate();
         }
 
 

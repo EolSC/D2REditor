@@ -28,11 +28,14 @@ namespace Diablo2Editor
         public static List<Base> DeserializeList<T, Base>(JSONObject json, string depType) where T : ISerializable, Base, new()
         {
             List<Base> result = new List<Base>();
-            foreach (JSONObject item in json[depType])
+            if (json[depType] != null)
             {
-                T serializable = new T();
-                serializable.Deserialize(item);
-                result.Add(serializable);
+                foreach (JSONObject item in json[depType])
+                {
+                    T serializable = new T();
+                    serializable.Deserialize(item);
+                    result.Add(serializable);
+                }
             }
             return result;
         }
@@ -41,14 +44,17 @@ namespace Diablo2Editor
          * Unity components require gameObject to be properly instanced so we need separate function for
          * component list
          */
-        public static List<T> DeserializeComponentList<T>(JSONObject json, GameObject gameObject, string depType) where T : Component, ISerializable
+        public static List<T> DeserializeComponentList<T>(JSONObject json, LevelEntity entity, string depType) where T : LevelEntityComponent, ISerializable
         {
             List<T> result = new List<T>();
+            GameObject gameObject = entity.gameObject;
+
             foreach (JSONObject item in json[depType])
             {
-                T serializable = gameObject.AddComponent<T>();
-                serializable.Deserialize(item);
-                result.Add(serializable);
+                T component = gameObject.AddComponent<T>();
+                component.entity = entity;
+                component.Deserialize(item);
+                result.Add(component);
             }
             return result;
         }

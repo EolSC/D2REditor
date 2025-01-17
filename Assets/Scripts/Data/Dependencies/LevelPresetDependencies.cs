@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SimpleJSON;
+using System.IO;
+using UnityEditor;
 
 namespace Diablo2Editor
 {
@@ -14,8 +16,19 @@ namespace Diablo2Editor
         public Dictionary<string, List<LevelPresetDependency>> dependencies = new Dictionary<string, List<LevelPresetDependency>>();
 
 
-        public Object GetResource(string resourcePath, DependencyType type)
+        public object GetResource(string resourcePath, DependencyType type)
         {
+            var res_path = resourcePath.ToLower();
+            string name = GetJsonAttributeName(type);
+            List<LevelPresetDependency> resources = dependencies[name];
+            foreach(var resource in resources) 
+            {
+                if (res_path == resource.path.ToLower())
+                {
+                    return resource.GetResource();
+                }
+            }
+            Debug.LogError("Resource of type " + type.ToString() + " is not found " + resourcePath);
             return null;
         }
 
@@ -29,11 +42,11 @@ namespace Diablo2Editor
         {
             switch (type)
             {
-                case DependencyType.Texture:
+                case DependencyType.Textures:
                     {
                         return ISerializable.DeserializeList<DependencyTexture, LevelPresetDependency>(obj, GetJsonAttributeName(type));
                     };
-                case DependencyType.Model:
+                case DependencyType.Models:
                     {
                         return ISerializable.DeserializeList<DependencyModel, LevelPresetDependency>(obj, GetJsonAttributeName(type));
                     };
@@ -50,26 +63,37 @@ namespace Diablo2Editor
             foreach (DependencyType depType in System.Enum.GetValues(typeof(DependencyType)))
             {
                 string name = GetJsonAttributeName(depType);
-                JSONObject source = obj[name] as JSONObject;
-                if (source)
+                dependencies[name] = LoadDependencyList(obj, depType);
+                foreach (var dep in dependencies[name])
                 {
-                    dependencies[name] = LoadDependencyList(source, depType);
-                    foreach (var dep in dependencies[name])
-                    {
-                        dep.dependencies = this;
-                    }
+                    dep.dependencies = this;
                 }
             }
         }
 
         public void LoadResources()
         {
-            foreach (var value in dependencies.Values)
+            if (dependencies.Count > 0)
             {
-                foreach(var item in value)
+                float total = 0;
+                foreach (var value in dependencies.Values)
                 {
-                    item.LoadResource();
+                    total += value.Count;
                 }
+
+                float startProgress = 0.0f;
+                float endProgress = 0.8f;
+                float step = (endProgress - startProgress) / total;
+                foreach (var value in dependencies.Values)
+                {
+                    foreach (var item in value)
+                    {
+                        EditorUtility.DisplayProgressBar("Loading level", "Loding resources...", startProgress);
+                        item.LoadResource();
+                        startProgress += step;
+                    }
+                }
+
             }
         }
 

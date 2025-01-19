@@ -4,9 +4,6 @@ using System.Linq;
 using System;
 using System.IO;
 using UnityEditor;
-using static LSLib.Granny.GR2.Magic;
-using LSLib.Granny.Model;
-using Unity.VisualScripting;
 using System.Collections.Generic;
 
 
@@ -63,20 +60,26 @@ namespace Diablo2Editor
             {
 
                 List<MeshData> models = obj as List<MeshData>;
+                int counter = 0;
                 foreach(var model in models)
                 {
-                    var meshObj = new GameObject(model.mesh.name);
-                    var meshFilter = meshObj.AddComponent<MeshFilter>();
-                    meshFilter.mesh = model.mesh;
-                    var meshRenderer = meshObj.AddComponent<MeshRenderer>();
-                    meshRenderer.SetSharedMaterials(model.materials);
+                    if (model.mesh != null)
+                    {
+                        string child_name = this.name + counter;
+                        var meshObj = new GameObject(child_name);
+                        var meshFilter = meshObj.AddComponent<MeshFilter>();
+                        meshFilter.mesh = model.mesh;
+                        var meshRenderer = meshObj.AddComponent<MeshRenderer>();
+                        meshRenderer.SetSharedMaterials(model.materials);
 
 
 
-                    meshObj.transform.parent = transform;
-                    meshObj.transform.localPosition = Vector3.zero;
-                    meshObj.transform.localRotation = Quaternion.identity;
-                    meshObj.transform.localScale = model.localScale;
+                        meshObj.transform.parent = transform;
+                        meshObj.transform.localPosition = Vector3.zero;
+                        meshObj.transform.localRotation = Quaternion.identity;
+                        meshObj.transform.localScale = model.localScale;
+
+                    }
                 }
             }
         }

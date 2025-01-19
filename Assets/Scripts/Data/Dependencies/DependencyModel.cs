@@ -1,12 +1,10 @@
-using Diablo2Editor;
-using LSLib.Granny;
-using LSLib.Granny.GR2;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.Rendering;
 namespace Diablo2Editor
 {
 
@@ -25,160 +23,28 @@ namespace Diablo2Editor
 
         public override void LoadResource()
         {
-            if (path.Contains("terrain"))
+            // Find absolute path to model file
+            string full_path = PathMapper.GetAbsolutePath(path);
+            // Apply lod level
+            full_path = full_path.Replace(".model", lod_level);
+            if (File.Exists(full_path))
             {
-                Debug.Log("Skipping terrain model: " + path);
-            }
-            else
-            {
-                // Find absolute path to model file
-                string full_path = PathMapper.GetAbsolutePath(path);
-                // Apply lod level
-                full_path = full_path.Replace(".model", lod_level);
-                if (File.Exists(full_path))
-                {
-                    // Create GR2 model
-                    try
-                    {
-                        var root = LSLib.Granny.GR2Utils.LoadModel(full_path);
-                        if (root != null)
-                        {
-                            // Instantiate model to Unity
-                            Load(this.dependencies, root, false);
-                        }
-
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError("Error loading model " + full_path + e.Message);
-                    }
-                }
-
+                LoadNative(this.dependencies, full_path);
             }
         }
 
-        private void LoadTexture(LevelPresetDependencies dependencies, string txt, UnityEngine.Material material, string type = "_MainTex")
+        public void LoadNative(LevelPresetDependencies dependencies, string full_path)
         {
-            object resource = dependencies.GetResource(txt, DependencyType.Textures);
-            if (resource != null)
+            // Load natively via GrannyLoader
+            try
             {
-                Texture2D tex = resource as Texture2D;
-                material.SetTexture(type, tex);
+                List<MeshData> data = NativeMeshLoader.LoadGrannyFile(dependencies, full_path);
+                resource = data;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error loading model " + full_path + e.Message);
             }
         }
-
-        public void Load(LevelPresetDependencies dependencies, LSLib.Granny.Model.Root root, bool skipTextures)
-        {
-            List<MeshData> meshes = new List<MeshData>();
-
-            foreach (var m in root.Meshes)
-            {
-                MeshData meshData = new MeshData();
-                var mesh = new UnityEngine.Mesh();
-                mesh.name = m.Name;
-                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-                int i = 0;
-                
-                int vertCount = m.PrimaryVertexData.Vertices.Count;
-
-                Vector3[] verts = new Vector3[vertCount];
-                Vector3[] normals = new Vector3[vertCount];
-                Vector2[] uv = new Vector2[vertCount];
-                var source_array = m.PrimaryVertexData.Vertices.ToArray();
-
-                for (i = 0; i < vertCount; i++) 
-                {
-                    var v = source_array[i];
-                    verts[i].x = -v.Position.X;
-                    verts[i].y = v.Position.Y;
-                    verts[i].z = v.Position.Z;
-
-                    normals[i].x = v.Normal.X;
-                    normals[i].y = v.Normal.Y;
-                    normals[i].z = v.Normal.Z;
-                    uv[i].x = v.TextureCoordinates0.X;
-                    uv[i].y = v.TextureCoordinates0.Y;
-                }
-
-                mesh.vertices = verts;
-                mesh.normals = normals;
-                mesh.uv = uv;
-                
-
-                // Flip mesh x and mesh normal x.  Unity scene did not match in-game objects
-                //mesh.vertices = m.PrimaryVertexData.Vertices.Select(v => new Vector3(-1 * v.Position.X, v.Position.Y, v.Position.Z)).ToArray();
-                //mesh.normals = m.PrimaryVertexData.Vertices.Select(v => new Vector3(v.Normal.X, v.Normal.Y, v.Normal.Z)).ToArray();
-                //mesh.uv = m.PrimaryVertexData.Vertices.Select(v => new Vector2(v.TextureCoordinates0.X, v.TextureCoordinates0.Y)).ToArray();
-                
-                int[] tris = m.PrimaryTopology.Indices.ToArray();
-
-                // flip normals https://stackoverflow.com/questions/51100346/flipping-3d-gameobjects-in-unity3d/51100522
-                for (i = 0; i < tris.Length / 3; i++)
-                {
-                    int a = tris[i * 3 + 0];
-                    int b = tris[i * 3 + 1];
-                    int c = tris[i * 3 + 2];
-                    tris[i * 3 + 0] = c;
-                    tris[i * 3 + 2] = a;
-                }
- 
-                mesh.triangles = tris;
-               
-                var groups = m.PrimaryTopology.Groups;
-
-                /*
-                 * Pass Group data from GR2 model to Unity mesh
-                 */
-                List<UnityEngine.Rendering.SubMeshDescriptor> submeshes = new List<UnityEngine.Rendering.SubMeshDescriptor>();
-                foreach (var group in groups)
-                {
-                    UnityEngine.Rendering.SubMeshDescriptor descriptor = new UnityEngine.Rendering.SubMeshDescriptor();
-                    descriptor.indexStart = group.TriFirst * 3;
-                    descriptor.indexCount = group.TriCount * 3;
-                    descriptor.baseVertex = 0;
-                    descriptor.topology = MeshTopology.Triangles;
-                    submeshes.Add(descriptor);
-
-                }
-                mesh.SetSubMeshes(submeshes);
-
-                meshData.localScale = new Vector3(m.ExtendedData.VertexScale, m.ExtendedData.VertexScale, m.ExtendedData.VertexScale);
-
-
-                // Load materials textures
-                meshData.materials = new List<UnityEngine.Material>();
-                if (m.MaterialBindings.Count > 0 )
-                {
-                    
-                    foreach (var binding in m.MaterialBindings)
-                    {
-                        var material = new UnityEngine.Material(Shader.Find("Standard"));
-                        material.EnableKeyword("_NORMALMAP");
-                        material.EnableKeyword("_METALLICGLOSSMAP");
-                        material.SetFloat("_GlossMapScale", 0.0f);
-                        if (!skipTextures)
-                        {
-                            var albedo = binding.Material?.Maps?.FirstOrDefault(map => map.Usage == "AlbedoTexture");
-                            if (albedo != null) LoadTexture(dependencies, albedo.Map.Texture.FromFileName, material);
-                            var normal = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "NormalTexture");
-                            if (normal != null) LoadTexture(dependencies, normal.Map.Texture.FromFileName, material, "_BumpMap");
-                            var orm = m.MaterialBindings[0].Material?.Maps?.FirstOrDefault(map => map.Usage == "ORMTexture");
-                            if (orm != null) LoadTexture(dependencies, orm.Map.Texture.FromFileName, material, "_MetallicGlossMap");
-
-                        }
-                        meshData.materials.Add(material);
-
-                    }
-                }
-                meshData.mesh = mesh;
-                meshes.Add(meshData);
-
-
-            }
-            resource = meshes;
-        }
-
-
-
     }
 }

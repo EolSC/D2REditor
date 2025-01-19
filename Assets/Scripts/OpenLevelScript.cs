@@ -70,13 +70,4 @@ public class OpenLevelScript : MonoBehaviour
         OpenLevel(absolute_path, true, false);
     }
 
-    [MenuItem("Diablo Level Editor/Test native loading")]
-    private static void TestNative()
-    {
-        TestNative native = new TestNative();
-        native.Test();
-    }
-
-
-
 }

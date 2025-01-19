@@ -60,7 +60,7 @@ namespace Diablo2Editor
             {
 
                 List<MeshData> models = obj as List<MeshData>;
-                int counter = 0;
+                int counter = 1;
                 foreach(var model in models)
                 {
                     if (model.mesh != null)
@@ -78,7 +78,7 @@ namespace Diablo2Editor
                         meshObj.transform.localPosition = Vector3.zero;
                         meshObj.transform.localRotation = Quaternion.identity;
                         meshObj.transform.localScale = model.localScale;
-
+                        counter++;
                     }
                 }
             }

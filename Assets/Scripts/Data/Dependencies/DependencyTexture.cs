@@ -7,11 +7,33 @@ using System.Linq;
 
 namespace Diablo2Editor
 {
+    public enum TextureLoadMode
+    {
+        All,
+        Albedo,
+        None
+    }
     public class DependencyTexture : LevelPresetDependency
     {
+        private bool NeedLoadTexture(string path)
+        {
+            switch (PathMapper.textureLoadMode)
+            {
+                default:
+                case TextureLoadMode.All:
+                         return true;
+                    case TextureLoadMode.Albedo:
+                         return path.EndsWith("_alb.texture");    
+                    case TextureLoadMode.None:
+                         return false;
+            }
+        }
         public override void LoadResource()
         {
-            LoadTexture();
+            if(NeedLoadTexture(path))
+            {
+                LoadTexture();
+            }
         }
 
         public void LoadTexture()

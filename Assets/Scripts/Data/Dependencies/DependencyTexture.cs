@@ -17,7 +17,8 @@ namespace Diablo2Editor
     {
         private bool NeedLoadTexture(string path)
         {
-            switch (PathMapper.textureLoadMode)
+            TextureLoadMode mode = EditorMain.Settings().common.textureLoadMode;
+            switch (mode)
             {
                 default:
                 case TextureLoadMode.All:

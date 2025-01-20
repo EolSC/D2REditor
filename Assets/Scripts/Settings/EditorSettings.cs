@@ -16,13 +16,18 @@ namespace Diablo2Editor
         private const string EXAMPLE_FILE = "Settings/D2REditorSettings_example.json";
         public class CommonSettings
         {
-            public string textureLoadMode;
+            public TextureLoadMode textureLoadMode = TextureLoadMode.All;
             public void Init(JSONNode node)
             {
                 JSONObject obj = node as JSONObject;
-                if (obj)
+                if (obj != null && obj.IsObject)
                 {
-                    textureLoadMode = obj["textureLoadMode"];
+                    object parsedMode;
+                    if (System.Enum.TryParse(typeof(TextureLoadMode),
+                        obj["textureLoadMode"], out parsedMode))
+                    {
+                        textureLoadMode = (TextureLoadMode)parsedMode;
+                    }
                 }
             }
         }
@@ -35,7 +40,7 @@ namespace Diablo2Editor
             public void Init(JSONNode node)
             {
                 JSONObject obj = node as JSONObject;
-                if (obj)
+                if (obj != null && obj.IsObject)
                 {
                     nearClip = obj["nearClip"];
                     farClip = obj["farClip"];

@@ -12,10 +12,10 @@ public class LevelContentLoader
 {
     // Loaded LevelPreset(D2R json data)
     private Diablo2Editor.LevelPreset preset = null;
+    // Loaded Level(D2 level data)
+    private Diablo2Editor.DS1Level ds1Level = null;
     // Random seed for level preset
     private int seed = 0;
-    // Old DS1 data(not handled yet)
-    private byte[] oldContent = { };
     
     /*
      * Load level content. This function fully constructs LevelPreset and Ds1Preset within Scene
@@ -41,7 +41,8 @@ public class LevelContentLoader
     // Ds1-specific logic
     private void LoadDS1Content(byte[] ds1Content)
     {
-        oldContent = ds1Content;
+        DS1Loader loader = new DS1Loader();
+        ds1Level = loader.ReadDS1(ds1Content);
     }
 
     /*
@@ -52,8 +53,11 @@ public class LevelContentLoader
         JSONNode resultJson = preset.Serialize();
         JSONNode sourceJson = JSON.Parse(jsonContent);
 
-        byte[] resultDS1 = oldContent;
-        bool oldContentEqual = resultDS1.Equals(ds1Content);
+        bool oldContentEqual = false;
+        if (ds1Level != null)
+        {
+            oldContentEqual = ds1Level.test_data.Equals(ds1Content);
+        }
         bool jsonEqual = JSONCompare.Compare(sourceJson, resultJson);
 
         return oldContentEqual && jsonEqual;

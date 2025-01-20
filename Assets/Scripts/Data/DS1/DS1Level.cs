@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 
 /*
@@ -122,6 +123,7 @@ namespace Diablo2Editor
         {
 
         }
+        public byte[] test_data; // source DS1 data for tests. TODO - delete after Save/Load is implemented
 
         public char [] dt1_idx = new char[DS1Consts.DT1_IN_DS1_MAX];
         public int [] dt1_mask = new int[DS1Consts.DT1_IN_DS1_MAX];
@@ -130,15 +132,15 @@ namespace Diablo2Editor
         public int bt_num;
         public byte[] wall_layer_mask = new byte[DS1Consts.WALL_MAX_LAYER];
         public byte [] floor_layer_mask = new byte[DS1Consts.FLOOR_MAX_LAYER];
-        public char [] shadow_layer_mask = new char[DS1Consts.SHADOW_MAX_LAYER];
+        public byte [] shadow_layer_mask = new byte[DS1Consts.SHADOW_MAX_LAYER];
         public DS1ObjectLayer objects_layer_mask;
         public byte paths_layer_mask;
         public byte walkable_layer_mask;
         public byte animations_layer_mask;
         public byte special_layer_mask;
         public int subtile_help_display;
-        public string name;    // long filename with paths
-        public string filename; // short filename
+        //public string name;    // long filename with paths
+        //public string filename; // short filename
         //UNDO_S undo;
 
         // from file
@@ -153,10 +155,52 @@ namespace Diablo2Editor
         public char[] file_buff;
         public int file_len;
 
-        public DS1Floor floor;
-        public DS1Shadow shadow;
+        // tiles data
+        public DS1Floor floor;      // floor
+        public DS1Shadow shadow;    // shadow
+        public DS1Wall wall;        // wall
+        public DS1Tagged tagged;    // tagged
+
+        // groupData
+        long group_num;
+        int group_size;
+        List<DS1Group> group = new List<DS1Group>();
+
+        /*
+         Internal data. TODO - clean this up if not needed
+        // internal
+        ZOOM_E cur_zoom;
+        int tile_w;
+        int tile_h;
+        int height_mul;
+        int height_div;
+        SCROLL_S cur_scroll;
+
+        // screen position and size for this ds1
+        WIN_PREVIEW_S own_wpreview;
+        */
 
 
+        // Objects data 
+        int[] drawing_order;
+        List<DS1Object> objects = new List<DS1Object>();
+        long obj_num;
+        long obj_num_undo;
+        int can_undo_obj;
+        int draw_edit_obj; // edit Type-Id of objects, FALSE / TRUE
+       // WIN_EDT_OBJ_S win_edt_obj;       Object editor window handle. TODO - replace with reference
+
+        // current animated floor frame
+        int cur_anim_floor_frame;
+
+        // path editing window of this ds1
+      //  PATH_EDIT_WIN_S path_edit_win;   Path editor window handle. TODO - replace with reference
+
+        // save count
+        long save_count;
+
+        // current number of objects
+        long current_obj_max;
 
     }
 }

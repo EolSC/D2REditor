@@ -16,7 +16,8 @@ namespace Diablo2Editor
 
         public void LoadTexture()
         {
-            string abs_path = PathMapper.GetAbsolutePath(this.path);
+            PathMapper mapper = EditorMain.Settings().paths;
+            string abs_path = mapper.GetAbsolutePath(this.path);
             if (File.Exists(abs_path))
             {
                 var bytes = File.ReadAllBytes(abs_path);

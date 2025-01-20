@@ -1,0 +1,19 @@
+{
+    "developer": {
+        "testLevel": "data/global/tiles/act1/barracks/barew.ds1"
+    },
+    "paths": {
+        "dataRoot": "E:\\work\\d2_assets\\",
+        "presetRoot": "data/hd/env/preset",
+        "tilesRoot": "data/global/tiles"
+    },
+	"common": {
+		"textureLoadMode" : "Albedo"
+	},
+	"camera": {
+		"nearClip" : 0.01,
+		"farClip" : 1000,
+		"occlusionCulling" : false,
+		"zoom" : 16.0
+	}
+}

@@ -1,0 +1,16 @@
+{
+    "developer": {
+        "test_level": "data/global/tiles/act1/barracks/barew.ds1"
+    },
+    "paths": {
+        "data_root": "E:\\work\\d2_assets\\",
+        "preset_root": "data/hd/env/preset",
+        "tiles_root": "data/global/tiles"
+    },
+	"common": {
+		"texture_load_mode" : "Albedo"
+	},
+	"camera" : {
+		
+	}
+}

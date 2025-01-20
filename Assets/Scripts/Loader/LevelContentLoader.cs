@@ -70,7 +70,7 @@ public class LevelContentLoader
             EditorUtility.DisplayProgressBar("Loading level", "Instantiating objects...", 0.8f);
             preset.Instantiate();
             EditorUtility.ClearProgressBar();
-
+            EditorMain.Settings().UpdateCameraSettings(preset.gameObject);
         }
     }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -23,8 +24,9 @@ namespace Diablo2Editor
 
         public override void LoadResource()
         {
+            PathMapper mapper = EditorMain.Settings().paths;
             // Find absolute path to model file
-            string full_path = PathMapper.GetAbsolutePath(path);
+            string full_path = mapper.GetAbsolutePath(path);
             // Apply lod level
             full_path = full_path.Replace(".model", lod_level);
             if (File.Exists(full_path))

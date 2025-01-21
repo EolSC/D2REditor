@@ -94,30 +94,30 @@ public class DS1TaggedCell
 
     }
 
-    public ulong num;
+    public uint num;
     public byte flags;
 }
 public class DS1Floor
 {
-    public List<DS1FloorCell> floor_buff = new List<DS1FloorCell>();  // buffer for all floor layers
-    public uint floor_num;      // # of layers in floor buffer
+    public DS1FloorCell[,,] floor_array;  // buffer for all floor layers
+    public uint floor_num;            // # of layers in floor buffer
 }
 
 public class DS1Shadow
 {
-    public List<DS1ShadowCell> shadow_buff = new List<DS1ShadowCell>();  // buffer for all shadow layers
-    public uint shadow_num;      // # of layers in shadow buffer
+    public DS1ShadowCell[,,] shadow_array; // buffer for all shadow layers
+    public uint shadow_num;             // # of layers in shadow buffer
 }
 
 public class DS1Wall
 {
-    public List<DS1WallCell> wall_buff = new List<DS1WallCell>();  // buffer for all wall layers
-    public uint wall_num;       // # of layers in wall buffer
+    public DS1WallCell [,,] wall_array ;  // buffer for all wall layers
+    public uint wall_num;             // # of layers in wall buffer
 }
 
 
 public class DS1Tagged
 {
-    public List<DS1TaggedCell> tag_buff = new List<DS1TaggedCell>();  // buffer for all wall layers
+    public DS1TaggedCell[,,] tag_array;  // buffer for all wall layers
     public uint tag_num;      // # of layers in unk buffer
 }

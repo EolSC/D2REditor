@@ -1,10 +1,6 @@
 using System;
 using System.Text;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
-using static Unity.Burst.Intrinsics.X86.Avx;
 
 namespace Diablo2Editor
 {
@@ -50,6 +46,16 @@ namespace Diablo2Editor
     {
         private const bool PRINT_DEBUG = true;
         private const bool ALWAYS_MAX_LAYERS = false;
+        // length of 1 wall tile in .ds1 file(bytes). Used to jump to orient data for walls
+        private const int WALL_TILE_DATA_SIZE = 4;
+
+        // Lookup table for tile orientation
+        static byte[] dir_lookup = {
+                  0x00, 0x01, 0x02, 0x01, 0x02, 0x03, 0x03, 0x05, 0x05, 0x06,
+                  0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
+                  0x0F, 0x10, 0x11, 0x12, 0x14
+               };
+
         public DS1Loader()
         {
 
@@ -119,11 +125,63 @@ namespace Diablo2Editor
             return result;
         }
 
-        private DS1WallCell ReadWallCell(byte[] content, ref int streamPosition)
+        // wall data and orientation data are located separately in ds1 file
+        // so we need to know offset pointing for orientation data to load walls properly
+        private DS1WallCell ReadWallCell(byte[] content, 
+            int orientOffset, ref int streamPosition, long version)
         {
-            DS1WallCell cell = new DS1WallCell();
+            int orient_position = streamPosition + orientOffset;
+            DS1WallCell tile = new DS1WallCell();
+            tile.prop1 = content[streamPosition++];
+            tile.prop2 = content[streamPosition++];
+            tile.prop3 = content[streamPosition++];
+            tile.prop4 = content[streamPosition++];
+            ReadWallOrientation(tile, content, orient_position, version);
+            return tile;
+        }
 
-            return cell;
+        private DS1FloorCell ReadFloorCell(byte[] content, ref int streamPosition)
+        {
+
+            DS1FloorCell tile = new DS1FloorCell();
+            tile.prop1 = content[streamPosition++];
+            tile.prop2 = content[streamPosition++];
+            tile.prop3 = content[streamPosition++];
+            tile.prop4 = content[streamPosition++];
+            return tile;
+        }
+
+        private DS1ShadowCell ReadShadowCell(byte[] content, ref int streamPosition)
+        {
+
+            DS1ShadowCell tile = new DS1ShadowCell();
+            tile.prop1 = content[streamPosition++];
+            tile.prop2 = content[streamPosition++];
+            tile.prop3 = content[streamPosition++];
+            tile.prop4 = content[streamPosition++];
+            return tile;
+        }
+        private DS1TaggedCell ReadTaggedCell(byte[] content, ref int streamPosition)
+        {
+
+            DS1TaggedCell tile = new DS1TaggedCell();
+            tile.num = BitConverter.ToUInt32(content, streamPosition);
+            streamPosition += sizeof(uint);
+            return tile;
+        }
+
+        private void ReadWallOrientation(DS1WallCell tile, byte[] content, int position, long version)
+        {
+            byte orient_data = content[position];
+
+            if (version < 7)
+            {
+                tile.orientation = dir_lookup[orient_data];
+            }
+            else
+            {
+                tile.orientation = orient_data;
+            }
         }
 
         public DS1Level ReadDS1(byte[] content, bool alwaysMaxLayers = false)
@@ -136,16 +194,10 @@ namespace Diablo2Editor
             uint shadowNumber = 1; // # of shadow layer, always here
             uint tagNumber = 0; // # of tag layer
 
-            // temp streaming data for layers
-            int [] layerStreamingCache = new int[14];
+            // tile layers data
+            int[] layerStreamingCache = new int[14];
             int numberOfLayers;
 
-            // Lookup table for tile directions
-            int []dir_lookup = {
-                  0x00, 0x01, 0x02, 0x01, 0x02, 0x03, 0x03, 0x05, 0x05, 0x06,
-                  0x06, 0x07, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E,
-                  0x0F, 0x10, 0x11, 0x12, 0x14
-               };
             // Current position in data buffer
             int streamPosition = 0;
             level.version = ReadUint(content, ref streamPosition);
@@ -227,8 +279,8 @@ namespace Diablo2Editor
                 numberOfLayers = 0;
                 for (int i = 0; i < wallNumber; i++)
                 {
-                    layerStreamingCache[numberOfLayers++] = 1 + i; // wall x
-                    layerStreamingCache[numberOfLayers++] = 5 + i; // orientation x
+                    layerStreamingCache[numberOfLayers++] = 1 + i;          // wall x
+                    layerStreamingCache[numberOfLayers++] = 5 + i;   // orientation x
                 }
                 for (int i = 0; i < floorNumber; i++)
                 {
@@ -259,6 +311,18 @@ namespace Diablo2Editor
             level.shadow.shadow_num = shadowNumber;
             level.tagged.tag_num = tagNumber;
 
+            /*
+             * Create data arrays for all tile types
+             */
+            level.floor.floor_array = new DS1FloorCell[floorNumber, level.height, level.width];
+            level.wall.wall_array = new DS1WallCell[wallNumber, level.height, level.width];
+            level.shadow.shadow_array = new DS1ShadowCell[shadowNumber, level.height, level.width];
+            if (level.tagged.tag_num > 0)
+            {
+                level.tagged.tag_array = new DS1TaggedCell[tagNumber, level.height, level.width];
+
+            }
+
             /* 
              DS1 initializes some buffers here
              Work with buffers is now obsolete. It goes like this:
@@ -282,12 +346,89 @@ namespace Diablo2Editor
             
             */
 
+            /*
+             * DS1 Tiles data stored like this(version >=4)
+                WWWWWWW
+                OOOOOOO
+                WWWWWWW
+                OOOOOOO
+                ...
+                FFFFFFF
+                SSSSSSS
+                TTTTTTT
+
+                W - Wall tile
+                O - orientation data for wall tile
+                F - floor tile
+                S - shadow tile
+                T - tag tile
+
+                Old versions(version < 4) have 5 layers exactly
+                WWWWWWW
+                FFFFFFF
+                OOOOOOO
+                TTTTTTT
+                SSSSSSS
+            */
+            // cycle through layer map
+            for (int n = 0; n < numberOfLayers; n++)
+            {
+                for (int y = 0; y < level.height; y++)
+                {
+                    for (int x = 0; x < level.width; x++)
+                    {
+                        switch(layerStreamingCache[n])
+                        {
+                            default:
+                            case 1:  // walls
+                            case 2:
+                            case 3:
+                            case 4:
+                            {
+                                int layerNumber = layerStreamingCache[n] - 1;
+                                int orientOffset = (int)level.width * WALL_TILE_DATA_SIZE;
+                                var tile = ReadWallCell(content, orientOffset, ref streamPosition, level.version);
+                                level.wall.wall_array[layerNumber, y, x] = tile;
+                            }; break;
+                            case 5: // orientation
+                            case 6:
+                            case 7:
+                            case 8:
+                                {
+                                    // Skip 4 bytes, this data is read in ReadWallCell
+                                    streamPosition += 4;
+                                }; break;
+                            case 9:
+                            case 10:  // floor
+                                {
+                                    int layerNumber = layerStreamingCache[n] - 9;
+                                    var tile = ReadFloorCell(content, ref streamPosition);
+                                    level.floor.floor_array[layerNumber, y, x] = tile;
+                                }; break;
+                            case 11:
+                                {
+                                    int layerNumber = layerStreamingCache[n] - 11;
+                                    var tile = ReadShadowCell(content, ref streamPosition);
+                                    level.shadow.shadow_array[layerNumber, y, x] = tile;
+
+                                }; break;
+                            case 12:
+                                {
+                                    int layerNumber = layerStreamingCache[n] - 12;
+                                    var tile = ReadTaggedCell(content, ref streamPosition);
+                                    level.tagged.tag_array[layerNumber, y, x] = tile;
+                                }; break;
+
+                        }
+                    }
+                }
+            }
+
             if (PRINT_DEBUG)
             {
                 var debug_printer = new DS1LoaderDebugPrinter();
                 debug_printer.PrintDebugInfo(level);
             }
-            
 
             return level;
         }

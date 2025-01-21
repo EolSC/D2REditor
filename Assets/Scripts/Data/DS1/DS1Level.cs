@@ -152,14 +152,13 @@ namespace Diablo2Editor
 
         // files in the ds1 (not used by the game)
         public long file_num;
-        public char[] file_buff;
-        public int file_len;
+        public List<string> files = new List<string>();
 
         // tiles data
-        public DS1Floor floor;      // floor
-        public DS1Shadow shadow;    // shadow
-        public DS1Wall wall;        // wall
-        public DS1Tagged tagged;    // tagged
+        public DS1Floor floor = new DS1Floor();     // floor
+        public DS1Shadow shadow = new DS1Shadow();  // shadow
+        public DS1Wall wall = new DS1Wall();        // wall
+        public DS1Tagged tagged = new DS1Tagged();  // tagged
 
         // groupData
         long group_num;

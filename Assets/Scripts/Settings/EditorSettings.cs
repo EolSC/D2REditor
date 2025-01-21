@@ -92,45 +92,5 @@ namespace Diablo2Editor
             }
             Debug.Log("Settings loaded: " + SETTINGS_FILE);
         }
-
-        public void UpdateCameraSettings(GameObject gameObject)
-        {
-            SceneView.CameraSettings settings = new SceneView.CameraSettings();
-            settings.nearClip = camera.nearClip;
-            settings.farClip = camera.farClip;
-            settings.occlusionCulling = camera.occlusionCulling;
-    
-            SceneView sceneView = SceneView.lastActiveSceneView;
-            sceneView.orthographic = true;
-            sceneView.size = camera.zoom;
-            sceneView.cameraSettings = settings;
-
-            var renderers = gameObject.GetComponentsInChildren<Renderer>();
-            if (renderers.Length > 0)
-            {
-                var bounds = renderers[0].bounds;
-                for (var i = 1; i < renderers.Length; ++i)
-                    bounds.Encapsulate(renderers[i].bounds);
-                var center = bounds.center;
-                sceneView.pivot = center;
-            }
-            sceneView.Repaint();
-            LogSceneViewPivot();
-        }
-
-        public void LogSceneViewPivot()
-        {
-            SceneView sceneView = SceneView.lastActiveSceneView;
-            var pivot = sceneView.pivot;
-            var position = sceneView.position;
-            var size = sceneView.size;
-            var distance = sceneView.cameraDistance;
-            Debug.Log("Camera pivot is " + pivot);
-            Debug.Log("Camera position is " + position);
-            Debug.Log("Camera size is " + size);
-            Debug.Log("Camera cameraDistance is " + distance);
-            sceneView.Repaint();
-
-        }
     }
 }

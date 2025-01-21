@@ -45,19 +45,6 @@ public class EditorMain : MonoBehaviour
         Settings().Reload();
     }
 
-    [MenuItem("Diablo Level Editor/Settings/UpdateCamera")]
-    private static void UpdateCamera()
-    {
-       // Settings().UpdateCameraSettings();
-    }
-
-    [MenuItem("Diablo Level Editor/Settings/LogPivot")]
-    private static void LogPivot()
-    {
-        Settings().LogSceneViewPivot();
-    }
-
-
     public static Diablo2Editor.EditorSettings Settings()
     {
         return settings;

@@ -74,9 +74,35 @@ public class LevelContentLoader
             EditorUtility.DisplayProgressBar("Loading level", "Instantiating objects...", 0.8f);
             preset.Instantiate();
             EditorUtility.ClearProgressBar();
-            EditorMain.Settings().UpdateCameraSettings(preset.gameObject);
+            UpdateCameraSettings(preset.gameObject);
         }
     }
+
+    private void UpdateCameraSettings(GameObject gameObject)
+    {
+        Diablo2Editor.EditorSettings.CameraSettings camera = EditorMain.Settings().camera;
+        SceneView.CameraSettings settings = new SceneView.CameraSettings();
+        settings.nearClip = camera.nearClip;
+        settings.farClip = camera.farClip;
+        settings.occlusionCulling = camera.occlusionCulling;
+
+        SceneView sceneView = SceneView.lastActiveSceneView;
+        sceneView.orthographic = true;
+        sceneView.size = camera.zoom;
+        sceneView.cameraSettings = settings;
+
+        var renderers = gameObject.GetComponentsInChildren<Renderer>();
+        if (renderers.Length > 0)
+        {
+            var bounds = renderers[0].bounds;
+            for (var i = 1; i < renderers.Length; ++i)
+                bounds.Encapsulate(renderers[i].bounds);
+            var center = bounds.center;
+            sceneView.pivot = center;
+        }
+        sceneView.Repaint();
+    }
+
 
 
 

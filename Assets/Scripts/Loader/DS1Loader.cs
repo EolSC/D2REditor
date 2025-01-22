@@ -1,47 +1,14 @@
 using System;
+using System.Drawing;
+using System.IO;
 using System.Text;
+using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
+using static Unity.Burst.Intrinsics.X86.Avx;
 
 namespace Diablo2Editor
 {
-    public class DS1LoaderDebugPrinter
-    {
-        private void PrintHeaderData(DS1Level level)
-        {
-            Debug.Log("DS1 level version " + level.version);
-            Debug.Log("DS1 level width " + level.width);
-            Debug.Log("DS1 level height " + level.height);
-            Debug.Log("DS1 level act " + level.act);
-            Debug.Log("DS1 level tag type " + level.tag_type);
-        }
-
-        private void PrintFilesData(DS1Level level)
-        {
-            Debug.Log("Number of files in level  is " + level.file_num);
-
-            int index = 0;
-            foreach (var file in level.files)
-            {
-                index++;
-                Debug.Log("Name of file " + index + " is `" + file + "`");
-            }
-        }
-
-        public void PrintLayersCountData(DS1Level level)
-        {
-            Debug.Log("Number of wall tiles: " + level.wall.wall_num);
-            Debug.Log("Number of floor tiles: " + level.floor.floor_num);
-            Debug.Log("Number of shadow tiles: " + level.shadow.shadow_num);
-            Debug.Log("Number of tag tiles: " + level.tagged.tag_num);
-        }
-        public void PrintDebugInfo(DS1Level level)
-        {
-            PrintHeaderData(level);
-            PrintFilesData(level);
-            PrintLayersCountData(level);
-        }
-    }
-
     public class DS1Loader
     {
         private const bool PRINT_DEBUG = true;
@@ -386,7 +353,9 @@ namespace Diablo2Editor
                             case 4:
                             {
                                 int layerNumber = layerStreamingCache[n] - 1;
-                                int orientOffset = (int)level.width * WALL_TILE_DATA_SIZE;
+                                // orientation is stored after wall data. 
+                                // We need to jump over the whole layer to read proper value
+                                int orientOffset = (int)level.width * (int)level.height* WALL_TILE_DATA_SIZE;
                                 var tile = ReadWallCell(content, orientOffset, ref streamPosition, level.version);
                                 level.wall.wall_array[layerNumber, y, x] = tile;
                             }; break;
@@ -423,6 +392,253 @@ namespace Diablo2Editor
                     }
                 }
             }
+
+            if (level.version >= 2)
+            {
+                level.obj_num = ReadUint(content, ref streamPosition);
+            }
+            else
+            {
+                // no objects on level
+            }
+
+            int max_subtile_width = (int)level.width * 5;
+            int max_subtile_height = (int)level.height * 5;
+            for (int n = 0; n < level.obj_num; n++)
+            {
+                DS1Object levelObject = new DS1Object();
+                levelObject.type = ReadUint(content, ref streamPosition);
+                levelObject.id = ReadUint(content, ref streamPosition);
+                levelObject.x = ReadUint(content, ref streamPosition);
+                levelObject.y = ReadUint(content, ref streamPosition);
+
+                if (level.version > 5)
+                {
+                    // flags
+                    levelObject.ds1_flags = ReadUint(content, ref streamPosition);
+                }
+
+                // integrity check (not done by the game I believe)
+                if ((levelObject.x >= 0) && (levelObject.x < max_subtile_width) && (levelObject.y >= 0) && (levelObject.y < max_subtile_height))
+                {
+                    // some init for the paths of this object
+                    levelObject.path_num = 0;
+                    levelObject.desc_idx = -1;
+                    levelObject.flags = 0;
+
+                    levelObject.frame_delta = (byte)(UnityEngine.Random.Range(0, 255) % 256);
+
+                    levelObject.label.rx = 0;
+                    levelObject.label.ry = 0;
+                    levelObject.label.w = 0;
+                    levelObject.label.h = 0;
+                    levelObject.label.flags = 0;
+                    // TODO: fill object label
+                    level.objects.Add(levelObject);
+                }
+                else
+                {
+                    Debug.Log("Level object with id" + levelObject.id + " is invalid. Skipping it");
+                }
+            }
+            level.obj_num = level.objects.Count;
+
+            /* groups for tag layer
+
+               warning : in fact there can be less groups than expected
+               like in data\global\tiles\act1\outdoors\trees.ds1, where the file
+               stop right after the last tile_x group data, leaving the other
+               datas unknown (tile_y, width, height), and npc paths unknown */
+
+            if ((level.version >= 12) &&
+                 ((level.tag_type == 1) || (level.tag_type == 2))
+               )
+            {
+                // skip 1 dword ?
+                if (level.version >= 18)
+                {
+                    streamPosition += sizeof(uint);
+                }
+
+                level.group_num = ReadUint(content, ref streamPosition);
+
+                // fill it
+                // For cases when group data is incomplete we 'll use safe way to read 
+                // data(TryReadUint32)
+                for (int i = 0; i < level.group_num; i++)
+                {
+                    DS1Group group = new DS1Group();
+                    uint temp_value;
+                    if (TryReadUint(content, ref streamPosition, out temp_value))
+                    {
+                        group.tile_x = temp_value;
+                    }
+                    if (TryReadUint(content, ref streamPosition, out temp_value))
+                    {
+                        group.tile_y = temp_value;
+                    }
+                    if (TryReadUint(content, ref streamPosition, out temp_value))
+                    {
+                        group.width = temp_value;
+                    }
+                    if (TryReadUint(content, ref streamPosition, out temp_value))
+                    {
+                        group.height = temp_value;
+                    }
+
+                    if (level.version >= 13)
+                    {
+                        if (TryReadUint(content, ref streamPosition, out temp_value))
+                        {
+                            group.unk = temp_value;
+                        }
+                    }
+                }
+            }
+
+            if (level.version >= 14)
+            {
+                uint temp_value;
+
+                // now we're on the npc's paths datas
+
+                uint npc_paths_count;
+                if (TryReadUint(content, ref streamPosition, out temp_value))
+                {
+                    npc_paths_count = temp_value;
+                }
+                else
+                {
+                    npc_paths_count = 0;
+                }
+
+                bool invalidPathDetected = false;
+                for (int i = 0; i < npc_paths_count; i++)
+                {
+                    uint path_count = ReadUint(content, ref streamPosition);
+                    uint x = ReadUint(content, ref streamPosition);
+                    uint y = ReadUint(content, ref streamPosition);
+
+                    // search of which object are these paths datas
+                    int cur_obj = 0;
+                    int last_obj = 0;
+                    int number = 0;
+                    bool done = false;
+                    while (!done)
+                    {
+                        if (cur_obj < level.obj_num)
+                        {
+                            if ((level.objects[cur_obj].x == x) && (level.objects[cur_obj].y == y))
+                            {
+                                last_obj = cur_obj;
+                                number++;
+                                if (number >= 2)
+                                    done = true;
+                            }
+                            cur_obj++; // next object
+                        }
+                        else
+                            done = true;
+                    }
+
+                    if (number >= 2)
+                    {
+                        // there are a least 2 objects at the same coordinates
+
+                        // put a warning
+                        if (!invalidPathDetected)
+                        {
+                            invalidPathDetected = true;
+                            Debug.Log("WARNING, there are at least 2 objects at the same coordinates for some paths datas");
+                        }
+                        Debug.Log("Removing " + path_count + " paths points of 1 object at coordinates (" + x + ", " + y + ")");
+
+                        // first, delete already assigned paths
+                        foreach (var levelObject in level.objects)
+                        {
+
+                            if ((levelObject.x == x) && (levelObject.y == y) &&
+                                (levelObject.path_num != 0))
+                            {
+                                levelObject.paths.Clear();
+                                levelObject.path_num = 0;
+                            }
+                        }
+
+                        // now, skip these paths
+                        if (level.version >= 15)
+                        {
+                            for (int p = 0; p < path_count; p++)
+                            {
+                                streamPosition += 3 * sizeof(uint); // skip 3 dwords per path
+                            }
+
+                        }
+                        else
+                        {
+                            for (int p = 0; p < path_count; p++)
+                            {
+                                streamPosition += 2 * sizeof(uint); // skip 3 dwords per path
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // only 1 object at these coordinates for paths, it's ok
+                        cur_obj = last_obj;
+
+                        // does these paths are pointing to a valid object position ?
+                        if (cur_obj >= level.obj_num)
+                        {
+                            // nope
+                            // the game don't alert the user, so why me ?
+                            // but we'll skip them
+                            if (level.version >= 15)
+                            {
+                                for (int p = 0; p < path_count; p++)
+                                {
+                                    streamPosition += 3 * sizeof(uint); // skip 3 dwords per path
+                                }
+
+                            }
+                            else
+                            {
+                                for (int p = 0; p < path_count; p++)
+                                {
+                                    streamPosition += 2 * sizeof(uint); // skip 3 dwords per path
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // yep, valid object
+
+                            // all ok for assigning the paths to this object
+                            var levelObject = level.objects[cur_obj];
+                            levelObject.path_num = path_count;
+
+                            for (int p = 0; p < levelObject.path_num; p++)
+                            {
+                                DS1ObjectPath pathObject = new DS1ObjectPath();
+                                pathObject.x = ReadUint(content, ref streamPosition);
+                                pathObject.y = ReadUint(content, ref streamPosition);
+                                if (level.version >= 15)
+                                {
+                                    pathObject.action = ReadUint(content, ref streamPosition);
+                                }
+                                else
+                                {
+                                    pathObject.action = 1; // default action
+                                }
+                                levelObject.paths.Add(pathObject);
+                            }
+                        }
+                    }
+                }
+                //TODO make object label
+            }
+            level.tile_w = 160;
+            level.tile_h = 80;
 
             if (PRINT_DEBUG)
             {

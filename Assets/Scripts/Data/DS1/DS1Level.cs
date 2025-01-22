@@ -161,9 +161,12 @@ namespace Diablo2Editor
         public DS1Tagged tagged = new DS1Tagged();  // tagged
 
         // groupData
-        long group_num;
-        int group_size;
-        List<DS1Group> group = new List<DS1Group>();
+        public long group_num;
+        public int group_size;
+        public List<DS1Group> group = new List<DS1Group>();
+
+        public int tile_w;
+        public int tile_h;
 
         /*
          Internal data. TODO - clean this up if not needed
@@ -181,25 +184,20 @@ namespace Diablo2Editor
 
 
         // Objects data 
-        int[] drawing_order;
-        List<DS1Object> objects = new List<DS1Object>();
-        long obj_num;
-        long obj_num_undo;
-        int can_undo_obj;
-        int draw_edit_obj; // edit Type-Id of objects, FALSE / TRUE
-       // WIN_EDT_OBJ_S win_edt_obj;       Object editor window handle. TODO - replace with reference
+        public int[] drawing_order;
+        public List<DS1Object> objects = new List<DS1Object>();
+        public long obj_num;
 
         // current animated floor frame
-        int cur_anim_floor_frame;
+        public int cur_anim_floor_frame;
 
         // path editing window of this ds1
-      //  PATH_EDIT_WIN_S path_edit_win;   Path editor window handle. TODO - replace with reference
+        //  PATH_EDIT_WIN_S path_edit_win;   Path editor window handle. TODO - replace with reference
 
         // save count
-        long save_count;
+        public long save_count;
 
         // current number of objects
-        long current_obj_max;
-
+        public long current_obj_max;
     }
 }

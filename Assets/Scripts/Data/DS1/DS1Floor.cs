@@ -93,7 +93,6 @@ public class DS1TaggedCell
     {
 
     }
-
     public uint num;
     public byte flags;
 }

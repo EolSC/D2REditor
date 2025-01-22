@@ -5,9 +5,9 @@ using UnityEngine;
  */
 public class DS1Group
 {
-    ulong tile_x;
-    ulong tile_y;
-    ulong width;
-    ulong height;
-    ulong unk;
+    public uint tile_x;
+    public uint tile_y;
+    public uint width;
+    public uint height;
+    public uint unk;
 }

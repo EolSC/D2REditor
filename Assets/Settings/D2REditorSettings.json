@@ -6,6 +6,7 @@
         "dataRoot": "C:\\work\\d2_data\\",
         "presetRoot": "data/hd/env/preset",
         "tilesRoot": "data/global/tiles"
+        "levelTypes": "data/global/excel/leveltypes.txt"
     },
 	"common": {
 		"textureLoadMode" : "Albedo"

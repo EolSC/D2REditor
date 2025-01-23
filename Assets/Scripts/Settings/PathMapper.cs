@@ -16,7 +16,8 @@ namespace Diablo2Editor
         private string tilesRoot = "";
         // Path to .json presets in data folder. Remains the same for all users.
         private string presetRoot = "";
-
+        // Path to leveltypes.txt
+        private string levelTypesPath = "";
         // DS1 extension
         // JSON preset extension
         private const string DS1_EXT = ".ds1";
@@ -32,6 +33,7 @@ namespace Diablo2Editor
                 dataRoot = Path.GetFullPath(settings["dataRoot"]);
                 tilesRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["tilesRoot"]));
                 presetRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["presetRoot"]));
+                levelTypesPath = settings["levelTypes"];
             }
             ValidateDataRoot();
         }
@@ -51,6 +53,18 @@ namespace Diablo2Editor
         {
             var canonical_path = Path.GetFullPath(Path.Combine(dataRoot, local_path));
             return canonical_path;
+        }
+        /*
+         * Returns path to Leveltypes.txt used to load tiles for ds1
+         */
+        public string GetPathToLevelTypes()
+        {
+            return GetAbsolutePath(levelTypesPath);
+        }
+
+        public string GetTilesRoot()
+        {
+            return tilesRoot;
         }
 
         /*

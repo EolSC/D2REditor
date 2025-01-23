@@ -16,26 +16,26 @@ namespace Diablo2Editor
             BT_MAX
         }
         // key
-        int dt1_idx_for_ds1;
-        long main_index;
-        long orientation;
-        long sub_index;
+        public int dt1_idx_for_ds1;
+        public long main_index;
+        public long orientation;
+        public long sub_index;
 
         // datas
-        int dt1_idx;
-        long rarity;
-        int block_idx;
-        BlockType type;
-        int zero_line;
-        int roof_y;
+        public int dt1_idx;
+        public long rarity;
+        public int block_idx;
+        public BlockType type;
+        public int zero_line;
+        public int roof_y;
 
         // conflicts managment
-        char conflict;
-        char used_by_game;   // True / False
-        char used_by_editor; // True / False
+        public char conflict;
+        public char used_by_game;   // True / False
+        public char used_by_editor; // True / False
 
         // animated tile
-        long curr_frame;
-        int updated;
+        public long curr_frame;
+        public int updated;
     }
 }

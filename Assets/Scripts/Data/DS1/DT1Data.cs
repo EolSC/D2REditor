@@ -151,6 +151,7 @@ public class DT1Data
     private void LoadBlockTextures()
     {
         int block_index = 0;
+        bitmaps = new List<Texture2D>();
         foreach(var block in blocks)
         {
             long orientation = block.orientation;
@@ -184,7 +185,6 @@ public class DT1Data
             // anti-bug (for empty block)
             if ((width == 0) || (height == 0))
             {
-                Debug.LogWarning("Tile is empty: " + block_index + " in file " + this.fileName);
                 continue;
             }
 
@@ -213,7 +213,8 @@ public class DT1Data
                     CreateSubtileNormal(texture, x0, y0, subtileData, length);
                 }
             }
-
+            texture.Apply();
+            bitmaps.Add(texture);
 
         }
     }
@@ -223,11 +224,11 @@ public class DT1Data
         DT1SubTile result = new DT1SubTile();
         int streamPosition = tiles_ptr + (20 * subtileIndex);
         result.x_pos = BitConverter.ToInt16(content, streamPosition);
-        result.x_pos = BitConverter.ToInt16(content, streamPosition + 2);
+        result.y_pos = BitConverter.ToInt16(content, streamPosition + 2);
         // skip 2 bytes : unknown1
         result.x_grid = content[streamPosition + 6];
         result.y_grid = content[streamPosition + 7];
-        result.format = content[streamPosition + 8];
+        result.format = BitConverter.ToInt16(content, streamPosition + 8);
         result.length = BitConverter.ToInt32(content, streamPosition + 10);
         // skip 2 bytes : unknown2
         result.data_offset = BitConverter.ToInt32(content, streamPosition + 16);
@@ -238,7 +239,7 @@ public class DT1Data
     void CreateSubtileIsometric(Texture2D texture,  int x0, int y0, int dataPosition, int length) 
     {
         int x, y = 0;
-        int streamPosition = dataPosition;
+        int dataPointer = dataPosition;
         int[] xjump = { 14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14 };
         int[] nbpix = { 4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4 };
 
@@ -254,9 +255,9 @@ public class DT1Data
             length -= n;
             while (n > 0)
             {
-                byte color = content[dataPosition];
+                byte color = content[dataPointer];
                 WritePixel(texture, x0 + x, y0 + y, color);
-                streamPosition++;
+                dataPointer++;
                 x++;
                 n--;
             }
@@ -274,7 +275,7 @@ public class DT1Data
             byte b1 = content[dataPointer];
             byte b2 = content[dataPointer + 1];
 
-            dataPosition += 2;
+            dataPointer += 2;
             length -= 2;
             if ((b1 > 0) || (b2 > 0))
             {
@@ -282,9 +283,9 @@ public class DT1Data
                 length -= b2;
                 while (b2 > 0)
                 {
-                    byte color = content[dataPosition];
+                    byte color = content[dataPointer];
                     WritePixel(texture, x0 + x, y0 + y, color);
-                    dataPosition++;
+                    dataPointer++;
                     x++;
                     b2--;
                 }
@@ -299,7 +300,7 @@ public class DT1Data
 
     public void WritePixel(Texture2D texture, int x, int y, byte pixel)
     {
-        float value = pixel / 255;
+        float value = (float)pixel / 255;
         Color color = new Color(value, value, value);
         texture.SetPixel(x, y, color);
     }

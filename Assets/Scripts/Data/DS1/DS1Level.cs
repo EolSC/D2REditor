@@ -21,6 +21,7 @@ namespace Diablo2Editor
         public int [] dt1_mask = new int[DS1Consts.DT1_IN_DS1_MAX];
         public int txt_act;
         public List<DS1BlockTable> block_table = new List<DS1BlockTable>();
+        public List<DT1Data> textureBanks;
         public int bt_num;
         public byte[] wall_layer_mask = new byte[DS1Consts.WALL_MAX_LAYER];
         public byte [] floor_layer_mask = new byte[DS1Consts.FLOOR_MAX_LAYER];
@@ -82,6 +83,29 @@ namespace Diablo2Editor
 
         public void InitBlockTable(List<DT1Data> tileData)
         {
+            textureBanks = tileData;
+        }
+
+        public void Intantiate(GameObject gameObject)
+        {
+            var textureBank = textureBanks[0];
+            var texture = textureBank.bitmaps[0];
+            var subObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            subObject.transform.parent = gameObject.transform;
+            subObject.transform.localScale = new Vector3(10, 10, 10);
+            subObject.transform.position = new Vector3(120, 120, 120);
+            var meshRenderer = subObject.GetComponent<MeshRenderer>();
+            if (meshRenderer)
+            {
+                var material = new UnityEngine.Material(Shader.Find("Standard"));
+                if (material)
+                {
+                    material.SetTexture("_MainTex", texture);
+                }
+                meshRenderer.material = material;
+            }
+            
+
 
         }
     }

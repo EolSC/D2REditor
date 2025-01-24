@@ -48,6 +48,8 @@ public class LevelContentLoader
         if (tileTables.Count > 0)
         {
             ds1Level.InitBlockTable(tileTables);
+            GameObject testDS1 = new GameObject();
+            ds1Level.Intantiate(testDS1);
         }
 
 

@@ -73,3 +73,4 @@ crashlytics-build.properties
 obj/Debug
 /Assets/Settings/PathSettings.json
 /Assets/Settings/PathSettings.json.meta
+/DS1Loader debug log.txt

@@ -16,16 +16,16 @@ namespace Diablo2Editor
             if (GetZoneAndActFromFileName(pathToLevel, out zone, out act))
             {
                 string[][] levelTypes = ReadLevelTypes();
-                if (levelTypes != null)
+                if (levelTypes != null && levelTypes.Length >= 3)
                 {
-                    for (int i = 0; i < levelTypes.Length; i++)
+                    for (int i = 2; i < levelTypes.Length; i++)
                     {
                         string nameCell = levelTypes[i][0];
                         string rowZone, rowAct;
                         GetZoneAndActFromLevelTypes(nameCell, out rowZone, out rowAct);
                         if (rowZone == zone &&  rowAct == act)
                         {
-                            for (int j = 1; j < levelTypes[i].Length; j++) 
+                            for (int j = 2; j < levelTypes[i].Length - 1; j++) 
                             {
                                 string fileName = levelTypes[i][j];
                                 if (fileName != "0")
@@ -55,16 +55,19 @@ namespace Diablo2Editor
             string[] values = name.Split('-');
             if (values.Length >= 2)
             {
-                act = new string(values[0].Where(c => !Char.IsWhiteSpace(c)).ToArray());
-                zone = new string(values[1].Where(c => !Char.IsWhiteSpace(c)).ToArray());
+                act = new string(values[0].Where(c => !Char.IsWhiteSpace(c)).ToArray()).ToLower();
+                zone = new string(values[1].Where(c => !Char.IsWhiteSpace(c)).ToArray()).ToLower();
             }
-            act = "";
-            zone = "";
+            else
+            {
+                act = "";
+                zone = "";
+            }
         }
 
-        private bool GetZoneAndActFromFileName(string fileName, out string act, out string zone)
+        private bool GetZoneAndActFromFileName(string fileName, out string zone, out string act)
         {
-            string[] parts = fileName.Split('/');
+            string[] parts = fileName.Split('\\');
             if (parts.Length >= 3)
             {
                 // path should look like data/global/tiles/act1/barracks/barew.ds1
@@ -72,7 +75,7 @@ namespace Diablo2Editor
                 // 
                 int zoneIndex = parts.Length - 2;
                 int actIndex = parts.Length - 3;
-                act = parts[zoneIndex].ToLower();
+                act = parts[actIndex].ToLower();
                 zone = parts[zoneIndex].ToLower();
                 return true;
 

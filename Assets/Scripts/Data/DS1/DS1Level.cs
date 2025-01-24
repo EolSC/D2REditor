@@ -80,9 +80,9 @@ namespace Diablo2Editor
         // current animated floor frame
         public int cur_anim_floor_frame;
 
-        // path editing window of this ds1
-        //  PATH_EDIT_WIN_S path_edit_win;   Path editor window handle. TODO - replace with reference
+        public void InitBlockTable(List<DT1Data> tileData)
+        {
 
-        // current number of objects
+        }
     }
 }

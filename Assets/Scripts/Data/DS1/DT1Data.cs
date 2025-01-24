@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,6 +27,19 @@ public class DT1Block
     public long tiles_length;
     public long tiles_number;
     // int        zeros3[12];
+}
+
+public class DT1SubTile
+{
+    public short x_pos;
+    public short y_pos;
+    //   WORD  unknown1;
+    public int x_grid;
+    public int y_grid;
+    public short format;
+    public long length;
+    //   WORD  unknown2;
+    public long data_offset;
 }
 
 public class DT1Data
@@ -97,6 +109,7 @@ public class DT1Data
 
         for (int i = 0; i < block_num; i++)
         {
+            blocks[i] = new DT1Block();
             var block = blocks[i];
             block.direction = BitConverter.ToUInt32(content, 
                 streamPosition + Offsets.B_DIRECTION);
@@ -106,7 +119,7 @@ public class DT1Data
             block.animated = content[streamPosition + Offsets.B_ANIMATED];
             block.size_x = BitConverter.ToUInt32(content,
                 streamPosition + Offsets.B_SIZE_X);
-            block.size_y = BitConverter.ToUInt32(content,
+            block.size_y = BitConverter.ToInt32(content,
                 streamPosition + Offsets.B_SIZE_Y);
             block.orientation = BitConverter.ToUInt32(content,
                 streamPosition + Offsets.B_ORIENTATION);
@@ -118,7 +131,7 @@ public class DT1Data
                 streamPosition + Offsets.B_RARITY);
 
             int subtile_flags = streamPosition + Offsets.B_SUBTILES_FLAGS;
-            for (int j = 0; j < subtile_flags; j++)
+            for (int j = 0; j < 25; j++)
             {
                 int index = idxtable[j];
                 block.sub_tiles_flags[index] = content[subtile_flags + j];
@@ -136,7 +149,158 @@ public class DT1Data
     }
 
     private void LoadBlockTextures()
-    { 
+    {
+        int block_index = 0;
+        foreach(var block in blocks)
+        {
+            long orientation = block.orientation;
+            int width = (int)block.size_x;
+            // height is always negative
+            int height = -(int)block.size_y;
+
+            // adjustment (which y line in the bitmap is the zero line ?)
+
+            // by default, when orientation > 15 : lower wall
+            long y_add = 96;
+            if ((orientation == 0) || (orientation == 15)) // floor or roof
+            {
+                if (block.size_y != 0)
+                {
+                    block.size_y = -80;
+                    height = 80;
+                    y_add = 0;
+                }
+            }
+            else if (orientation < 15) // upper wall, shadow, special
+            {
+                if (block.size_y != 0)
+                {
+                    block.size_y += 32;
+                    height -= 32;
+                    y_add = height;
+                }
+            }
+
+            // anti-bug (for empty block)
+            if ((width == 0) || (height == 0))
+            {
+                Debug.LogWarning("Tile is empty: " + block_index + " in file " + this.fileName);
+                continue;
+            }
+
+            block_index++;
+            // normal block (non-empty)
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGB24, false);
+
+
+            for (int s_index = 0; s_index < block.tiles_number; s_index++) // for each sub-tiles
+            {
+                var subTile = LoadSubTile((int)block.tiles_ptr, s_index);
+                int x0 = subTile.x_pos;
+                int y0 = (int)y_add+ subTile.y_pos;
+                int subtileData = (int)(block.tiles_ptr + subTile.data_offset);
+                int length = (int)subTile.length;
+                int format = subTile.format;
+
+                // draw the sub-tile
+                if (format == 0x0001)
+                {
+                    CreateSubtileIsometric(texture, x0, y0, subtileData, length);
+
+                }
+                else
+                {
+                    CreateSubtileNormal(texture, x0, y0, subtileData, length);
+                }
+            }
+
+
+        }
     }
 
+    public DT1SubTile LoadSubTile(int tiles_ptr, int subtileIndex)
+    {
+        DT1SubTile result = new DT1SubTile();
+        int streamPosition = tiles_ptr + (20 * subtileIndex);
+        result.x_pos = BitConverter.ToInt16(content, streamPosition);
+        result.x_pos = BitConverter.ToInt16(content, streamPosition + 2);
+        // skip 2 bytes : unknown1
+        result.x_grid = content[streamPosition + 6];
+        result.y_grid = content[streamPosition + 7];
+        result.format = content[streamPosition + 8];
+        result.length = BitConverter.ToInt32(content, streamPosition + 10);
+        // skip 2 bytes : unknown2
+        result.data_offset = BitConverter.ToInt32(content, streamPosition + 16);
+
+        return result;
+    }
+
+    void CreateSubtileIsometric(Texture2D texture,  int x0, int y0, int dataPosition, int length) 
+    {
+        int x, y = 0;
+        int streamPosition = dataPosition;
+        int[] xjump = { 14, 12, 10, 8, 6, 4, 2, 0, 2, 4, 6, 8, 10, 12, 14 };
+        int[] nbpix = { 4, 8, 12, 16, 20, 24, 28, 32, 28, 24, 20, 16, 12, 8, 4 };
+
+        // 3d-isometric subtile is 256 bytes, no more, no less
+        if (length != 256)
+            return;
+
+        // draw
+        while (length > 0)
+        {
+            x = xjump[y];
+            int n = nbpix[y];
+            length -= n;
+            while (n > 0)
+            {
+                byte color = content[dataPosition];
+                WritePixel(texture, x0 + x, y0 + y, color);
+                streamPosition++;
+                x++;
+                n--;
+            }
+            y++;
+        }
+    }
+    void CreateSubtileNormal(Texture2D texture, int x0, int y0, int dataPosition, int length)
+    {
+        int dataPointer = dataPosition;
+        int x = 0, y = 0;
+
+        // draw
+        while (length > 0)
+        {
+            byte b1 = content[dataPointer];
+            byte b2 = content[dataPointer + 1];
+
+            dataPosition += 2;
+            length -= 2;
+            if ((b1 > 0) || (b2 > 0))
+            {
+                x += b1;
+                length -= b2;
+                while (b2 > 0)
+                {
+                    byte color = content[dataPosition];
+                    WritePixel(texture, x0 + x, y0 + y, color);
+                    dataPosition++;
+                    x++;
+                    b2--;
+                }
+            }
+            else
+            {
+                x = 0;
+                y++;
+            }
+        }
+    }
+
+    public void WritePixel(Texture2D texture, int x, int y, byte pixel)
+    {
+        float value = pixel / 255;
+        Color color = new Color(value, value, value);
+        texture.SetPixel(x, y, color);
+    }
 }

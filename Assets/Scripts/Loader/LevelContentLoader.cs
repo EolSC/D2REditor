@@ -21,10 +21,10 @@ public class LevelContentLoader
      * Load level content. This function fully constructs LevelPreset and Ds1Preset within Scene
      */
 
-    public void LoadLevel(string levelName, byte[] ds1Content, string jsonContent)
+    public void LoadLevel(string pathToLevel, string levelName, byte[] ds1Content, string jsonContent)
     {
         LoadJsonPreset(levelName, jsonContent);
-        LoadDS1Content(ds1Content);
+        LoadDS1Content(pathToLevel, ds1Content);
         Debug.Log("Level loaded: " + levelName);
     }
 
@@ -39,10 +39,18 @@ public class LevelContentLoader
 
 
     // Ds1-specific logic
-    private void LoadDS1Content(byte[] ds1Content)
+    private void LoadDS1Content(string pathToLevel, byte[] ds1Content)
     {
         DS1Loader loader = new DS1Loader();
         ds1Level = loader.ReadDS1(ds1Content);
+        LevelTypesLoader levelTypes = new LevelTypesLoader();
+        var tileTables = levelTypes.FindTilesForLevel(pathToLevel);
+        if (tileTables.Count > 0)
+        {
+            ds1Level.InitBlockTable(tileTables);
+        }
+
+
     }
 
     /*

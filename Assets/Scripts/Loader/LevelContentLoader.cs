@@ -23,8 +23,11 @@ public class LevelContentLoader
 
     public void LoadLevel(string pathToLevel, string levelName, byte[] ds1Content, string jsonContent)
     {
-        LoadJsonPreset(levelName, jsonContent);
+        //EditorUtility.DisplayProgressBar("Loading level", "Reading json...", 0.0f);
+        //LoadJsonPreset(levelName, jsonContent);
+        EditorUtility.DisplayProgressBar("Loading level", "Loading DS1...", 0.0f);
         LoadDS1Content(pathToLevel, ds1Content);
+        EditorUtility.ClearProgressBar();
         Debug.Log("Level loaded: " + levelName);
     }
 
@@ -41,15 +44,17 @@ public class LevelContentLoader
     // Ds1-specific logic
     private void LoadDS1Content(string pathToLevel, byte[] ds1Content)
     {
+        // Reload palettes
+        D2Palette palletes = new D2Palette();
+        palletes.LoadPalleteFiles();
+
         DS1Loader loader = new DS1Loader();
         ds1Level = loader.ReadDS1(ds1Content);
         LevelTypesLoader levelTypes = new LevelTypesLoader();
-        var tileTables = levelTypes.FindTilesForLevel(pathToLevel);
+        var tileTables = levelTypes.FindTilesForLevel(pathToLevel, palletes);
         if (tileTables.Count > 0)
         {
             ds1Level.InitBlockTable(tileTables);
-            GameObject testDS1 = new GameObject();
-            ds1Level.Intantiate(testDS1);
         }
 
 
@@ -60,24 +65,29 @@ public class LevelContentLoader
      */
     public bool TestLevelLoading(byte[] ds1Content, string jsonContent)
     {
-        JSONNode resultJson = preset.Serialize();
-        JSONNode sourceJson = JSON.Parse(jsonContent);
-
-        bool oldContentEqual = false;
-        if (ds1Level != null)
+        if ((preset != null) && (ds1Level != null))
         {
-            oldContentEqual = ds1Level.test_data.Equals(ds1Content);
-        }
-        bool jsonEqual = JSONCompare.Compare(sourceJson, resultJson);
+            JSONNode resultJson = preset.Serialize();
+            JSONNode sourceJson = JSON.Parse(jsonContent);
 
-        return oldContentEqual && jsonEqual;
+            bool oldContentEqual = false;
+            if (ds1Level != null)
+            {
+                oldContentEqual = ds1Level.test_data.Equals(ds1Content);
+            }
+            bool jsonEqual = JSONCompare.Compare(sourceJson, resultJson);
+
+            return oldContentEqual && jsonEqual;
+        }
+        return false;
     }
 
     public void Instantiate()
     {
+        
         if (preset != null)
         {
-            EditorUtility.DisplayProgressBar("Loading level", "Loding resources...", 0.0f);
+            EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", 0.0f);
             preset.LoadResources();
 
 
@@ -85,6 +95,14 @@ public class LevelContentLoader
             preset.Instantiate();
             EditorUtility.ClearProgressBar();
             UpdateCameraSettings(preset.gameObject);
+        }
+       
+        if (ds1Level != null)
+        {
+            GameObject testDS1 = new GameObject();
+            DS1Drawer drawer = new DS1Drawer();
+            drawer.DrawTilesToTexture(ds1Level);
+            drawer.Intantiate(testDS1);
         }
     }
 

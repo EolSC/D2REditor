@@ -74,7 +74,6 @@ public class EditorMain : MonoBehaviour
         // Load preset
         LevelContentLoader loader = new LevelContentLoader();
 
-        EditorUtility.DisplayProgressBar("Loading level", "Reading json...", 0.0f);
         loader.LoadLevel(absolute_path, fileName, dsContent, jsonContent);
         //Perform some tests if they are needed
         if (test_serialization)

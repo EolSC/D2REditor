@@ -18,6 +18,8 @@ namespace Diablo2Editor
         private string presetRoot = "";
         // Path to leveltypes.txt
         private string levelTypesPath = "";
+        // Palettes directory
+        private string palettesPath = "";
         // DS1 extension
         // JSON preset extension
         private const string DS1_EXT = ".ds1";
@@ -33,6 +35,7 @@ namespace Diablo2Editor
                 dataRoot = Path.GetFullPath(settings["dataRoot"]);
                 tilesRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["tilesRoot"]));
                 presetRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["presetRoot"]));
+                palettesPath = Path.GetFullPath(Path.Combine(dataRoot, settings["palettePath"]));
                 levelTypesPath = settings["levelTypes"];
             }
             ValidateDataRoot();
@@ -60,6 +63,11 @@ namespace Diablo2Editor
         public string GetPathToLevelTypes()
         {
             return GetAbsolutePath(levelTypesPath);
+        }
+
+        public string GetPalettesPath()
+        {
+            return GetAbsolutePath(palettesPath);
         }
 
         public string GetTilesRoot()

@@ -88,7 +88,7 @@ namespace Diablo2Editor
                 {
                     foreach (var item in value)
                     {
-                        EditorUtility.DisplayProgressBar("Loading level", "Loding resources...", startProgress);
+                        EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", startProgress);
                         item.LoadResource();
                         startProgress += step;
                     }

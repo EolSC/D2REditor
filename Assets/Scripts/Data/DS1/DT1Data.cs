@@ -1,5 +1,7 @@
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 
 public class DT1Block
@@ -44,6 +46,7 @@ public class DT1SubTile
 
 public class DT1Data
 {
+    public NativeArray<Color> palette;
     public string fileName;
     public byte[] content;
     public long x1; // signature (7)
@@ -205,12 +208,12 @@ public class DT1Data
                 // draw the sub-tile
                 if (format == 0x0001)
                 {
-                    CreateSubtileIsometric(texture, x0, y0, subtileData, length);
+                    CreateSubtileIsometric(texture, x0, y0, subtileData, length, palette);
 
                 }
                 else
                 {
-                    CreateSubtileNormal(texture, x0, y0, subtileData, length);
+                    CreateSubtileNormal(texture, x0, y0, subtileData, length, palette);
                 }
             }
             texture.Apply();
@@ -236,7 +239,7 @@ public class DT1Data
         return result;
     }
 
-    void CreateSubtileIsometric(Texture2D texture,  int x0, int y0, int dataPosition, int length) 
+    void CreateSubtileIsometric(Texture2D texture,  int x0, int y0, int dataPosition, int length, NativeArray<Color> palette) 
     {
         int x, y = 0;
         int dataPointer = dataPosition;
@@ -255,8 +258,8 @@ public class DT1Data
             length -= n;
             while (n > 0)
             {
-                byte color = content[dataPointer];
-                WritePixel(texture, x0 + x, y0 + y, color);
+                byte colorIndex = content[dataPointer];
+                WritePixel(texture, x0 + x, y0 + y, colorIndex, palette);
                 dataPointer++;
                 x++;
                 n--;
@@ -264,7 +267,7 @@ public class DT1Data
             y++;
         }
     }
-    void CreateSubtileNormal(Texture2D texture, int x0, int y0, int dataPosition, int length)
+    void CreateSubtileNormal(Texture2D texture, int x0, int y0, int dataPosition, int length, NativeArray<Color> palette)
     {
         int dataPointer = dataPosition;
         int x = 0, y = 0;
@@ -283,8 +286,8 @@ public class DT1Data
                 length -= b2;
                 while (b2 > 0)
                 {
-                    byte color = content[dataPointer];
-                    WritePixel(texture, x0 + x, y0 + y, color);
+                    byte colorIndex = content[dataPointer];
+                    WritePixel(texture, x0 + x, y0 + y, colorIndex, palette);
                     dataPointer++;
                     x++;
                     b2--;
@@ -298,10 +301,11 @@ public class DT1Data
         }
     }
 
-    public void WritePixel(Texture2D texture, int x, int y, byte pixel)
+    public void WritePixel(Texture2D texture, int x, int y, byte colorIndex, NativeArray<Color> pal)
     {
-        float value = (float)pixel / 255;
-        Color color = new Color(value, value, value);
+        // Read color from palllet, assert it has 256 colors 
+        Assert.AreEqual(pal.Length, 256);
+        Color color = pal[colorIndex];
         texture.SetPixel(x, y, color);
     }
 }

@@ -9,7 +9,7 @@ namespace Diablo2Editor
 {
     public class LevelTypesLoader
     {
-        public List<DT1Data> FindTilesForLevel(string pathToLevel)
+        public List<DT1Data> FindTilesForLevel(string pathToLevel, D2Palette palettes)
         {
             List<DT1Data> result = new List<DT1Data>();
             string zone, act;
@@ -25,12 +25,15 @@ namespace Diablo2Editor
                         GetZoneAndActFromLevelTypes(nameCell, out rowZone, out rowAct);
                         if (rowZone == zone &&  rowAct == act)
                         {
+                            var actPallette = palettes.GetPaletteForAct(act);
+
                             for (int j = 2; j < levelTypes[i].Length - 1; j++) 
                             {
                                 string fileName = levelTypes[i][j];
                                 if (fileName != "0")
                                 {
-                                    var dt1Data = DT1Loader.ReadDT1DataFromFile(fileName);
+
+                                    var dt1Data = DT1Loader.ReadDT1DataFromFile(fileName, actPallette);
                                     if (dt1Data != null)
                                     {
                                         result.Add(dt1Data);

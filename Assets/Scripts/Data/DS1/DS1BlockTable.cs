@@ -22,7 +22,7 @@ namespace Diablo2Editor
         public long sub_index;
 
         // datas
-        public int dt1_idx;
+        public DT1Data tileData;
         public long rarity;
         public int block_idx;
         public BlockType type;

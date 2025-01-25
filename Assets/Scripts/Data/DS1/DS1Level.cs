@@ -153,6 +153,7 @@ namespace Diablo2Editor
                             blockTable.zero_line = 96;
                         }
                     }
+                    block_table.Add(blockTable);
                     blockIndex++;
                 }
                 dtIndex++;
@@ -206,8 +207,7 @@ namespace Diablo2Editor
                 if (
                     ((int)blockType.orientation == orientation) &&
                     ((int)blockType.main_index == mainIndex) &&
-                    ((int)blockType.sub_index == subIndex) &&
-                     (blockType.used_by_editor > 0)
+                    ((int)blockType.sub_index == subIndex) 
                     )
                 {
                     wallBlock.bt_idx = blockIndex;
@@ -235,8 +235,7 @@ namespace Diablo2Editor
                     if (
                         ((int)blockType.orientation == orientation) &&
                         ((int)blockType.main_index == mainIndex) &&
-                        ((int)blockType.sub_index == subIndex) &&
-                         (blockType.used_by_editor > 0)
+                        ((int)blockType.sub_index == subIndex) 
                         )
                     {
                         wallBlock.bt_idx = blockIndex;
@@ -252,8 +251,7 @@ namespace Diablo2Editor
                 if (
                     ((int)blockType.orientation == orientation) &&
                     ((int)blockType.main_index == mainIndex) &&
-                    ((int)blockType.sub_index == subIndex) &&
-                        (blockType.used_by_editor > 0)
+                    ((int)blockType.sub_index == subIndex) 
                     )
                 {
                     wallBlock.bt_idx = blockIndex;
@@ -281,8 +279,7 @@ namespace Diablo2Editor
                 if (
                     ((int)blockType.orientation == 0) &&
                     ((int)blockType.main_index == mainIndex) &&
-                    ((int)blockType.sub_index == subIndex) &&
-                     (blockType.used_by_editor > 0)
+                    ((int)blockType.sub_index == subIndex)
                     )
                 {
                     floorBlock.bt_idx = blockIndex;
@@ -310,8 +307,7 @@ namespace Diablo2Editor
                 if (
                     ((int)blockType.orientation == 13) &&
                     ((int)blockType.main_index == mainIndex) &&
-                    ((int)blockType.sub_index == subIndex) &&
-                     (blockType.used_by_editor > 0)
+                    ((int)blockType.sub_index == subIndex)
                     )
                 {
                     shadowBlock.bt_idx = blockIndex;

@@ -31,8 +31,8 @@ namespace Diablo2Editor
 
         // conflicts managment
         public char conflict;
-        public char used_by_game;   // True / False
-        public char used_by_editor; // True / False
+        public bool used_by_game = false;   // True / False
+        public bool used_by_editor = false; // True / False
 
         // animated tile
         public long curr_frame;

@@ -9,13 +9,13 @@ using static Diablo2Editor.DS1BlockTable;
 public class DS1Drawer
 {
     Texture2D target;
-    int TARGET_WIDTH = 1024;
-    int TARGET_HEIGHT = 768;
+    int TARGET_WIDTH = 2048;
+    int TARGET_HEIGHT = 2048;
 
 
     public DS1Drawer()
     {
-        target = new Texture2D(TARGET_WIDTH, TARGET_HEIGHT);
+        target = new Texture2D(TARGET_WIDTH, TARGET_HEIGHT, TextureFormat.RGB24, false);
     }
 
     public void DrawTilesToTexture(DS1Level level)
@@ -196,6 +196,17 @@ public class DS1Drawer
 
     private void DrawSpriteToTarget(Texture2D texture, int x, int y)
     {
+        int x_max = x + texture.width;
+        int y_max = y + texture.height;
+        if (x < 0 || x_max >= TARGET_WIDTH)
+        {
+            return;
+        }
+        if (y < 0 || y_max >= TARGET_HEIGHT)
+        {
+            return;
+        }
+
         // Copy tile to target
         Graphics.CopyTexture(texture, 0, 0, 0, 0, texture.width, texture.height,
             target, 0, 0, x, y);

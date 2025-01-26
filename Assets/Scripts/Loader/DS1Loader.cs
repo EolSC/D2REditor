@@ -90,16 +90,14 @@ namespace Diablo2Editor
         // wall data and orientation data are located separately in ds1 file
         // so we need to know offset pointing for orientation data to load walls properly
         private DS1WallCell ReadWallCell(byte[] content, 
-            int orientOffset, ref int streamPosition, long version)
+            ref int streamPosition, long version)
         {
-            int orient_position = streamPosition + orientOffset;
-            DS1WallCell tile = new DS1WallCell();
+           DS1WallCell tile = new DS1WallCell();
             tile.prop1 = content[streamPosition++];
             tile.prop2 = content[streamPosition++];
             tile.prop3 = content[streamPosition++];
             tile.prop4 = content[streamPosition++];
-            ReadWallOrientation(tile, content, orient_position, version);
-            return tile;
+           return tile;
         }
 
         private DS1FloorCell ReadFloorCell(byte[] content, ref int streamPosition)
@@ -348,10 +346,7 @@ namespace Diablo2Editor
                             case 4:
                             {
                                 int layerNumber = layerStreamingCache[n] - 1;
-                                // orientation is stored after wall data. 
-                                // We need to jump over the whole layer to read proper value
-                                int orientOffset = (int)level.width * (int)level.height* WALL_TILE_DATA_SIZE;
-                                var tile = ReadWallCell(content, orientOffset, ref streamPosition, level.version);
+                                var tile = ReadWallCell(content, ref streamPosition, level.version);
                                 level.wall.wall_array[layerNumber, y, x] = tile;
                             }; break;
                             case 5: // orientation
@@ -360,6 +355,9 @@ namespace Diablo2Editor
                             case 8:
                                 {
                                     // Skip 4 bytes, this data is read in ReadWallCell
+                                    int wallLayerNum = layerStreamingCache[n] - 5;
+                                    var wallCell = level.wall.wall_array[wallLayerNum, y, x];
+                                    ReadWallOrientation(wallCell, content, streamPosition, level.version);
                                     streamPosition += 4;
                                 }; break;
                             case 9:

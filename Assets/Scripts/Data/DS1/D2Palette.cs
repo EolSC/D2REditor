@@ -106,6 +106,7 @@ public class D2Palette
                 color.r = (float)r / 255;
                 color.g = (float)g / 255;
                 color.b = (float)b / 255;
+                color.a = 1.0f;
 
                 result[i] = color;
             }

@@ -8,33 +8,45 @@ using static Diablo2Editor.DS1BlockTable;
 
 public class DS1Drawer
 {
-    Texture2D target;
+    RenderTexture target;
     int TARGET_WIDTH = 2048;
     int TARGET_HEIGHT = 2048;
 
 
     public DS1Drawer()
     {
-        target = new Texture2D(TARGET_WIDTH, TARGET_HEIGHT, TextureFormat.RGB24, false);
+        target = new RenderTexture(TARGET_WIDTH, TARGET_HEIGHT, 0, RenderTextureFormat.Default);
     }
 
     public void DrawTilesToTexture(DS1Level level)
     {
+        RenderTexture.active = target;
+        GL.Clear(true, true, UnityEngine.Color.white);
+        GL.PushMatrix();                                //Saves both projection and modelview matrices to the matrix stack.
+        GL.LoadPixelMatrix(0, TARGET_WIDTH, TARGET_HEIGHT, 0);			//Setup a matrix for pixel-correct rendering.
         // loop 1A : lower walls, floors, shadows of dt1
+        int start_pos_x = 1024;
+        int start_pos_y = 1024;
         for (int y = 0; y < level.height; y++)
         {
             int base_x = y * -level.tile_w / 2;
             int base_y = y * level.tile_h / 2;
             for (int x = 0; x < level.width; x++)
             {
-                int mx = base_x + x * level.tile_w / 2;
-                int my = base_y + x * level.tile_h / 2;
-                DrawWalls(level, x, y, mx, my, false);      // lower walls
-                DrawFloorTile(level, x, y, mx, my);     // floors
-                DrawShadowTile(level, x, y, mx, my);           // shadows of dt1
-                
+                int mx = base_x + x * level.tile_w / 2 + start_pos_x;
+                int my = base_y + x * level.tile_h / 2 + start_pos_y;
+                {
+                   DrawWalls(level, x, y, mx, my, false);      // lower walls
+                   DrawFloorTile(level, x, y, mx, my);     // floors
+                   DrawShadowTile(level, x, y, mx, my);           // shadows of dt1
+                   DrawWalls(level, x, y, mx, my, true);      // lower walls
+
+                }
+
             }
         }
+        GL.PopMatrix();
+        RenderTexture.active = null;
     }
 
     public void DrawWalls(DS1Level level, int x, int y, int mx, int my, bool isUpper)
@@ -103,7 +115,7 @@ public class DS1Drawer
 
                     while (!done)
                     {
-                        if (block_index >= level.bt_num)
+                        if (block_index >= level.block_table.Count)
                             done = true;
                         else
                         {
@@ -179,7 +191,6 @@ public class DS1Drawer
 
                 var texture = block.tileData.bitmaps[block.block_idx];
                 var y1 = my - block.zero_line;
-                y1 += level.tile_h; // walls are lower than floors (and than roofs) by 80 pixels
                 if ((y1 + texture.height) < 0)
                     continue;
 
@@ -207,10 +218,8 @@ public class DS1Drawer
             return;
         }
 
-        // Copy tile to target
-        Graphics.CopyTexture(texture, 0, 0, 0, 0, texture.width, texture.height,
-            target, 0, 0, x, y);
-        target.Apply();
+        Rect rect = new Rect(x, y, texture.width, texture.height);
+        Graphics.DrawTexture(rect, texture);
     }
 
     public void Intantiate(GameObject gameObject)

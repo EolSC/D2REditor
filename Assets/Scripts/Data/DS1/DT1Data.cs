@@ -193,9 +193,17 @@ public class DT1Data
 
             block_index++;
             // normal block (non-empty)
-            Texture2D texture = new Texture2D(width, height, TextureFormat.RGB24, false);
-
-
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            Color32[] colors = new Color32[width * height];
+            for (int i = 0; i < colors.Length; ++i)
+            {
+                colors[i].r = 0;
+                colors[i].g = 0;
+                colors[i].b = 0;
+                colors[i].a = 0;
+            }
+            texture.SetPixels32(colors);
+            texture.Apply();
             for (int s_index = 0; s_index < block.tiles_number; s_index++) // for each sub-tiles
             {
                 var subTile = LoadSubTile((int)block.tiles_ptr, s_index);

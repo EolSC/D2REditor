@@ -235,6 +235,7 @@ public class DS1Drawer
             if (material)
             {
                 material.SetTexture("_MainTex", target);
+                material.SetFloat("_Glossiness", 0.0f);
             }
             meshRenderer.material = material;
         }

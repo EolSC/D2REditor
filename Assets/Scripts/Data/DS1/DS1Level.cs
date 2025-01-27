@@ -319,7 +319,7 @@ namespace Diablo2Editor
                     ((int)blockType.orientation == orientation) &&
                     ((int)blockType.main_index == mainIndex) &&
                     ((int)blockType.sub_index == subIndex) &&
-                    (blockType.used_by_editor == true)
+                    (blockType.used_by_game == true)
                     )
                 {
                     wallBlock.bt_idx = blockIndex;

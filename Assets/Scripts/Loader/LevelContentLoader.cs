@@ -23,8 +23,8 @@ public class LevelContentLoader
 
     public void LoadLevel(string pathToLevel, string levelName, byte[] ds1Content, string jsonContent)
     {
-        //EditorUtility.DisplayProgressBar("Loading level", "Reading json...", 0.0f);
-        //LoadJsonPreset(levelName, jsonContent);
+        EditorUtility.DisplayProgressBar("Loading level", "Reading json...", 0.0f);
+        LoadJsonPreset(levelName, jsonContent);
         EditorUtility.DisplayProgressBar("Loading level", "Loading DS1...", 0.0f);
         LoadDS1Content(pathToLevel, ds1Content);
         EditorUtility.ClearProgressBar();

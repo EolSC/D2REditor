@@ -289,11 +289,11 @@ public class DT1Data
 
             dataPointer += 2;
             length -= 2;
-            if ((b1 > 0) || (b2 > 0))
+            if ((b1 != 0) || (b2 != 0))
             {
                 x += b1;
                 length -= b2;
-                while (b2 > 0)
+                while (b2 != 0)
                 {
                     byte colorIndex = content[dataPointer];
                     WritePixel(texture, x0 + x, y0 + y, colorIndex, palette);
@@ -315,6 +315,6 @@ public class DT1Data
         // Read color from palllet, assert it has 256 colors 
         Assert.AreEqual(pal.Length, 256);
         Color color = pal[colorIndex];
-        texture.SetPixel(x, y, color);
+        texture.SetPixel(x, -y, color);
     }
 }

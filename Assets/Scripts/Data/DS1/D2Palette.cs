@@ -10,14 +10,20 @@ using UnityEngine;
 public class D2Palette
 {
     const int ACT_MAX = 5;
+    const int GAMMA_LEVELS = 41;
+    const int DEFAULT_GAMMA = 22;
     const int PALLETE_SIZE = 256;
     const string PAL_FILE_NAME = "pal.pl2";
     const string PAL_PATH_PREFIX = "act";
+    const string GAMMA_FILE = "Assets\\Resources\\gamma.dat";
+    byte[][] gamma_table;
+    public int cur_gamma = DEFAULT_GAMMA;
     NativeArray<Color>[] palettes;
     NativeArray<Color> default_palette;
     public D2Palette()
     {
         LoadDefaultPalette();
+        LoadGamma();
     }
     ~D2Palette()
     {
@@ -32,6 +38,24 @@ public class D2Palette
         for (int i = 0; i < ACT_MAX; ++i)
         {
             palettes[i] = LoadPalleteForAct(i);
+        }
+    }
+
+    private void LoadGamma()
+    {
+        string pathToGammaFile = Path.GetFullPath(GAMMA_FILE);
+        if (File.Exists(pathToGammaFile))
+        {
+            byte[] content = File.ReadAllBytes(pathToGammaFile);
+            gamma_table = new byte[GAMMA_LEVELS][];
+            for (int i =0; i < GAMMA_LEVELS; ++i)
+            {
+                gamma_table[i] = new byte[PALLETE_SIZE];
+                for (int j = 0; j < PALLETE_SIZE; j++)
+                {
+                    gamma_table[i][j] = content[i * PALLETE_SIZE + j];
+                }
+            }
         }
     }
 
@@ -89,18 +113,13 @@ public class D2Palette
                 byte r = content[ridx];
                 byte g = content[ridx + 1];
                 byte b = content[ridx + 2];
-                /*
-                 * Gamma correction. TODO : implement gamma
-                    r = glb_ds1edit.d2_pal[pal_idx][ridx];
-                    g = glb_ds1edit.d2_pal[pal_idx][ridx + 1];
-                    b = glb_ds1edit.d2_pal[pal_idx][ridx + 2];
-                    r = glb_ds1edit.gamma_table[glb_ds1edit.cur_gamma][r];
-                    g = glb_ds1edit.gamma_table[glb_ds1edit.cur_gamma][g];
-                    b = glb_ds1edit.gamma_table[glb_ds1edit.cur_gamma][b];
-                */
-                r = (byte)(r >> 2);
-                g = (byte)(g >> 2);
-                b = (byte)(b >> 2);
+
+                if (gamma_table != null)
+                {
+                    r = gamma_table[cur_gamma][r];
+                    g = gamma_table[cur_gamma][g];
+                    b = gamma_table[cur_gamma][b];
+                }
 
                 Color color = new Color();
                 color.r = (float)r / 255;

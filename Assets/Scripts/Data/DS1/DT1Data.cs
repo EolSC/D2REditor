@@ -157,6 +157,9 @@ public class DT1Data
         bitmaps = new List<Texture2D>();
         foreach(var block in blocks)
         {
+            Texture2D texture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            bitmaps.Add(texture);
+
             long orientation = block.orientation;
             int width = (int)block.size_x;
             // height is always negative
@@ -193,7 +196,7 @@ public class DT1Data
 
             block_index++;
             // normal block (non-empty)
-            Texture2D texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            texture.Reinitialize(width, height);
             Color32[] colors = new Color32[width * height];
             for (int i = 0; i < colors.Length; ++i)
             {
@@ -225,8 +228,6 @@ public class DT1Data
                 }
             }
             texture.Apply();
-            bitmaps.Add(texture);
-
         }
     }
 

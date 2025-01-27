@@ -13,6 +13,8 @@ namespace Diablo2Editor
         {
             List<DT1Data> result = new List<DT1Data>();
             string zone, act;
+            // TODO: read proper levelmask from lvlprest.txt
+            int levelMask = 75;
             if (GetZoneAndActFromFileName(pathToLevel, out zone, out act))
             {
                 string[][] levelTypes = ReadLevelTypes();
@@ -26,20 +28,28 @@ namespace Diablo2Editor
                         if (rowZone == zone &&  rowAct == act)
                         {
                             var actPallette = palettes.GetPaletteForAct(act);
-
+                            int index = 0;
                             for (int j = 2; j < levelTypes[i].Length - 1; j++) 
                             {
                                 string fileName = levelTypes[i][j];
                                 if (fileName != "0")
                                 {
-
-                                    var dt1Data = DT1Loader.ReadDT1DataFromFile(fileName, actPallette);
-                                    if (dt1Data != null)
+                                    int maskBit = (levelMask >> index) & 0x01;
+                                    bool needLoad = maskBit == 1;
+                                    if (needLoad)
                                     {
-                                        result.Add(dt1Data);
+                                        var dt1Data = DT1Loader.ReadDT1DataFromFile(fileName, actPallette);
+                                        if (dt1Data != null)
+                                        {
+                                            result.Add(dt1Data);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Debug.Log("DT1 " + fileName + "skipped because of level mask");
                                     }
                                 }
-                                
+                                index++;
                             }
                         }
                     }

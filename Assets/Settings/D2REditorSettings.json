@@ -1,6 +1,17 @@
 {
     "developer": {
-        "testLevel": "data/global/tiles/act1/barracks/barew.ds1"
+        "testLevel2": {
+			"path": "data/global/tiles/act1/barracks/barew.ds1",
+			"dt1Index": 7,
+			"dt1Mask": 75,
+			"act": 1
+		},
+        "testLevel": {
+			"path": "data/global/tiles/act1/outdoors/tower2.ds1",
+			"dt1Index": 2,
+			"dt1Mask": 524288,
+			"act": 1
+		}		
     },
     "paths": {
         "dataRoot2": "C:\\work\\d2_data\\",

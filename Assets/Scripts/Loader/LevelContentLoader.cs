@@ -16,17 +16,19 @@ public class LevelContentLoader
     private Diablo2Editor.DS1Level ds1Level = null;
     // Random seed for level preset
     private int seed = 0;
-    
+
+    private GameObject rootGameObject;
+
     /*
      * Load level content. This function fully constructs LevelPreset and Ds1Preset within Scene
      */
 
-    public void LoadLevel(string pathToLevel, string levelName, byte[] ds1Content, string jsonContent)
+    public void LoadLevel(DS1LevelInfo info, string levelName, byte[] ds1Content, string jsonContent)
     {
         EditorUtility.DisplayProgressBar("Loading level", "Reading json...", 0.0f);
         LoadJsonPreset(levelName, jsonContent);
         EditorUtility.DisplayProgressBar("Loading level", "Loading DS1...", 0.0f);
-        LoadDS1Content(pathToLevel, ds1Content);
+        LoadDS1Content(info, ds1Content);
         EditorUtility.ClearProgressBar();
         Debug.Log("Level loaded: " + levelName);
     }
@@ -34,7 +36,7 @@ public class LevelContentLoader
     // Json-specific logic
     private void LoadJsonPreset(string levelName, string jsonContent)
     {
-        GameObject rootGameObject = new GameObject();
+        rootGameObject = new GameObject();
         rootGameObject.name = levelName;
         JSONNode jsonNode = JSON.Parse(jsonContent);
         preset = new Diablo2Editor.LevelPreset(rootGameObject, jsonNode.AsObject, seed);
@@ -42,7 +44,7 @@ public class LevelContentLoader
 
 
     // Ds1-specific logic
-    private void LoadDS1Content(string pathToLevel, byte[] ds1Content)
+    private void LoadDS1Content(DS1LevelInfo info, byte[] ds1Content)
     {
         // Reload palettes
         D2Palette palletes = new D2Palette();
@@ -51,7 +53,7 @@ public class LevelContentLoader
         DS1Loader loader = new DS1Loader();
         ds1Level = loader.ReadDS1(ds1Content);
         LevelTypesLoader levelTypes = new LevelTypesLoader();
-        var tileTables = levelTypes.FindTilesForLevel(pathToLevel, palletes);
+        var tileTables = levelTypes.FindTilesForLevel(info, palletes);
         if (tileTables.Count > 0)
         {
             ds1Level.InitBlockTable(tileTables);
@@ -100,9 +102,9 @@ public class LevelContentLoader
         if (ds1Level != null)
         {
             GameObject testDS1 = new GameObject();
-            DS1Drawer drawer = new DS1Drawer();
-            drawer.DrawTilesToTexture(ds1Level);
-            drawer.Intantiate(testDS1);
+            testDS1.transform.parent = rootGameObject.transform;
+            DS1Drawer drawer = new DS1Drawer(ds1Level);
+            drawer.Instantiate(testDS1);
         }
     }
 
@@ -115,7 +117,7 @@ public class LevelContentLoader
         settings.occlusionCulling = camera.occlusionCulling;
 
         SceneView sceneView = SceneView.lastActiveSceneView;
-        sceneView.orthographic = true;
+        sceneView.orthographic = false;
         sceneView.size = camera.zoom;
         sceneView.cameraSettings = settings;
 

@@ -4,37 +4,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Diablo2Editor
 {
     public class LevelTypesLoader
     {
-        public List<DT1Data> FindTilesForLevel(string pathToLevel, D2Palette palettes)
+        public List<DT1Data> FindTilesForLevel(DS1LevelInfo info, D2Palette palettes)
         {
             List<DT1Data> result = new List<DT1Data>();
-            string zone, act;
-            // TODO: read proper levelmask from lvlprest.txt
-            int levelMask = 75;
-            if (GetZoneAndActFromFileName(pathToLevel, out zone, out act))
+            string[][] levelTypes = ReadLevelTypes();
+            if (levelTypes != null && levelTypes.Length >= 3)
             {
-                string[][] levelTypes = ReadLevelTypes();
-                if (levelTypes != null && levelTypes.Length >= 3)
+                for (int i = 2; i < levelTypes.Length; i++)
                 {
-                    for (int i = 2; i < levelTypes.Length; i++)
+                    string indexCell = levelTypes[i][1];
+                    try
                     {
-                        string nameCell = levelTypes[i][0];
-                        string rowZone, rowAct;
-                        GetZoneAndActFromLevelTypes(nameCell, out rowZone, out rowAct);
-                        if (rowZone == zone &&  rowAct == act)
+                        int lvlIndex = int.Parse(indexCell);
+                        if (lvlIndex == info.dt1Index)
                         {
-                            var actPallette = palettes.GetPaletteForAct(act);
-                            int index = 0;
-                            for (int j = 2; j < levelTypes[i].Length - 1; j++) 
+                            var actPallette = palettes.GetPaletteForAct(info.act);
+                            int dt1Index = 0;
+                            for (int j = 2; j < levelTypes[i].Length - 1; j++)
                             {
                                 string fileName = levelTypes[i][j];
                                 if (fileName != "0")
                                 {
-                                    int maskBit = (levelMask >> index) & 0x01;
+                                    int maskBit = (info.dt1Mask >> dt1Index) & 0x01;
                                     bool needLoad = maskBit == 1;
                                     if (needLoad)
                                     {
@@ -49,53 +46,26 @@ namespace Diablo2Editor
                                         Debug.Log("DT1 " + fileName + "skipped because of level mask");
                                     }
                                 }
-                                index++;
+                                dt1Index++;
                             }
+                            return result;
                         }
                     }
+                    catch (FormatException )
+                    {
+                        Debug.LogError("Incorrect dt1index " + info.dt1Index);
+                        return result;
+
+                    }
                 }
+
             }
             else
             {
-                Debug.LogError("Can't find zone and act for level " + pathToLevel);
+                Debug.LogError("Can't find zone and act for level " + info.path);
             }
 
             return result;
-        }
-
-        private void GetZoneAndActFromLevelTypes(string name, out string zone, out string act)
-        {
-            string[] values = name.Split('-');
-            if (values.Length >= 2)
-            {
-                act = new string(values[0].Where(c => !Char.IsWhiteSpace(c)).ToArray()).ToLower();
-                zone = new string(values[1].Where(c => !Char.IsWhiteSpace(c)).ToArray()).ToLower();
-            }
-            else
-            {
-                act = "";
-                zone = "";
-            }
-        }
-
-        private bool GetZoneAndActFromFileName(string fileName, out string zone, out string act)
-        {
-            string[] parts = fileName.Split('\\');
-            if (parts.Length >= 3)
-            {
-                // path should look like data/global/tiles/act1/barracks/barew.ds1
-                // for this example array will contain [..., 'act1', 'barracks', 'barew.ds1']
-                // 
-                int zoneIndex = parts.Length - 2;
-                int actIndex = parts.Length - 3;
-                act = parts[actIndex].ToLower();
-                zone = parts[zoneIndex].ToLower();
-                return true;
-
-            }
-            act = "";
-            zone = "";
-            return false;
         }
 
         private string [][] ReadLevelTypes()

@@ -54,12 +54,16 @@ namespace Diablo2Editor
         {
             // Path to test level in data folder to speed up menuing
 
-            public string testLevel;
+            public DS1LevelInfo testLevel = new DS1LevelInfo();
             public void Init(JSONNode obj)
             {
                 if (obj != null && obj.IsObject)
                 {
-                    testLevel = obj["testLevel"];
+                    JSONObject levelData = obj["testLevel"].AsObject;
+                    testLevel.path = levelData["path"];
+                    testLevel.dt1Mask = levelData["dt1Mask"];
+                    testLevel.dt1Index = levelData["dt1Index"];
+                    testLevel.act = levelData["act"];
                 }
             }
         }

@@ -27,7 +27,11 @@ namespace Diablo2Editor
         public LevelPreset(GameObject gameObject, JSONObject json, int seed)
         {
             this.seed = seed;
-            this.gameObject = gameObject;
+            GameObject obj = new GameObject();
+            obj.transform.parent = gameObject.transform;
+            obj.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+            obj.name = "json";
+            this.gameObject = obj;
             Deserialize(json);
         }
 

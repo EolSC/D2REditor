@@ -9,16 +9,18 @@ using static Diablo2Editor.DS1BlockTable;
 public class DS1Drawer
 {
     RenderTexture target;
+    DS1Level level;
     int TARGET_WIDTH = 2048;
     int TARGET_HEIGHT = 2048;
 
 
-    public DS1Drawer()
+    public DS1Drawer(DS1Level level)
     {
         target = new RenderTexture(TARGET_WIDTH, TARGET_HEIGHT, 0, RenderTextureFormat.Default);
+        this.level = level;
     }
 
-    public void DrawTilesToTexture(DS1Level level)
+    public void DrawTilesToTexture()
     {
         RenderTexture.active = target;
         GL.Clear(true, true, UnityEngine.Color.white);
@@ -222,8 +224,14 @@ public class DS1Drawer
         Graphics.DrawTexture(rect, texture);
     }
 
-    public void Intantiate(GameObject gameObject)
+    public void Instantiate(GameObject gameObject)
     {
+        TestTilesGrid(gameObject);
+    }
+
+    private void TestDrawTiles(GameObject gameObject)
+    {
+        DrawTilesToTexture();
         var subObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
         subObject.transform.parent = gameObject.transform;
         subObject.transform.localScale = new Vector3(10, 10, 10);
@@ -239,6 +247,13 @@ public class DS1Drawer
             }
             meshRenderer.material = material;
         }
+    }
+
+    private void TestTilesGrid(GameObject gameObject)
+    {
+        var grid = gameObject.AddComponent<TileGrid>();
+        gameObject.name = "DS1Level";
+        grid.SetLevelData(level);
     }
 
 }

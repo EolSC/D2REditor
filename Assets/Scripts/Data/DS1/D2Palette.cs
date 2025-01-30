@@ -59,14 +59,12 @@ public class D2Palette
         }
     }
 
-    public NativeArray<Color> GetPaletteForAct(string act)
+    public NativeArray<Color> GetPaletteForAct(int act)
     {
-        // expecting string "actN" as input
-        int actIndex = int.Parse(act.Replace("act", ""));
-        if (actIndex > 0)
+        if (act > 0)
         {
             // turning to sero-based index
-            actIndex--;
+            int actIndex = act - 1 ;
             if (actIndex >= 0 && actIndex < ACT_MAX)
             {
                 return palettes[actIndex];

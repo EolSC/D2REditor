@@ -10,6 +10,18 @@ using UnityEngine.UIElements;
 
 namespace Diablo2Editor
 {
+
+    // Data required to properly load the level
+    public class DS1LevelInfo
+    {
+        // TODO: get this stucture by level name only, without extra specification of dt1Index and mask
+        public string path;    // path to DS1 file
+        public int dt1Index;   // row in leveltypes which contains proper DT1 data
+        public int dt1Mask;     // mask for dt1 from lvlprest.txt
+        public int act;         // level act for proper palette
+
+
+    }
     public class DS1Level
     {
         public DS1Level()
@@ -313,6 +325,10 @@ namespace Diablo2Editor
             int mainIndex = (wallBlock.prop3 >> 4) + ((wallBlock.prop4 & 0x03) << 4);
             int subIndex = wallBlock.prop2;
             int blockIndex = 0;
+            if (wallBlock.IsSpecial())
+            {
+                wallBlock.specialIndex = mainIndex;
+            }
             foreach (var blockType in this.block_table)
             {
                 if (

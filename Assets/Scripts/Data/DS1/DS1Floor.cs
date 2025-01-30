@@ -83,8 +83,14 @@ public class DS1WallCell
     public byte prop3;
     public byte prop4;
     public byte orientation;
+    public int specialIndex;
     public int bt_idx;
     public byte flags;
+
+    public bool IsSpecial()
+    {
+        return orientation == 11 || orientation == 10;
+    }
 }
 
 public class DS1TaggedCell

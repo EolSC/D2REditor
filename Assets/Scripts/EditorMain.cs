@@ -25,18 +25,8 @@ public class EditorMain : MonoBehaviour
     private static void TestLoading()
     {
         // Use path from settings without opening Browse dialog
-        string pathToLevel = Settings().developer.testLevel;
-        string absolute_path = Settings().paths.GetAbsolutePath(pathToLevel);
-        OpenLevel(absolute_path, true, true);
-    }
-
-    [MenuItem("Diablo Level Editor/Open level...")]
-    private static void OpenLevel()
-    {
-        // Open file dialog
-        string absolute_path = EditorUtility.OpenFilePanel("Open Diablo 2 Ressurected level", "", "ds1");
-        // Load level with no tests
-        OpenLevel(absolute_path, true, false);
+        DS1LevelInfo info = Settings().developer.testLevel;
+        OpenLevel(info, true, true);
     }
 
     [MenuItem("Diablo Level Editor/Settings/Reload")]
@@ -51,11 +41,12 @@ public class EditorMain : MonoBehaviour
     }
 
 
-    private static void OpenLevel(string absolute_path, bool test_serialization, bool instantiate)
+    private static void OpenLevel(DS1LevelInfo info, bool test_serialization, bool instantiate)
     {
         /*
          * D2R uses hybid level data so we need both ds1 and json preset to load level properly
          */
+        string absolute_path = Settings().paths.GetAbsolutePath(info.path);
         string fileName = Path.GetFileNameWithoutExtension(absolute_path);
         string local_path = Settings().paths.GetLocalPath(absolute_path);
         string pathToJson = Settings().paths.GetPresetForLevel(local_path);
@@ -74,7 +65,7 @@ public class EditorMain : MonoBehaviour
         // Load preset
         LevelContentLoader loader = new LevelContentLoader();
 
-        loader.LoadLevel(absolute_path, fileName, dsContent, jsonContent);
+        loader.LoadLevel(info, fileName, dsContent, jsonContent);
         //Perform some tests if they are needed
         if (test_serialization)
         {

@@ -19,6 +19,13 @@ namespace Diablo2Editor
             gameObject.transform.localScale = this.scale;
         }
 
+        private void SaveCurrentTrasform()
+        {
+            position = gameObject.transform.position;
+            orientation = gameObject.transform.rotation;
+            scale = gameObject.transform.localScale;
+        }
+
         public override void Instantiate()
         {
             base.Instantiate();
@@ -48,6 +55,8 @@ namespace Diablo2Editor
         }
         public override JSONObject Serialize()
         {
+            SaveCurrentTrasform();
+
             JSONObject result = base.Serialize();
 
             JSONObject pos_object = new JSONObject();

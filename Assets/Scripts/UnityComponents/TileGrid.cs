@@ -1,6 +1,7 @@
 using Diablo2Editor;
 using System.Collections.Generic;
 using System.Data;
+using System.Runtime.CompilerServices;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -37,6 +38,8 @@ public class Tile
     private Mesh mesh;
     private Material material;
     private Collider collider;
+
+    public DS1WallCell data;
 
     public TileSelection selection = TileSelection.None;
     public TileStatus status = TileStatus.Empty;
@@ -180,7 +183,7 @@ public class Tile
 
     public void Draw(Camera camera)
     {
-        Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, camera);
+        Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, camera, 0 , null, false, false);
     }
 
     public bool Raycast(Ray ray, out RaycastHit hit, float distance)
@@ -196,6 +199,10 @@ public class TileGrid : MonoBehaviour
     Tile[][] tiles;
     Tile selected = null;
 
+    public Tile GetSelectedTile()
+    {
+        return selected;
+    }
 
     void OnDisable()
     {
@@ -207,11 +214,11 @@ public class TileGrid : MonoBehaviour
         UpdateCameraCallback(true);
     }
 
-    public void Raycast(Ray ray, bool mouseUp)
+    public bool Raycast(Ray ray, bool mouseUp)
     {
         if (tiles == null)
         {
-            return;
+            return false;
         }
 
         for (int z = 0; z < tiles.Length; z++)
@@ -230,6 +237,7 @@ public class TileGrid : MonoBehaviour
                         }
                         tile.SetSelection(TileSelection.Selected);
                         selected = tile;
+                        return true;
                     }
                     else
                     {
@@ -242,6 +250,7 @@ public class TileGrid : MonoBehaviour
                 }
             }
         }
+        return false;
     }
 
     private void Draw(Camera camera)
@@ -290,6 +299,8 @@ public class TileGrid : MonoBehaviour
 ;                       for ( int i = 0; i < level.wall.wall_num; i++)
                         {
                             var wallTile = level.wall.wall_array[i, y, x];
+                            tile.data = wallTile;
+
                             if (wallTile.IsSpecial())
                             {
                                 tile.SetStatus(TileStatus.Special);
@@ -345,11 +356,111 @@ public class TileGridEditor : Editor
             bool mouseUp = e.isMouse && e.button == 0 && e.type == EventType.MouseUp;
 
             UnityEngine.Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
-            grid.Raycast(ray, mouseUp);
+            if (grid.Raycast(ray, mouseUp))
+            {
+                Repaint();
+            }
             // Keep grid selected while we are working with it
             // Helps with clicks through models
             Selection.activeObject = grid;
         }
-
     }
+
+    public override void OnInspectorGUI()
+    {
+        //DrawDefaultInspector();
+        TileGrid grid = (TileGrid)target;
+        if (grid != null)
+        {
+            Tile selected = grid.GetSelectedTile();
+            if (selected != null)
+            {
+
+                DS1WallCell cell = selected.data;
+                GUIStyle style = new GUIStyle();
+                style.normal.textColor = Color.white;
+
+                if (cell != null)
+                {
+                    GUILayout.BeginVertical();
+                    DrawByteAttribute("Priority: ", ref cell.prop1, style);
+                    DrawByteAttribute("Sub index: ", ref cell.prop2, style);
+                    int mainIndex = cell.GetMainIndex();
+                    if (DrawIntAttribute("Main index: ", ref mainIndex, style))
+                    {
+                        cell.SetMainIndex(mainIndex);
+                    }
+
+                    DrawByteAttribute("Orientation: ", ref cell.orientation, style);
+                    bool hidden = cell.IsHidden();
+                    if (DrawBoolAttribute("Is hidden: ", ref hidden, style))
+                    {
+                        cell.SetHidden(hidden);
+                    }
+                    bool isSpecial = cell.IsSpecial();
+                    DrawBoolAttribute("Is special: ", ref isSpecial, style);
+                    if (isSpecial)
+                    {
+                        int orientation = cell.orientation;
+                        // waypoint
+                        if (orientation == 10)
+                        {
+                            GUILayout.Label("Waypoint with index: " + cell.GetMainIndex(), style);
+                        }
+                        // some other stuff
+                        if (orientation == 11)
+                        {
+                            GUILayout.Label("Other type of tile with index: " + cell.GetMainIndex(), style);
+                        }
+
+                    }
+
+                    GUILayout.EndVertical();
+                }
+            }
+        }
+    }
+    private bool DrawByteAttribute(string name, ref byte attribute, GUIStyle style)
+    {
+        string oldValue = attribute.ToString();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(name, style);
+        string value = GUILayout.TextField(oldValue);
+        GUILayout.EndHorizontal();
+        if (value != oldValue)
+        {
+            return byte.TryParse(value, out attribute);
+        }
+        return false;
+    }
+
+    private bool DrawIntAttribute(string name, ref int attribute, GUIStyle style)
+    {
+        string oldValue = attribute.ToString();
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(name, style);
+        string value = GUILayout.TextField(oldValue);
+        GUILayout.EndHorizontal();
+        if (value != oldValue)
+        {
+            return int.TryParse(value, out attribute);
+        }
+        return false;
+    }
+
+    private bool DrawBoolAttribute(string name, ref bool attribute, GUIStyle style)
+    {
+        bool oldValue = attribute;
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(name, style);
+        bool newValue = EditorGUILayout.Toggle(attribute);
+        if (oldValue != newValue)
+        {
+            attribute = newValue;
+            return true;
+        }
+        GUILayout.EndHorizontal();
+        return false;
+    }
+
 }

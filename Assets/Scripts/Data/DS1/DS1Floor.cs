@@ -1,91 +1,90 @@
 using UnityEngine;
 using System.Collections.Generic;
-/*
-  
- typedef struct CELL_W_S
+using Diablo2Editor;
+using static Unity.Collections.AllocatorManager;
+
+public class DS1Block
 {
-   UBYTE prop1;
-   UBYTE prop2;
-   UBYTE prop3;
-   UBYTE prop4;
-   UBYTE orientation;
-   int   bt_idx;
-   UBYTE flags;
-} CELL_W_S;
-
-typedef struct CELL_F_S
-{
-   UBYTE prop1;
-   UBYTE prop2;
-   UBYTE prop3;
-   UBYTE prop4;
-   int   bt_idx;
-   UBYTE flags;
-} CELL_F_S;
-
-typedef struct CELL_S_S // exactly the same struct for shadow as for the floor
-{
-   UBYTE prop1;
-   UBYTE prop2;
-   UBYTE prop3;
-   UBYTE prop4;
-   int   bt_idx;
-   UBYTE flags;
-} CELL_S_S;
-
-typedef struct CELL_T_S
-{
-   // assume the data is 1 dword, and not 4 different bytes
-   UDWORD num;
-   UBYTE  flags;
-} CELL_T_S;
-*/
-
-public class DS1FloorCell
-{
-    public DS1FloorCell()
-    {
-
-    }
-
-    public byte prop1;
-    public byte prop2;
-    public byte prop3;
-    public byte prop4;
+    public byte prop1;  // priority
+    public byte prop2;  // sub_index
+    public byte prop3;  // main_index
+    public byte prop4;  // main_index + flags
     public int bt_idx;
     public byte flags;
-}
 
-public class DS1ShadowCell
-{
-    public DS1ShadowCell()
+    public int GetMainIndex()
     {
-
+        return (prop3 >> 4) + ((prop4 & 0x03) << 4);
     }
 
-    public byte prop1;
-    public byte prop2;
-    public byte prop3;
-    public byte prop4;
-    public int bt_idx;
-    public byte flags;
-}
-
-public class DS1WallCell
-{
-    public DS1WallCell()
+    public virtual void SetMainIndex(long main_index)
     {
-
+        prop3 = (byte)((main_index & 0x0F) << 4);
+        prop4 = (byte)((main_index & 0x30) >> 4);
     }
 
-    public byte prop1;
-    public byte prop2;
-    public byte prop3;
-    public byte prop4;
+    public virtual byte GetNormalPriority()
+    {
+        return 0;
+    }
+
+    public void SetHidden(bool hidden)
+    {
+        if (hidden)
+        {
+            // set 8th bit
+            prop4 = (byte)(prop4 | 0x80);
+        }
+        else
+        {
+            // clear 8th bit
+            prop4 = (byte)(prop4 & 0x7F);
+        }
+    }
+
+    public bool IsHidden()
+    {
+        return (prop4 & 0x80) != 0;
+    }
+}
+
+public class DS1FloorCell : DS1Block
+{
+    const byte DEFAULT_FLOOR_PRIORITY = 194;
+
+    public override byte GetNormalPriority()
+    {
+        return DEFAULT_FLOOR_PRIORITY;
+    }
+
+}
+
+public class DS1ShadowCell : DS1Block
+{
+    const byte DEFAULT_SHADOW_PRIORITY = 128;
+    public override byte GetNormalPriority()
+    {
+        return DEFAULT_SHADOW_PRIORITY;
+    }
+
+    public override void SetMainIndex(long main_index)
+    {
+        prop3 = (byte)((main_index & 0x0F) << 4);
+        prop4 = (byte)((main_index & 0x30) >> 4);
+        SetHidden(true);
+    }
+
+}
+
+public class DS1WallCell : DS1Block
+{
     public byte orientation;
-    public int specialIndex;
-    public int bt_idx;
-    public byte flags;
+
+    const byte DEFAULT_WALL_PRIORITY = 129;
+    public override byte GetNormalPriority()
+    {
+        return DEFAULT_WALL_PRIORITY;
+    }
 
     public bool IsSpecial()
     {

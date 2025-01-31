@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 
 /*
@@ -21,6 +22,8 @@ public class EditorMain : MonoBehaviour
 {
     public static Diablo2Editor.EditorSettings settings = new Diablo2Editor.EditorSettings();
 
+    private static LevelContentLoader loader = new LevelContentLoader();
+
     [MenuItem("Diablo Level Editor/Test loading")]
     private static void TestLoading()
     {
@@ -28,6 +31,22 @@ public class EditorMain : MonoBehaviour
         DS1LevelInfo info = Settings().developer.testLevel;
         OpenLevel(info, true, true);
     }
+
+    [MenuItem("Diablo Level Editor/Save level")]
+    private static void SaveLevel()
+    {
+        var path = EditorUtility.SaveFilePanel(
+            "Save level as ds1/json pair",
+            "",
+            "level.ds1",
+            "ds1");
+
+        if (path.Length != 0)
+        {
+            loader.SaveLevel(path);
+        }
+    }
+
 
     [MenuItem("Diablo Level Editor/Settings/Reload")]
     private static void ReloadSettings()
@@ -63,8 +82,6 @@ public class EditorMain : MonoBehaviour
             jsonContent = File.ReadAllText(pathToJson);
         }
         // Load preset
-        LevelContentLoader loader = new LevelContentLoader();
-
         loader.LoadLevel(info, fileName, dsContent, jsonContent);
         //Perform some tests if they are needed
         if (test_serialization)

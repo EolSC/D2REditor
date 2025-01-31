@@ -77,8 +77,8 @@ public class DS1Drawer
                 // special tile asked to draw later
                 continue;
             }
-            int hiddenFloor = wallTIle.prop4 & 0x80;
-            if (hiddenFloor != 0) // binary : 1000-0000
+            bool isHidden = wallTIle.IsHidden();
+            if (isHidden) // binary : 1000-0000
             {
                 // hidden
                 if ((oreintation != 10) && (oreintation != 11))
@@ -170,8 +170,8 @@ public class DS1Drawer
             if (block_index == 0) // no tiles here
                 continue;
 
-            int hiddenFloor = floorTile.prop4 & 0x80;
-            if (hiddenFloor != 0) // binary : 1000-0000
+            bool isHidden = floorTile.IsHidden();
+            if (isHidden) // binary : 1000-0000
             {
                 // hidden
                 block_index = -1; // a hidden floor --> "unknown"

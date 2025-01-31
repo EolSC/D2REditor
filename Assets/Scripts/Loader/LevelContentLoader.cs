@@ -1,6 +1,7 @@
 using Diablo2Editor;
 using SimpleJSON;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -32,6 +33,24 @@ public class LevelContentLoader
         EditorUtility.ClearProgressBar();
         Debug.Log("Level loaded: " + levelName);
     }
+    public void SaveLevel(string fileName)
+    {
+        string path = Path.GetDirectoryName(fileName);
+
+        JSONNode resultJson = preset.Serialize();
+        DS1Saver saver = new DS1Saver();
+
+        byte[] resultDS1 = saver.SaveDS1(ds1Level);
+
+        string jsonFileName = Path.Combine(path, preset.name + ".json");
+        string ds1FileName = fileName;
+
+        File.WriteAllText(jsonFileName, resultJson.ToString());
+        File.WriteAllBytes(ds1FileName, resultDS1);
+        Debug.Log("Level ds1 saved: " + ds1FileName);
+        Debug.Log("Level json saved: " + jsonFileName);
+    }
+
 
     // Json-specific logic
     private void LoadJsonPreset(string levelName, string jsonContent)

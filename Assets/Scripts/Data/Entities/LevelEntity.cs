@@ -37,63 +37,11 @@ namespace Diablo2Editor
             foreach (JSONNode component in components)
             {
                 var component_type = component["type"];
-                var obj = CreateComponentByType(component_type, gameObject);
+                var obj = ComponentFactory.CreateComponentByType(component_type, gameObject);
                 obj.entity = this;
                 obj.Deserialize(component.AsObject);
                 this.components.Add(obj);
             }
-        }
-
-
-        // TODO: move it to some factory class
-        private LevelEntityComponent CreateComponentByType(string type, GameObject gameObject)
-        {
-            if (type == "TransformDefinitionComponent")
-            {
-                return gameObject.AddComponent<TransformDefinitionComponent>();
-            }
-            if (type == "TerrainDefinitionComponent")
-            {
-                return gameObject.AddComponent<TerrainDefinitionComponent>(); 
-            }
-            if (type == "ModelDefinitionComponent")
-            {
-                return gameObject.AddComponent<ModelDefinitionComponent>();
-            }
-            if (type == "ModelVariationDefinitionComponent")
-            {
-                return gameObject.AddComponent<ModelVariationDefinitionComponent>();
-            }
-            if (type == "PhysicsBodyDefinitionComponent")
-            {
-                return gameObject.AddComponent<PhysicsBodyDefinitionComponent>();
-            }
-            if (type == "WallTransparencyComponent")
-            {
-                return gameObject.AddComponent<WallTransparencyComponent>();
-            }
-            if (type == "PrefabPlacementDefinitionComponent")
-            {
-                return gameObject.AddComponent<PrefabPlacementDefinitionComponent>();
-            }
-            if (type == "VfxDefinitionComponent")
-            {
-                return gameObject.AddComponent<VfxDefinitionComponent>();
-            }
-            if (type == "TerrainDecalDefinitionComponent")
-            {
-                return gameObject.AddComponent<TerrainDecalDefinitionComponent>();
-            }
-            if (type == "TerrainStampDefinitionComponent")
-            {
-                return gameObject.AddComponent<TerrainStampDefinitionComponent>();
-            }
-            if (type == "PointLightDefinitionComponent")
-            {
-                return gameObject.AddComponent<PointLightDefinitionComponent>();
-            }
-            Debug.Log("Unknown component: " + type);
-            return gameObject.AddComponent<LevelComponentUnknown>();
         }
 
         public JSONObject Serialize()

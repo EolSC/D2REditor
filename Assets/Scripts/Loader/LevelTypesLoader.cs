@@ -41,10 +41,6 @@ namespace Diablo2Editor
                                             result.Add(dt1Data);
                                         }
                                     }
-                                    else
-                                    {
-                                        Debug.Log("DT1 " + fileName + "skipped because of level mask");
-                                    }
                                 }
                                 dt1Index++;
                             }

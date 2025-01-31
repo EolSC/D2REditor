@@ -276,16 +276,6 @@ namespace Diablo2Editor
             }
         }
 
-        private void SortBlocks()
-        {
-            this.block_table.Sort(delegate(DS1BlockTable t1, DS1BlockTable t2)
-            {
-                return t1.CompareTo(t2);
-            }
-            );
-        }
-
-
         private void InitTilesIndexes()
         {
             for (int y = 0; y < height; y++)
@@ -322,13 +312,10 @@ namespace Diablo2Editor
                 return;
             }
             int orientation = wallBlock.orientation;
-            int mainIndex = (wallBlock.prop3 >> 4) + ((wallBlock.prop4 & 0x03) << 4);
+            int mainIndex = wallBlock.GetMainIndex();
             int subIndex = wallBlock.prop2;
             int blockIndex = 0;
-            if (wallBlock.IsSpecial())
-            {
-                wallBlock.specialIndex = mainIndex;
-            }
+
             foreach (var blockType in this.block_table)
             {
                 if (
@@ -400,7 +387,7 @@ namespace Diablo2Editor
                 floorBlock.bt_idx = 0;
                 return;
             }
-            int mainIndex = (floorBlock.prop3 >> 4) + ((floorBlock.prop4 & 0x03) << 4);
+            int mainIndex = floorBlock.GetMainIndex();
             int subIndex = floorBlock.prop2;
             int blockIndex = 0;
             foreach (var blockType in this.block_table)
@@ -429,7 +416,7 @@ namespace Diablo2Editor
                 shadowBlock.bt_idx = 0;
                 return;
             }
-            int mainIndex = (shadowBlock.prop3 >> 4) + ((shadowBlock.prop4 & 0x03) << 4);
+            int mainIndex = shadowBlock.GetMainIndex();
             int subIndex = shadowBlock.prop2;
             int blockIndex = 0;
             foreach (var blockType in this.block_table)

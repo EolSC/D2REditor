@@ -55,7 +55,7 @@ namespace Diablo2Editor
         }
         public override JSONObject Serialize()
         {
-            SaveCurrentTrasform();
+            //SaveCurrentTrasform();
 
             JSONObject result = base.Serialize();
 

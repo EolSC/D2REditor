@@ -1,5 +1,6 @@
 using Diablo2Editor;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -42,21 +43,144 @@ public class DS1Saver
         writer.Write((int)level.wall.wall_num);
         writer.Write((int)level.floor.floor_num);
 
-        //TODO: implement saving all the data
-
         //TileData:
 
         // walls
         // floors
         // shadows
         // tagged tiles
+        var walls = level.wall;
+        for (int n = 0; n < walls.wall_num; ++n)
+        {
+            // wall data first
+            for (int y = 0; y < level.height; ++y)
+            {
+                for (int x = 0; x < level.width; ++x)
+                {
+                    var tile = walls.wall_array[n, y, x];
+                    writer.Write(tile.prop1);
+                    writer.Write(tile.prop2);
+                    writer.Write(tile.prop3);
+                    writer.Write(tile.prop4);
+                }
+            }
+            // then orientation
+            for (int y = 0; y < level.height; ++y)
+            {
+                for (int x = 0; x < level.width; ++x)
+                {
+                    var tile = walls.wall_array[n, y, x];
+                    writer.Write(tile.orientation);
+                    byte padding = 0;
+                    // 3 zero bytes as padding
+                    writer.Write(padding);
+                    writer.Write(padding);
+                    writer.Write(padding);
+                }
+            }
 
-        // Other data:
+        }
+
+        // floors
+        var floors = level.floor;
+        for (int n = 0; n < floors.floor_num; ++n)
+        {
+            for (int y = 0; y < level.height; ++y)
+            {
+                for (int x = 0; x < level.width; ++x)
+                {
+                    var tile = floors.floor_array[n, y, x];
+                    writer.Write(tile.prop1);
+                    writer.Write(tile.prop2);
+                    writer.Write(tile.prop3);
+                    writer.Write(tile.prop4);
+                }
+            }
+        }
+
+        var shadows = level.shadow;
+        for (int n = 0; n < shadows.shadow_num; ++n)
+        {
+            for (int y = 0; y < level.height; ++y)
+            {
+                for (int x = 0; x < level.width; ++x)
+                {
+                    var tile = shadows.shadow_array[n, y, x];
+                    writer.Write(tile.prop1);
+                    writer.Write(tile.prop2);
+                    writer.Write(tile.prop3);
+                    writer.Write(tile.prop4);
+                }
+            }
+        }
+
+        if (level.tag_type > 0)
+        {
+            var tagged = level.tagged;
+            for (int n = 0; n < tagged.tag_num; ++n)
+            {
+                for (int y = 0; y < level.height; ++y)
+                {
+                    for (int x = 0; x < level.width; ++x)
+                    {
+                        var tile = tagged.tag_array[n, y, x];
+                        writer.Write(tile.num);
+
+                    }
+                }
+            }
+        }
 
         // objects
+        writer.Write((int)level.obj_num);
+
+        List<int> npc = new List<int>();
+        for (int i = 0; i < level.objects.Count; ++i)
+        {
+            var obj = level.objects[i];
+
+            writer.Write((int)obj.type);
+            writer.Write((int)obj.id);
+            writer.Write((int)obj.x);
+            writer.Write((int)obj.y);
+            writer.Write((int)obj.ds1_flags);
+            if (obj.path_num > 0)
+            {
+                npc.Add(i);
+            }
+        }
+
         // groups
+        if (level.tag_type > 0)
+        {
+            int n = 0;
+            // put 4 bytes of zeroes
+            writer.Write(n);
+            writer.Write((int)level.group_num);
+            foreach (var gr in level.group)
+            {
+                writer.Write((int)gr.tile_x);
+                writer.Write((int)gr.tile_y);
+                writer.Write((int)gr.width);
+                writer.Write((int)gr.height);
+                writer.Write((int)gr.unk);
+            }
+        }
+
         // paths
-
-
+        writer.Write((int)npc.Count);
+        foreach (var n in npc)
+        {
+            var obj = level.objects[n];
+            writer.Write((int)obj.path_num);
+            writer.Write((int)obj.x);
+            writer.Write((int)obj.y);
+            for (int path = 0; path < obj.path_num; path++)
+            {
+                writer.Write((int)obj.paths[path].x);
+                writer.Write((int)obj.paths[path].y);
+                writer.Write((int)obj.paths[path].action);
+            }
+        }
     }
 }

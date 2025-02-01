@@ -29,7 +29,6 @@ namespace Diablo2Editor
             this.seed = seed;
             GameObject obj = new GameObject();
             obj.transform.parent = gameObject.transform;
-            obj.transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
             obj.name = "json";
             this.gameObject = obj;
             Deserialize(json);

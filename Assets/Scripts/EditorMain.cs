@@ -91,18 +91,11 @@ public class EditorMain : MonoBehaviour
             jsonContent = File.ReadAllText(pathToJson);
         }
         // Load preset
-        loader.LoadLevel(fileName, dsContent, jsonContent);
+        loader.LoadLevel(fileName, dsContent, jsonContent, instantiate);
         //Perform some tests if they are needed
         if (test_serialization)
         {
             loader.TestLevelLoading(dsContent, jsonContent);
         }
-        if (instantiate)
-        { // instantiate it
-            loader.Instantiate();
-        }
     }
-
-
-
 }

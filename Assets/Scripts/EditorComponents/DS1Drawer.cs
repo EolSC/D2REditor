@@ -1,10 +1,10 @@
 using Diablo2Editor;
-using System.Buffers.Text;
-using System.Drawing;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
-using static Diablo2Editor.DS1BlockTable;
+
+/*
+ * Debug component to draw legacy level content to RenderTarget
+ * Not used at the moment but will allow to do some legacy tiles editing
+ */
 
 public class DS1Drawer
 {

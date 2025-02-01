@@ -1,17 +1,7 @@
 {
     "developer": {
-        "testLevel2": {
-			"path": "data/global/tiles/act1/barracks/barew.ds1",
-			"dt1Index": 7,
-			"dt1Mask": 75,
-			"act": 1
-		},
-        "testLevel": {
-			"path": "data/global/tiles/act1/outdoors/tower2.ds1",
-			"dt1Index": 2,
-			"dt1Mask": 524288,
-			"act": 1
-		}		
+        "testLevel2": "data/global/tiles/act1/barracks/barew.ds1",
+        "testLevel":  "data/global/tiles/act1/outdoors/tower2.ds1",
     },
     "paths": {
         "dataRoot2": "C:\\work\\d2_data\\",
@@ -19,7 +9,9 @@
         "presetRoot": "data/hd/env/preset",
         "tilesRoot": "data/global/tiles",
         "levelTypes": "data/global/excel/lvltypes.txt",
-		"palettePath" : "data/global/palette"
+        "levelPresets": "data/global/excel/lvlprest.txt",
+		"palettePath" : "data/global/palette",
+		"maplistPath" : "Assets/Resources/maplist.csv",
     },
 	"common": {
 		"textureLoadMode" : "Albedo"

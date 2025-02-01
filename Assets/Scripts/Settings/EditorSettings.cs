@@ -54,16 +54,12 @@ namespace Diablo2Editor
         {
             // Path to test level in data folder to speed up menuing
 
-            public DS1LevelInfo testLevel = new DS1LevelInfo();
+            public string testLevel;
             public void Init(JSONNode obj)
             {
                 if (obj != null && obj.IsObject)
                 {
-                    JSONObject levelData = obj["testLevel"].AsObject;
-                    testLevel.path = levelData["path"];
-                    testLevel.dt1Mask = levelData["dt1Mask"];
-                    testLevel.dt1Index = levelData["dt1Index"];
-                    testLevel.act = levelData["act"];
+                    testLevel = obj["testLevel"];
                 }
             }
         }
@@ -72,6 +68,7 @@ namespace Diablo2Editor
         public CommonSettings common = new CommonSettings();
         public DeveloperSettings developer = new DeveloperSettings();
         public CameraSettings camera = new CameraSettings();
+        public MapList mapList = new MapList();
 
         public EditorSettings()
         {
@@ -89,6 +86,7 @@ namespace Diablo2Editor
                 common.Init(settings["common"]);
                 developer.Init(settings["developer"]);
                 camera.Init(settings["camera"]);
+                mapList.InitFromFile(paths.GetPathToMapList(), paths.GetPathToLevelPresets());
             }
             else
             {

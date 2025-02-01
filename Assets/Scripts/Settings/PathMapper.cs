@@ -16,14 +16,18 @@ namespace Diablo2Editor
         private string tilesRoot = "";
         // Path to .json presets in data folder. Remains the same for all users.
         private string presetRoot = "";
-        // Path to leveltypes.txt
+        // Path to lvltypes.txt
         private string levelTypesPath = "";
+        // Path to lvlprest.txt
+        private string levelPresetsPath = "";
+        // Path to maplist.csv
+        private string mapListPath = "";
         // Palettes directory
         private string palettesPath = "";
         // DS1 extension
         // JSON preset extension
-        private const string DS1_EXT = ".ds1";
-        private const string JSON_EXT = ".json";
+        public const string DS1_EXT = ".ds1";
+        public const string JSON_EXT = ".json";
 
         /*
          * Path setup. Must be called before any work to read proper paths.
@@ -37,6 +41,8 @@ namespace Diablo2Editor
                 presetRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["presetRoot"]));
                 palettesPath = Path.GetFullPath(Path.Combine(dataRoot, settings["palettePath"]));
                 levelTypesPath = settings["levelTypes"];
+                levelPresetsPath = settings["levelPresets"];
+                mapListPath = settings["maplistPath"];
             }
             ValidateDataRoot();
         }
@@ -63,6 +69,22 @@ namespace Diablo2Editor
         public string GetPathToLevelTypes()
         {
             return GetAbsolutePath(levelTypesPath);
+        }
+
+        /*
+         * Returns path to lvlprest.txt used to load tiles for ds1
+         */
+        public string GetPathToLevelPresets()
+        {
+            return GetAbsolutePath(levelPresetsPath);
+        }
+
+        /*
+         * Returns path to maplist.csv used to load tiles for ds1
+         */
+        public string GetPathToMapList()
+        {
+            return Path.GetFullPath(mapListPath);
         }
 
         public string GetPalettesPath()

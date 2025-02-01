@@ -24,12 +24,12 @@ public class LevelContentLoader
      * Load level content. This function fully constructs LevelPreset and Ds1Preset within Scene
      */
 
-    public void LoadLevel(DS1LevelInfo info, string levelName, byte[] ds1Content, string jsonContent)
+    public void LoadLevel(string levelName, byte[] ds1Content, string jsonContent)
     {
         EditorUtility.DisplayProgressBar("Loading level", "Reading json...", 0.0f);
         LoadJsonPreset(levelName, jsonContent);
         EditorUtility.DisplayProgressBar("Loading level", "Loading DS1...", 0.0f);
-        LoadDS1Content(info, ds1Content);
+        LoadDS1Content(levelName, ds1Content);
         EditorUtility.ClearProgressBar();
         Debug.Log("Level loaded: " + levelName);
     }
@@ -63,19 +63,30 @@ public class LevelContentLoader
 
 
     // Ds1-specific logic
-    private void LoadDS1Content(DS1LevelInfo info, byte[] ds1Content)
+    private void LoadDS1Content(string levelName, byte[] ds1Content)
     {
         // Reload palettes
         D2Palette palletes = new D2Palette();
         palletes.LoadPalleteFiles();
 
+
         DS1Loader loader = new DS1Loader();
         ds1Level = loader.ReadDS1(ds1Content);
         LevelTypesLoader levelTypes = new LevelTypesLoader();
-        var tileTables = levelTypes.FindTilesForLevel(info, palletes);
-        if (tileTables.Count > 0)
+
+        // Find level data using filename including extension
+        MapListLevelData levelData = EditorMain.Settings().mapList.GetLevelData(levelName + PathMapper.DS1_EXT);
+        if(levelData != null)
         {
-            ds1Level.InitBlockTable(tileTables);
+            var tileTables = levelTypes.FindTilesForLevel(levelData, palletes);
+            if (tileTables.Count > 0)
+            {
+                ds1Level.InitBlockTable(tileTables);
+            }
+        }
+        else
+        {
+            Debug.LogError("Level data not found for level " + levelName + " in maplist.csv");
         }
 
 

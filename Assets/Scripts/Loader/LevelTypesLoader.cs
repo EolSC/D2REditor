@@ -10,7 +10,7 @@ namespace Diablo2Editor
 {
     public class LevelTypesLoader
     {
-        public List<DT1Data> FindTilesForLevel(DS1LevelInfo info, D2Palette palettes)
+        public List<DT1Data> FindTilesForLevel(MapListLevelData levelData, D2Palette palettes)
         {
             List<DT1Data> result = new List<DT1Data>();
             string[][] levelTypes = ReadLevelTypes();
@@ -22,16 +22,18 @@ namespace Diablo2Editor
                     try
                     {
                         int lvlIndex = int.Parse(indexCell);
-                        if (lvlIndex == info.dt1Index)
+                        if (lvlIndex == levelData.lvlTypeId)
                         {
-                            var actPallette = palettes.GetPaletteForAct(info.act);
+                            int actIndex = levelTypes[i].Length - 1;
+                            int act = int.Parse(levelTypes[i][actIndex]);
+                            var actPallette = palettes.GetPaletteForAct(act);
                             int dt1Index = 0;
                             for (int j = 2; j < levelTypes[i].Length - 1; j++)
                             {
                                 string fileName = levelTypes[i][j];
                                 if (fileName != "0")
                                 {
-                                    int maskBit = (info.dt1Mask >> dt1Index) & 0x01;
+                                    int maskBit = (levelData.dt1Mask >> dt1Index) & 0x01;
                                     bool needLoad = maskBit == 1;
                                     if (needLoad)
                                     {
@@ -49,7 +51,7 @@ namespace Diablo2Editor
                     }
                     catch (FormatException )
                     {
-                        Debug.LogError("Incorrect dt1index " + info.dt1Index);
+                        Debug.LogError("Incorrect dt1index " + levelData.lvlTypeId);
                         return result;
 
                     }
@@ -58,7 +60,8 @@ namespace Diablo2Editor
             }
             else
             {
-                Debug.LogError("Can't find zone and act for level " + info.path);
+                string pathToLevelTypes = EditorMain.Settings().paths.GetPathToLevelTypes();
+                Debug.LogError("Can't lvltypes.txt: path in settings " + pathToLevelTypes);
             }
 
             return result;

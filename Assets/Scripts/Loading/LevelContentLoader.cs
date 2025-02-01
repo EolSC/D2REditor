@@ -11,6 +11,7 @@ using UnityEngine;
  */
 public class LevelContentLoader 
 {
+    private static string DEFAULT_LEVEL_NAME = "level";
     /*
      * Load level content. This function fully constructs LevelPreset and Ds1Preset within Scene
      */
@@ -34,7 +35,17 @@ public class LevelContentLoader
         }
     }
 
-    private LevelComponent FindLevel()
+    public static string GetLevelName()
+    {
+        var level = FindLevel();
+        if (level != null)
+        {
+            return level.GetName() + PathMapper.DS1_EXT;
+        }
+        return DEFAULT_LEVEL_NAME + PathMapper.DS1_EXT;
+    }
+
+    private static LevelComponent FindLevel()
     {
         // if level is loaded(it can be only one level)
         return Object.FindAnyObjectByType<LevelComponent>() as LevelComponent;

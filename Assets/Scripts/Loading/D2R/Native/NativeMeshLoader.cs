@@ -111,7 +111,7 @@ public class NativeMeshLoader
 
     public unsafe static void LoadMeshData(void* meshHandle, UnityEngine.Mesh unity_mesh)
     {
-        MeshDataArray array = Mesh.AllocateWritableMeshData(1);
+        MeshDataArray array = AllocateWritableMeshData(1);
         var data = array[0];
         {
             int vertex_count = 0;
@@ -152,10 +152,8 @@ public class NativeMeshLoader
             NativeGrannyWrapper.DeleteMeshBuffer(indexes);
         }
 
-        Mesh.ApplyAndDisposeWritableMeshData(array, unity_mesh);
-        
+        ApplyAndDisposeWritableMeshData(array, unity_mesh);
     }
-
     public unsafe static Diablo2Editor.MeshData LoadMesh(LevelPresetDependencies deps, void *meshHandle)
     {
         Diablo2Editor.MeshData meshData = new Diablo2Editor.MeshData();

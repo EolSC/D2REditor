@@ -7,29 +7,38 @@ namespace Diablo2Editor
     * Transform component. Passes transform data to Unity via gameObject.transform
     * 
     */
+    [ExecuteInEditMode]
     public class TransformDefinitionComponent : LevelEntityComponent
     {
         public UnityEngine.Vector3 position;
         public UnityEngine.Quaternion orientation;
         public UnityEngine.Vector3 scale;
         public bool inheritOnlyPosition = true;
-        private void UpdateTransform()
+        private void UpdateObjectTransform()
         {
             gameObject.transform.SetLocalPositionAndRotation(this.position, this.orientation);
             gameObject.transform.localScale = this.scale;
         }
+        void Update()
+        {
+            if (transform.hasChanged)
+            {
+                transform.hasChanged = false;
+                SaveCurrentTrasform();
+            }
+        }
 
         private void SaveCurrentTrasform()
         {
-            position = gameObject.transform.position;
-            orientation = gameObject.transform.rotation;
+            position = gameObject.transform.localPosition;
+            orientation = gameObject.transform.localRotation;
             scale = gameObject.transform.localScale;
         }
 
         public override void Instantiate()
         {
             base.Instantiate();
-            UpdateTransform();
+            UpdateObjectTransform();
         }
 
         public override void Deserialize(JSONObject obj)
@@ -55,7 +64,7 @@ namespace Diablo2Editor
         }
         public override JSONObject Serialize()
         {
-            //SaveCurrentTrasform();
+            SaveCurrentTrasform();
 
             JSONObject result = base.Serialize();
 

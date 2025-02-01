@@ -47,19 +47,28 @@ public class Tile
 
     public void SetSelection(TileSelection selection)
     {
-        this.selection = selection;
-        UpdateStatus();
+        if (this.selection != selection)
+        {
+            this.selection = selection;
+            UpdateStatus();
+        }
     }
 
     public void SetStatus(TileStatus status)
     {
-        this.status = status;
-        UpdateStatus();
+        if (this.status != status)
+        {
+            this.status = status;
+            UpdateStatus();
+        }
     }
     public void SetHover(TileHover hover)
     {
-        this.hover = hover;
-        UpdateStatus();
+        if (this.hover != hover)
+        {
+            this.hover = hover;
+            UpdateStatus();
+        }
     }
 
 
@@ -399,6 +408,7 @@ public class TileGridEditor : Editor
                     }
                     bool isSpecial = cell.IsSpecial();
                     DrawBoolAttribute("Is special: ", ref isSpecial, style);
+                    
                     if (isSpecial)
                     {
                         int orientation = cell.orientation;
@@ -412,6 +422,11 @@ public class TileGridEditor : Editor
                         {
                             GUILayout.Label("Other type of tile with index: " + cell.GetMainIndex(), style);
                         }
+                        selected.SetStatus(TileStatus.Special);
+                    }
+                    else
+                    {
+                        selected.SetStatus(TileStatus.Empty);
 
                     }
 

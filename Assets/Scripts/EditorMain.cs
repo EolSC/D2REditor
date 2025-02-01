@@ -33,13 +33,15 @@ public class EditorMain : MonoBehaviour
         OpenLevel(absolute_path);
     }
 
-    [MenuItem("Diablo Level Editor/Save level")]
+    [MenuItem("Diablo Level Editor/Save level...")]
     private static void SaveLevel()
     {
+        var name = LevelContentLoader.GetLevelName();
+
         var path = EditorUtility.SaveFilePanel(
             "Save level as ds1/json pair",
             "",
-            "level.ds1",
+            name,
             "ds1");
 
         if (path.Length != 0)
@@ -48,7 +50,7 @@ public class EditorMain : MonoBehaviour
         }
     }
 
-    [MenuItem("Diablo Level Editor/Test loading")]
+    [MenuItem("Diablo Level Editor/Developer/Test loading")]
     private static void TestLoading()
     {
         // Use path from settings without opening Browse dialog
@@ -57,7 +59,7 @@ public class EditorMain : MonoBehaviour
     }
 
 
-    [MenuItem("Diablo Level Editor/Settings/Reload")]
+    [MenuItem("Diablo Level Editor/Developer/Reload settings")]
     private static void ReloadSettings()
     {
         Settings().Reload();

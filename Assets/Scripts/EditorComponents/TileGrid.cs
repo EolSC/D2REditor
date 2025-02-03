@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.WSA;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.Rendering.DebugUI.MessageBox;
 
 public enum TileStatus
 {
@@ -204,7 +205,7 @@ public class Tile
 [ExecuteInEditMode]
 public class TileGrid : MonoBehaviour
 {
-    DS1Level level;
+    public DS1Level level;
     Tile[][] tiles;
     Tile selected = null;
 
@@ -386,42 +387,52 @@ public class TileGridEditor : Editor
             {
 
                 DS1WallCell cell = selected.data;
-                GUIStyle style = new GUIStyle();
-                style.normal.textColor = Color.white;
+                GUIStyle labelStyle = new GUIStyle();
+                GUIStyle areaStyle = new GUIStyle();
 
+                labelStyle.padding = new RectOffset(0, 0, 4, 4);
+                labelStyle.normal.textColor = Color.white;
+                areaStyle.normal.textColor = Color.white;
                 if (cell != null)
                 {
-                    GUILayout.BeginVertical();
-                    DrawByteAttribute("Priority: ", ref cell.prop1, style);
-                    DrawByteAttribute("Sub index: ", ref cell.prop2, style);
+                    if (cell.bt_idx != -1) 
+                    {
+                        GUIStyle previewStyle = GUI.skin.textArea;
+                        Rect previewRect = new Rect(40, 20, 100, 100);
+                        var bitmaps = grid.level.block_table[cell.bt_idx].tileData.bitmaps;
+                        var previewIndex = grid.level.block_table[cell.bt_idx].block_idx;
+                        var preview = bitmaps[previewIndex];
+                        GUILayout.Box(preview, previewStyle);
+                        
+
+
+                    }
+
+                    GUILayout.BeginVertical("Cell properties", areaStyle);
+                    GUILayout.Space(20);
+                    DrawByteAttribute("Priority: ", ref cell.prop1, labelStyle);
+                    DrawByteAttribute("Sub index:", ref cell.prop2, labelStyle);
                     int mainIndex = cell.GetMainIndex();
-                    if (DrawIntAttribute("Main index: ", ref mainIndex, style))
+                    if (DrawIntAttribute("Main index: ", ref mainIndex, labelStyle))
                     {
                         cell.SetMainIndex(mainIndex);
                     }
 
-                    DrawByteAttribute("Orientation: ", ref cell.orientation, style);
+
+                    DrawByteAttribute("Orientation: ", ref cell.orientation, labelStyle);
+                    GUILayout.EndVertical();
+                    
+                    GUILayout.BeginVertical("Special data", areaStyle);
+                    GUILayout.Space(20);
                     bool hidden = cell.IsHidden();
-                    if (DrawBoolAttribute("Is hidden: ", ref hidden, style))
+                    if (DrawBoolAttribute("Is hidden: ", ref hidden, labelStyle))
                     {
                         cell.SetHidden(hidden);
                     }
                     bool isSpecial = cell.IsSpecial();
-                    DrawBoolAttribute("Is special: ", ref isSpecial, style);
-                    
+                    DrawBoolAttribute("Is special: ", ref isSpecial, labelStyle);
                     if (isSpecial)
                     {
-                        int orientation = cell.orientation;
-                        // waypoint
-                        if (orientation == 10)
-                        {
-                            GUILayout.Label("Waypoint with index: " + cell.GetMainIndex(), style);
-                        }
-                        // some other stuff
-                        if (orientation == 11)
-                        {
-                            GUILayout.Label("Other type of tile with index: " + cell.GetMainIndex(), style);
-                        }
                         selected.SetStatus(TileStatus.Special);
                     }
                     else
@@ -429,18 +440,24 @@ public class TileGridEditor : Editor
                         selected.SetStatus(TileStatus.Empty);
 
                     }
-
                     GUILayout.EndVertical();
+                    
                 }
             }
         }
     }
-    private bool DrawByteAttribute(string name, ref byte attribute, GUIStyle style)
+    private bool DrawByteAttribute(string name, ref byte attribute, GUIStyle labelStyle)
     {
+        GUIStyle horizontalStyle = new GUIStyle();
+        horizontalStyle.padding = new RectOffset(0, 20, 0, 0);
+
+        GUIStyle textStyle = GUI.skin.textField;
+        textStyle.fixedWidth = 100;
+
         string oldValue = attribute.ToString();
-        GUILayout.BeginHorizontal();
-        GUILayout.Label(name, style);
-        string value = GUILayout.TextField(oldValue);
+        GUILayout.BeginHorizontal(horizontalStyle);
+        GUILayout.Label(name, labelStyle);
+        string value = GUILayout.TextField(oldValue, 30, textStyle);
         GUILayout.EndHorizontal();
         if (value != oldValue)
         {
@@ -449,12 +466,18 @@ public class TileGridEditor : Editor
         return false;
     }
 
-    private bool DrawIntAttribute(string name, ref int attribute, GUIStyle style)
+    private bool DrawIntAttribute(string name, ref int attribute, GUIStyle labelStyle)
     {
+        GUIStyle horizontalStyle = new GUIStyle();
+        horizontalStyle.padding = new RectOffset(0, 20, 0, 0);
+
+        GUIStyle textStyle = GUI.skin.textField;
+        textStyle.fixedWidth = 100;
+
         string oldValue = attribute.ToString();
-        GUILayout.BeginHorizontal();
-        GUILayout.Label(name, style);
-        string value = GUILayout.TextField(oldValue);
+        GUILayout.BeginHorizontal(horizontalStyle);
+        GUILayout.Label(name, labelStyle);
+        string value = GUILayout.TextField(oldValue, 30, textStyle);
         GUILayout.EndHorizontal();
         if (value != oldValue)
         {

@@ -100,6 +100,26 @@ public class Tile
         }
     }
 
+    private void FlipMesh(Mesh mesh)
+    {
+        var vertices = mesh.vertices;
+        for (int i = 0; i < vertices.Length; ++i)
+        {
+            vertices[i].Scale(new Vector3(-1, 1, 1));
+        }
+
+        var indexes = mesh.triangles;
+        for (int i = 0; i < indexes.Length; i += 3)
+        {
+            int temp = indexes[i];
+            indexes[i] = indexes[i + 2];
+            indexes[i + 2] = temp;
+        }
+
+        mesh.vertices = vertices;
+        mesh.triangles = indexes;
+    }
+
     private void CreateWalkableInfo(Vector3 tile_world_pos)
     {
         for (int y = 0; y < DT1Block.SUBTILES_Y; ++y)
@@ -127,8 +147,6 @@ public class Tile
                 };
 
                 mesh.vertices = vertices;
-
-
                 int[] indexes = new int[]
                 {
                     // lower left triangle
@@ -136,8 +154,8 @@ public class Tile
                     // upper right triangle
                     2, 3, 1,
                 };
-
                 mesh.triangles = indexes;
+                FlipMesh(mesh);
 
                 mesh.RecalculateBounds();
                 mesh.RecalculateNormals();
@@ -202,10 +220,7 @@ public class Tile
             v13 + v16,
 
         };
-
         mesh.vertices = vertices;
-
-
         int[] indexes = new int[]
         {
             // lower left triangle
@@ -222,7 +237,7 @@ public class Tile
         };
 
         mesh.triangles = indexes;
-
+        FlipMesh(mesh);
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
@@ -270,21 +285,19 @@ public class Tile
         material.color = color;
     }
 
-    public void Draw(Camera camera, Transform transform)
+    public void Draw(Camera camera)
     {
-        var matrix = transform.localToWorldMatrix;
-        Graphics.DrawMesh(mesh, matrix, material, 0, camera, 0 , null, false, false);
+        Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, camera, 0 , null, false, false);
     }
 
-    public void DrawWalkableInfo(Camera camera, Transform transform)
+    public void DrawWalkableInfo(Camera camera)
     {
-        var matrix = transform.localToWorldMatrix;
         for (int y = 0; y < DT1Block.SUBTILES_Y; ++y)
         {
             for (int x = 0; x < DT1Block.SUBTILES_X; ++x)
             {
                 var index = y * DT1Block.SUBTILES_Y + x;
-                Graphics.DrawMesh(walkableInfo[index], matrix, walkableMaterials[index], 0, camera, 0, null, false, false);
+                Graphics.DrawMesh(walkableInfo[index], Matrix4x4.identity, walkableMaterials[index], 0, camera, 0, null, false, false);
             }
         }
     }
@@ -298,7 +311,9 @@ public class Tile
 [ExecuteInEditMode]
 public class TileGrid : MonoBehaviour
 {
+    [SerializeField]
     public bool drawWalkableInfo = true;
+
     public DS1Level level;
     Tile[][] tiles;
     Tile selected = null;
@@ -369,10 +384,10 @@ public class TileGrid : MonoBehaviour
             for (int x = 0; x < tiles[z].Length; x++)
             {
                 var tile = tiles[z][x];
-                tile.Draw(camera, transform);
+                tile.Draw(camera);
                 if (drawWalkableInfo)
                 {
-                    tile.DrawWalkableInfo(camera, transform);
+                    tile.DrawWalkableInfo(camera);
                 }
             }
         }
@@ -481,7 +496,7 @@ public class TileGridEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        //DrawDefaultInspector();
+        DrawDefaultInspector();
         TileGrid grid = (TileGrid)target;
         if (grid != null)
         {

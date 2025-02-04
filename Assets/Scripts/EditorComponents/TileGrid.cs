@@ -1,14 +1,6 @@
 using Diablo2Editor;
-using Mono.Cecil.Cil;
-using System.Collections.Generic;
-using System.Data;
-using System.Runtime.CompilerServices;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.WSA;
-using static UnityEngine.GraphicsBuffer;
-using static UnityEngine.Rendering.DebugUI.MessageBox;
 
 public enum TileStatus
 {
@@ -31,6 +23,8 @@ public class Tile
 {
     // Distance between cells in Unity units
     static float TILE_GRID_SIZE = 10.0f;
+    static float SUBTILE_SIZE_X = TILE_GRID_SIZE / DT1Block.SUBTILES_X;
+    static float SUBTILE_SIZE_Y = TILE_GRID_SIZE / DT1Block.SUBTILES_Y;
 
     // Distance between cells in Unity units
     static Vector3 TILE_GRID_STEP = new Vector3(10.0f, 0.0f, 10.0f);
@@ -38,6 +32,9 @@ public class Tile
     static float LINE_THICKNESS = 1.0f;
 
     private Mesh mesh;
+
+    private Mesh[] walkableInfo = new Mesh[DT1Block.SUBTILES_COUNT];
+    private Material[] walkableMaterials = new Material[DT1Block.SUBTILES_COUNT];
     private Material material;
     private Collider collider;
 
@@ -74,14 +71,94 @@ public class Tile
         }
     }
 
+    public void UpdateWalkableInfo(byte[] walkableData)
+    {
+        for (int y = 0; y < DT1Block.SUBTILES_Y; ++y)
+        {
+            for (int x = 0; x < DT1Block.SUBTILES_X; ++x)
+            {
+                var index = y * DT1Block.SUBTILES_Y + x;
+                UpdateWalkableStatus(walkableMaterials[index], walkableData[index]);
+            }
+        }
+    }
+
+    private void UpdateWalkableStatus(Material material, byte walkable)
+    {
+        switch(walkable)
+        {
+            
+            case 0:
+                {
+                    material.color = Color.green;
+                }; break;
+            default:
+            case 1:
+                {
+                    material.color = Color.red;
+                }; break;
+        }
+    }
+
+    private void CreateWalkableInfo(Vector3 tile_world_pos)
+    {
+        for (int y = 0; y < DT1Block.SUBTILES_Y; ++y)
+        {
+            for (int x = 0; x < DT1Block.SUBTILES_X; ++x)
+            {
+                var mesh = new Mesh();
+                material = new Material(Shader.Find("Standard"));
+                material.SetFloat("_Glossiness", 0.0f);
+                material.color = Color.red;
+                var position = tile_world_pos + new Vector3(x * SUBTILE_SIZE_X, 0.0f, y * SUBTILE_SIZE_Y);
+
+                Vector3 v1 = position + new Vector3(0.0f, 0.15f, 0.0f);
+                Vector3 v2 = new Vector3(SUBTILE_SIZE_X, 0.0f, 0.0f);
+                Vector3 v3 = new Vector3(0.0f, 0.0f, SUBTILE_SIZE_Y);
+                Vector3 v4 = new Vector3(SUBTILE_SIZE_X, 0.0f, SUBTILE_SIZE_Y);
+
+
+                Vector3[] vertices = new Vector3[]
+                {
+                    v1,
+                    v1 + v2,
+                    v1 + v3,
+                    v1 + v4,
+                };
+
+                mesh.vertices = vertices;
+
+
+                int[] indexes = new int[]
+                {
+                    // lower left triangle
+                    0, 2, 1,
+                    // upper right triangle
+                    2, 3, 1,
+                };
+
+                mesh.triangles = indexes;
+
+                mesh.RecalculateBounds();
+                mesh.RecalculateNormals();
+
+                var index = y * DT1Block.SUBTILES_Y + x;
+                walkableInfo[index] = mesh;
+                walkableMaterials[index] = material;
+
+            }
+        }
+    }
 
     public void Create(BoxCollider boxCollider, int x, int y, int z)
     {
+        Vector3 world_pos = new Vector3(x * TILE_GRID_STEP.x, y * TILE_GRID_STEP.y + 0.1f, z * TILE_GRID_STEP.z);
+        CreateWalkableInfo(world_pos);
+
         mesh = new Mesh();
         material = new Material(Shader.Find("Standard"));
         material.SetFloat("_Glossiness", 0.0f);
-
-        Vector3 v1 = new Vector3(-(x + 1) * TILE_GRID_STEP.x, y * TILE_GRID_STEP.y + 0.1f, z * TILE_GRID_STEP.z);
+        Vector3 v1 = world_pos;
         Vector3 v2 = new Vector3(TILE_GRID_SIZE, 0.0f, 0.0f);
         Vector3 v3 = new Vector3(0.0f, 0.0f, LINE_THICKNESS);
         Vector3 v4 = new Vector3(TILE_GRID_SIZE, 0.0f, LINE_THICKNESS);
@@ -193,9 +270,23 @@ public class Tile
         material.color = color;
     }
 
-    public void Draw(Camera camera)
+    public void Draw(Camera camera, Transform transform)
     {
-        Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, camera, 0 , null, false, false);
+        var matrix = transform.localToWorldMatrix;
+        Graphics.DrawMesh(mesh, matrix, material, 0, camera, 0 , null, false, false);
+    }
+
+    public void DrawWalkableInfo(Camera camera, Transform transform)
+    {
+        var matrix = transform.localToWorldMatrix;
+        for (int y = 0; y < DT1Block.SUBTILES_Y; ++y)
+        {
+            for (int x = 0; x < DT1Block.SUBTILES_X; ++x)
+            {
+                var index = y * DT1Block.SUBTILES_Y + x;
+                Graphics.DrawMesh(walkableInfo[index], matrix, walkableMaterials[index], 0, camera, 0, null, false, false);
+            }
+        }
     }
 
     public bool Raycast(Ray ray, out RaycastHit hit, float distance)
@@ -207,6 +298,7 @@ public class Tile
 [ExecuteInEditMode]
 public class TileGrid : MonoBehaviour
 {
+    public bool drawWalkableInfo = true;
     public DS1Level level;
     Tile[][] tiles;
     Tile selected = null;
@@ -276,7 +368,12 @@ public class TileGrid : MonoBehaviour
         {
             for (int x = 0; x < tiles[z].Length; x++)
             {
-                tiles[z][x].Draw(camera);
+                var tile = tiles[z][x];
+                tile.Draw(camera, transform);
+                if (drawWalkableInfo)
+                {
+                    tile.DrawWalkableInfo(camera, transform);
+                }
             }
         }
     }
@@ -306,6 +403,9 @@ public class TileGrid : MonoBehaviour
                     collider.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
                     tile.Create(collider, x, 0, y);
                     tiles[y][x] = tile;
+                    var walkableData = level.walkableInfo.GetWalkableData(x, y);
+
+                    tile.UpdateWalkableInfo(walkableData.walkable);
                     if (level.wall.wall_num > 0)
                     {
 ;                       for ( int i = 0; i < level.wall.wall_num; i++)

@@ -5,7 +5,10 @@ using UnityEngine;
 
 public class DT1Block
 {
-    public const int SUBTILES_COUNT = 25;
+    // subtile grid dimensions
+    public const int SUBTILES_X = 5;
+    public const int SUBTILES_Y = 5;
+    public const int SUBTILES_COUNT = SUBTILES_X * SUBTILES_Y;
     public long direction;
     public short roof_y;
     public byte sound;

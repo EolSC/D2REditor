@@ -12,15 +12,10 @@ namespace Diablo2Editor
 {
     public class DS1Level
     {
-        public DS1Level()
-        {
-
-        }
-        public byte[] test_data; // source DS1 data for tests. TODO - delete after Save/Load is implemented
-
         public char[] dt1_idx = new char[DS1Consts.DT1_IN_DS1_MAX];
         public int[] dt1_mask = new int[DS1Consts.DT1_IN_DS1_MAX];
         public int txt_act;
+        public DS1WalkableInfo walkableInfo = new DS1WalkableInfo();
         public List<DS1BlockTable> block_table = new List<DS1BlockTable>();
         public List<DT1Data> textureBanks;
         public int bt_num;
@@ -58,21 +53,6 @@ namespace Diablo2Editor
 
         public int tile_w;
         public int tile_h;
-
-        /*
-         Internal data. TODO - clean this up if not needed
-        // internal
-        ZOOM_E cur_zoom;
-        int tile_w;
-        int tile_h;
-        int height_mul;
-        int height_div;
-        SCROLL_S cur_scroll;
-
-        // screen position and size for this ds1
-        WIN_PREVIEW_S own_wpreview;
-        */
-
 
         // Objects data 
         public int[] drawing_order;
@@ -162,6 +142,8 @@ namespace Diablo2Editor
 
             CheckConflicts();
             InitTilesIndexes();
+            // update walkable data when all block info is in place
+            walkableInfo.Init(this);
         }
 
         private void CheckConflicts()

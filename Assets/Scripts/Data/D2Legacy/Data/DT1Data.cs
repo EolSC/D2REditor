@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
@@ -6,6 +5,7 @@ using UnityEngine;
 
 public class DT1Block
 {
+    public const int SUBTILES_COUNT = 25;
     public long direction;
     public short roof_y;
     public byte sound;
@@ -23,7 +23,7 @@ public class DT1Block
     UBYTE      unknown_c;
     UBYTE      unknown_d;
     */
-    public byte[] sub_tiles_flags = new byte[25];
+    public byte[] sub_tiles_flags = new byte[SUBTILES_COUNT];
     // int        zeros2[7];
     public long tiles_ptr;
     public long tiles_length;
@@ -134,7 +134,7 @@ public class DT1Data
                 streamPosition + Offsets.B_RARITY);
 
             int subtile_flags = streamPosition + Offsets.B_SUBTILES_FLAGS;
-            for (int j = 0; j < 25; j++)
+            for (int j = 0; j < DT1Block.SUBTILES_COUNT; j++)
             {
                 int index = idxtable[j];
                 block.sub_tiles_flags[index] = content[subtile_flags + j];
@@ -313,7 +313,7 @@ public class DT1Data
     public void WritePixel(Texture2D texture, int x, int y, byte colorIndex, NativeArray<Color> pal)
     {
         // Read color from palllet, assert it has 256 colors 
-        Assert.AreEqual(pal.Length, 256);
+        Debug.Assert(pal.Length == 256);
         Color color = pal[colorIndex];
         texture.SetPixel(x, -y, color);
     }

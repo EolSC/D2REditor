@@ -1,4 +1,5 @@
 using Diablo2Editor;
+using Mono.Cecil.Cil;
 using System.Collections.Generic;
 using System.Data;
 using System.Runtime.CompilerServices;
@@ -40,7 +41,8 @@ public class Tile
     private Material material;
     private Collider collider;
 
-    public DS1WallCell data;
+    public int x = 0;
+    public int y = 0;
 
     public TileSelection selection = TileSelection.None;
     public TileStatus status = TileStatus.Empty;
@@ -309,7 +311,8 @@ public class TileGrid : MonoBehaviour
 ;                       for ( int i = 0; i < level.wall.wall_num; i++)
                         {
                             var wallTile = level.wall.wall_array[i, y, x];
-                            tile.data = wallTile;
+                            tile.x = x;
+                            tile.y = y;
 
                             if (wallTile.IsSpecial())
                             {
@@ -383,10 +386,11 @@ public class TileGridEditor : Editor
         if (grid != null)
         {
             Tile selected = grid.GetSelectedTile();
+            DS1Level lvl = grid.level;
             if (selected != null)
             {
 
-                DS1WallCell cell = selected.data;
+                DS1WallCell cell = lvl.wall.wall_array[0, selected.y, selected.x];
                 GUIStyle labelStyle = new GUIStyle();
                 GUIStyle areaStyle = new GUIStyle();
 
@@ -441,6 +445,7 @@ public class TileGridEditor : Editor
 
                     }
                     GUILayout.EndVertical();
+                    DrawWalkableData(lvl, selected.x, selected.y);
                     
                 }
             }
@@ -499,6 +504,17 @@ public class TileGridEditor : Editor
         }
         GUILayout.EndHorizontal();
         return false;
+    }
+
+    private void DrawWalkableData(DS1Level level, int x, int y)
+    {
+        var walkableInfo = level.walkableInfo.GetWalkableData(x, y);
+        if (walkableInfo != null)
+        {
+            // TODO: draw some meaningful walkable data
+            byte[] walkable = walkableInfo.walkable;
+
+        }
     }
 
 }

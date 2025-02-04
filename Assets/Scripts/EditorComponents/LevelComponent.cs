@@ -81,7 +81,10 @@ public class LevelComponent : MonoBehaviour
             bool oldContentEqual = false;
             if (ds1Level != null)
             {
-                oldContentEqual = ds1Level.test_data.Equals(ds1Content);
+                // Can't check old content - resaving it upgrades level version to 18
+                // so binary content will be changed
+                // Just skip it for now 'cause we don't support saving in older versions  
+                oldContentEqual = true;
             }
             bool jsonEqual = JSONCompare.Compare(sourceJson, resultJson);
 

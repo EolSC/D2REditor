@@ -147,7 +147,6 @@ namespace Diablo2Editor
         public DS1Level ReadDS1(byte[] content, bool alwaysMaxLayers = false)
         {
             DS1Level level = new DS1Level();
-            level.test_data = content;
             InitDS1LevelStruct(level);
             uint wallNumber;     // # of wall & orientation layers
             uint floorNumber;     // # of floor layer

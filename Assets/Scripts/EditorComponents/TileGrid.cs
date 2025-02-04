@@ -1,6 +1,7 @@
 using Diablo2Editor;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public enum TileStatus
 {
@@ -312,7 +313,7 @@ public class Tile
 public class TileGrid : MonoBehaviour
 {
     [SerializeField]
-    public bool drawWalkableInfo = true;
+    public bool drawWalkableInfo = false;
 
     public DS1Level level;
     Tile[][] tiles;
@@ -421,24 +422,14 @@ public class TileGrid : MonoBehaviour
                     var walkableData = level.walkableInfo.GetWalkableData(x, y);
 
                     tile.UpdateWalkableInfo(walkableData.walkable);
-                    if (level.wall.wall_num > 0)
+                    tile.x = x;
+                    tile.y = y;
+
+                    if (level.HasSpecialTiles(x, y))
                     {
-;                       for ( int i = 0; i < level.wall.wall_num; i++)
-                        {
-                            var wallTile = level.wall.wall_array[i, y, x];
-                            tile.x = x;
-                            tile.y = y;
-
-                            if (wallTile.IsSpecial())
-                            {
-                                tile.SetStatus(TileStatus.Special);
-                            }
-                        }
-
+                        tile.SetStatus(TileStatus.Special);
                     }
-
                 }
-
             }
         }
     }
@@ -460,176 +451,3 @@ public class TileGrid : MonoBehaviour
     }
 }
 
-[CustomEditor(typeof(TileGrid))]
-public class TileGridEditor : Editor
-{
-    private TileGrid grid;
-
-    void OnEnable()
-    {
-        grid = (TileGrid)target;
-        Tools.hidden = true;
-    }
-
-    void OnDisable()
-    {
-        Tools.hidden = false;
-    }
-
-    void OnSceneGUI()
-    {
-        if (grid != null)
-        {
-            var e = Event.current;
-            bool mouseUp = e.isMouse && e.button == 0 && e.type == EventType.MouseUp;
-
-            UnityEngine.Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
-            if (grid.Raycast(ray, mouseUp))
-            {
-                Repaint();
-            }
-            // Keep grid selected while we are working with it
-            // Helps with clicks through models
-            Selection.activeObject = grid;
-        }
-    }
-
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-        TileGrid grid = (TileGrid)target;
-        if (grid != null)
-        {
-            Tile selected = grid.GetSelectedTile();
-            DS1Level lvl = grid.level;
-            if (selected != null)
-            {
-
-                DS1WallCell cell = lvl.wall.wall_array[0, selected.y, selected.x];
-                GUIStyle labelStyle = new GUIStyle();
-                GUIStyle areaStyle = new GUIStyle();
-
-                labelStyle.padding = new RectOffset(0, 0, 4, 4);
-                labelStyle.normal.textColor = Color.white;
-                areaStyle.normal.textColor = Color.white;
-                if (cell != null)
-                {
-                    if (cell.bt_idx != -1) 
-                    {
-                        GUIStyle previewStyle = GUI.skin.textArea;
-                        Rect previewRect = new Rect(40, 20, 100, 100);
-                        var bitmaps = grid.level.block_table[cell.bt_idx].tileData.bitmaps;
-                        var previewIndex = grid.level.block_table[cell.bt_idx].block_idx;
-                        var preview = bitmaps[previewIndex];
-                        GUILayout.Box(preview, previewStyle);
-                        
-
-
-                    }
-
-                    GUILayout.BeginVertical("Cell properties", areaStyle);
-                    GUILayout.Space(20);
-                    DrawByteAttribute("Priority: ", ref cell.prop1, labelStyle);
-                    DrawByteAttribute("Sub index:", ref cell.prop2, labelStyle);
-                    int mainIndex = cell.GetMainIndex();
-                    if (DrawIntAttribute("Main index: ", ref mainIndex, labelStyle))
-                    {
-                        cell.SetMainIndex(mainIndex);
-                    }
-
-
-                    DrawByteAttribute("Orientation: ", ref cell.orientation, labelStyle);
-                    GUILayout.EndVertical();
-                    
-                    GUILayout.BeginVertical("Special data", areaStyle);
-                    GUILayout.Space(20);
-                    bool hidden = cell.IsHidden();
-                    if (DrawBoolAttribute("Is hidden: ", ref hidden, labelStyle))
-                    {
-                        cell.SetHidden(hidden);
-                    }
-                    bool isSpecial = cell.IsSpecial();
-                    DrawBoolAttribute("Is special: ", ref isSpecial, labelStyle);
-                    if (isSpecial)
-                    {
-                        selected.SetStatus(TileStatus.Special);
-                    }
-                    else
-                    {
-                        selected.SetStatus(TileStatus.Empty);
-
-                    }
-                    GUILayout.EndVertical();
-                    DrawWalkableData(lvl, selected.x, selected.y);
-                    
-                }
-            }
-        }
-    }
-    private bool DrawByteAttribute(string name, ref byte attribute, GUIStyle labelStyle)
-    {
-        GUIStyle horizontalStyle = new GUIStyle();
-        horizontalStyle.padding = new RectOffset(0, 20, 0, 0);
-
-        GUIStyle textStyle = GUI.skin.textField;
-        textStyle.fixedWidth = 100;
-
-        string oldValue = attribute.ToString();
-        GUILayout.BeginHorizontal(horizontalStyle);
-        GUILayout.Label(name, labelStyle);
-        string value = GUILayout.TextField(oldValue, 30, textStyle);
-        GUILayout.EndHorizontal();
-        if (value != oldValue)
-        {
-            return byte.TryParse(value, out attribute);
-        }
-        return false;
-    }
-
-    private bool DrawIntAttribute(string name, ref int attribute, GUIStyle labelStyle)
-    {
-        GUIStyle horizontalStyle = new GUIStyle();
-        horizontalStyle.padding = new RectOffset(0, 20, 0, 0);
-
-        GUIStyle textStyle = GUI.skin.textField;
-        textStyle.fixedWidth = 100;
-
-        string oldValue = attribute.ToString();
-        GUILayout.BeginHorizontal(horizontalStyle);
-        GUILayout.Label(name, labelStyle);
-        string value = GUILayout.TextField(oldValue, 30, textStyle);
-        GUILayout.EndHorizontal();
-        if (value != oldValue)
-        {
-            return int.TryParse(value, out attribute);
-        }
-        return false;
-    }
-
-    private bool DrawBoolAttribute(string name, ref bool attribute, GUIStyle style)
-    {
-        bool oldValue = attribute;
-        GUILayout.BeginHorizontal();
-        GUILayout.Label(name, style);
-        bool newValue = EditorGUILayout.Toggle(attribute);
-        if (oldValue != newValue)
-        {
-            attribute = newValue;
-            return true;
-        }
-        GUILayout.EndHorizontal();
-        return false;
-    }
-
-    private void DrawWalkableData(DS1Level level, int x, int y)
-    {
-        var walkableInfo = level.walkableInfo.GetWalkableData(x, y);
-        if (walkableInfo != null)
-        {
-            // TODO: draw some meaningful walkable data
-            byte[] walkable = walkableInfo.walkable;
-
-        }
-    }
-
-}

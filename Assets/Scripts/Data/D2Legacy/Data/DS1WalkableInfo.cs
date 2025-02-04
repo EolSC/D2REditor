@@ -85,7 +85,7 @@ public class DS1WalkableInfo
             var floorTile = level.floor.floor_array[f, y, x];
             all_floor_props |= floorTile.prop1 | floorTile.prop2 |
                                floorTile.prop3 | floorTile.prop4;
-            if ((floorTile.prop3 & 0x02) != 0)
+            if (!floorTile.IsWalkable())
             {
                 // this is a global unwalkable info
                 walkableData.MarkUnwalkable();
@@ -127,7 +127,7 @@ public class DS1WalkableInfo
         for (int w = 0; w < level.wall.wall_num; w++)
         {
             var wallTile = level.wall.wall_array[w, y, x];
-            if ((wallTile.prop3 & 0x02) != 0)
+            if (!wallTile.IsWalkable())
             {
                 // this is a global unwalkable info
                 walkableData.MarkUnwalkable();

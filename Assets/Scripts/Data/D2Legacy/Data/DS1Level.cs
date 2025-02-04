@@ -62,6 +62,29 @@ namespace Diablo2Editor
         // current animated floor frame
         public int cur_anim_floor_frame;
 
+        public bool HasSpecialTiles(int x, int y)
+        {
+            if (x < 0 || x >= width)
+            {
+                return false;
+            }
+            if (y < 0 || y >= height)
+            {
+                return false;
+            }
+
+            for (int i =0; i < wall.wall_num; ++i)
+            {
+                var tile = wall.wall_array[i, y, x];
+                if (tile.IsSpecial())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
         public void InitBlockTable(List<DT1Data> tileData)
         {
             textureBanks = tileData;

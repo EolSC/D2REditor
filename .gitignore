@@ -74,3 +74,5 @@ obj/Debug
 /Assets/Settings/PathSettings.json
 /Assets/Settings/PathSettings.json.meta
 /DS1Loader debug log.txt
+/Assets/Settings/DataRootSettings.json.meta
+/Assets/Settings/DataRootSettings.json

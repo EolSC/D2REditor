@@ -4,8 +4,6 @@
         "testLevel":  "data/global/tiles/act1/outdoors/tower2.ds1",
     },
     "paths": {
-        "dataRoot2": "C:\\work\\d2_data\\",
-		"dataRoot": "E:\\work\\d2_assets\\",
         "presetRoot": "data/hd/env/preset",
         "tilesRoot": "data/global/tiles",
         "levelTypes": "data/global/excel/lvltypes.txt",

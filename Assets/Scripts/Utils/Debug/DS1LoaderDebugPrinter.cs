@@ -50,15 +50,15 @@ namespace Diablo2Editor
 
         private void PrintLayersCountData(DS1Level level)
         {
-            WriteString("Number of wall tiles: " + level.wall.wall_num);
-            WriteString("Number of floor tiles: " + level.floor.floor_num);
-            WriteString("Number of shadow tiles: " + level.shadow.shadow_num);
-            WriteString("Number of tag tiles: " + level.tagged.tag_num);
+            WriteString("Number of wall tiles: " + level.wall.layers);
+            WriteString("Number of floor tiles: " + level.floor.layers);
+            WriteString("Number of shadow tiles: " + level.shadow.layers);
+            WriteString("Number of tag tiles: " + level.tagged.layers);
         }
 
         private void PrintDebugTilesData(DS1Level level)
         {
-            uint wall_num = level.wall.wall_num;
+            uint wall_num = level.wall.layers;
             for (int n = 0; n < wall_num; n++)
             {
                 WriteString("Wall layer " + n);
@@ -67,12 +67,12 @@ namespace Diablo2Editor
                     for (int x = 0; x < level.width; x++)
                     {
                         WriteString("Wall tile [ " + y + ", " + x + "]:");
-                        PrintDebugWallData(level.wall.wall_array[n, y, x]);
+                        PrintDebugWallData(level.wall.data[n, y, x]);
                     }
                 }
             }
 
-            uint floor_num = level.floor.floor_num;
+            uint floor_num = level.floor.layers;
             for (int n = 0; n < floor_num; n++)
             {
                 for (int y = 0; y < level.height; y++)
@@ -80,12 +80,12 @@ namespace Diablo2Editor
                     for (int x = 0; x < level.width; x++)
                     {
                         WriteString("Floor tile [ " + y + ", " + x + "]:");
-                        PrintDebugFloorData(level.floor.floor_array[n, y, x]);
+                        PrintDebugFloorData(level.floor.data[n, y, x]);
                     }
                 }
             }
 
-            uint shadow_num = level.shadow.shadow_num;
+            uint shadow_num = level.shadow.layers;
             for (int n = 0; n < shadow_num; n++)
             {
                 for (int y = 0; y < level.height; y++)
@@ -93,11 +93,11 @@ namespace Diablo2Editor
                     for (int x = 0; x < level.width; x++)
                     {
                         WriteString("Shadow tile [ " + y + ", " + x + "]:");
-                        PrintDebugShadowData(level.shadow.shadow_array[n, y, x]);
+                        PrintDebugShadowData(level.shadow.data[n, y, x]);
                     }
                 }
             }
-            uint tags_num = level.tagged.tag_num;
+            uint tags_num = level.tagged.layers;
             for (int n = 0; n < tags_num; n++)
             {
                 for (int y = 0; y < level.height; y++)
@@ -105,13 +105,13 @@ namespace Diablo2Editor
                     for (int x = 0; x < level.width; x++)
                     {
                         WriteString("Tagged tile [ " + y + ", " + x + "]:");
-                        PrintDebugTaggedData(level.tagged.tag_array[n, y, x]);
+                        PrintDebugTaggedData(level.tagged.data[n, y, x]);
                     }
                 }
             }
         }
 
-        private void PrintDebugWallData(DS1WallCell tile)
+        private void PrintDebugWallData(DS1WallTile tile)
         {
             WriteString("Prop1: " + tile.prop1);
             WriteString("Prop2: " + tile.prop2);
@@ -120,14 +120,14 @@ namespace Diablo2Editor
             WriteString("Orientation: " + tile.orientation);
         }
 
-        private void PrintDebugFloorData(DS1FloorCell tile)
+        private void PrintDebugFloorData(DS1FloorTile tile)
         {
             WriteString("Prop1: " + tile.prop1);
             WriteString("Prop2: " + tile.prop2);
             WriteString("Prop3: " + tile.prop3);
             WriteString("Prop4: " + tile.prop4);
         }
-        private void PrintDebugShadowData(DS1ShadowCell tile)
+        private void PrintDebugShadowData(DS1ShadowTile tile)
         {
             WriteString("Prop1: " + tile.prop1);
             WriteString("Prop2: " + tile.prop2);
@@ -135,7 +135,7 @@ namespace Diablo2Editor
             WriteString("Prop4: " + tile.prop4);
         }
 
-        private void PrintDebugTaggedData(DS1TaggedCell tile)
+        private void PrintDebugTaggedData(DS1TaggedTile tile)
         {
             WriteString("Num: " + tile.num);
         }

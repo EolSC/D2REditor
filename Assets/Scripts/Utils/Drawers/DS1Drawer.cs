@@ -8,27 +8,17 @@ using UnityEngine;
 
 public class DS1Drawer
 {
-    RenderTexture target;
-    DS1Level level;
-    int TARGET_WIDTH = 2048;
-    int TARGET_HEIGHT = 2048;
-
-
-    public DS1Drawer(DS1Level level)
-    {
-        target = new RenderTexture(TARGET_WIDTH, TARGET_HEIGHT, 0, RenderTextureFormat.Default);
-        this.level = level;
-    }
-
-    public void DrawTilesToTexture()
+    public static void DrawTilesToTexture(DS1Level level, RenderTexture target, Vector2 pos)
     {
         RenderTexture.active = target;
+
         GL.Clear(true, true, UnityEngine.Color.white);
         GL.PushMatrix();                                //Saves both projection and modelview matrices to the matrix stack.
-        GL.LoadPixelMatrix(0, TARGET_WIDTH, TARGET_HEIGHT, 0);			//Setup a matrix for pixel-correct rendering.
+        GL.LoadPixelMatrix(0, target.width, target.height, 0);			//Setup a matrix for pixel-correct rendering.
         // loop 1A : lower walls, floors, shadows of dt1
-        int start_pos_x = 1024;
-        int start_pos_y = 1024;
+        int start_pos_x = (int)pos.x;
+        int start_pos_y = (int)pos.y;
+
         for (int y = 0; y < level.height; y++)
         {
             int base_x = y * -level.tile_w / 2;
@@ -38,10 +28,10 @@ public class DS1Drawer
                 int mx = base_x + x * level.tile_w / 2 + start_pos_x;
                 int my = base_y + x * level.tile_h / 2 + start_pos_y;
                 {
-                   DrawWalls(level, x, y, mx, my, false);      // lower walls
+                   DrawWalls(level, x, y, mx, my, false);  // lower walls
                    DrawFloorTile(level, x, y, mx, my);     // floors
-                   DrawShadowTile(level, x, y, mx, my);           // shadows of dt1
-                   DrawWalls(level, x, y, mx, my, true);      // lower walls
+                   DrawShadowTile(level, x, y, mx, my);    // shadows of dt1
+                   DrawWalls(level, x, y, mx, my, true);   // lower walls
 
                 }
 
@@ -51,11 +41,11 @@ public class DS1Drawer
         RenderTexture.active = null;
     }
 
-    public void DrawWalls(DS1Level level, int x, int y, int mx, int my, bool isUpper)
+    private static void DrawWalls(DS1Level level, int x, int y, int mx, int my, bool isUpper)
     {
-        for (int n = 0; n < level.wall.wall_num; n++)
+        for (int n = 0; n < level.wall.layers; n++)
         {
-            var wallTIle = level.wall.wall_array[n, y, x];
+            var wallTIle = level.wall.data[n, y, x];
             // if layer is hidden - skip it
             if (level.wall_layer_mask[n] == 0)
                 continue;
@@ -103,8 +93,8 @@ public class DS1Drawer
                 if ((y1 + texture.height) < 0)
                     continue;
 
-                // Copy tile to target
-                DrawSpriteToTarget(texture, mx, y1);
+                // Draw tile to target
+                DrawSprite(texture, mx, y1);
 
                 // // upper-left corner
                 if (block.orientation == 3)
@@ -149,18 +139,18 @@ public class DS1Drawer
                         y1 += level.tile_h; // walls are lower than floors (and than roofs) by 80 pixels
                         if ((y1 + texture.height) < 0)
                             continue;
-                        DrawSpriteToTarget(texture, mx, y1);
+                        DrawSprite(texture, mx, y1);
                     }
                 }
             }
         }
     }
 
-    public void DrawFloorTile(DS1Level level, int x, int y, int mx, int my)
+    public static void DrawFloorTile(DS1Level level, int x, int y, int mx, int my)
     {
-        for (int n = 0; n < level.floor.floor_num; n++)
+        for (int n = 0; n < level.floor.layers; n++)
         {
-            var floorTile = level.floor.floor_array[n, y, x];
+            var floorTile = level.floor.data[n, y, x];
             // if layer is hidden - skip it
             if (level.floor_layer_mask[n] == 0)
                 continue;
@@ -197,63 +187,19 @@ public class DS1Drawer
                     continue;
 
                 // Copy tile to target
-                DrawSpriteToTarget(texture, mx, y1);
+                DrawSprite(texture, mx, y1);
 
             }
         }
     }
-    public void DrawShadowTile(DS1Level level, int x, int y, int mx, int my)
+    public static void DrawShadowTile(DS1Level level, int x, int y, int mx, int my)
     {
 
     }
 
-    private void DrawSpriteToTarget(Texture2D texture, int x, int y)
+    private static void DrawSprite(Texture2D texture, int x, int y)
     {
-        int x_max = x + texture.width;
-        int y_max = y + texture.height;
-        if (x < 0 || x_max >= TARGET_WIDTH)
-        {
-            return;
-        }
-        if (y < 0 || y_max >= TARGET_HEIGHT)
-        {
-            return;
-        }
-
         Rect rect = new Rect(x, y, texture.width, texture.height);
         Graphics.DrawTexture(rect, texture);
     }
-
-    public void Instantiate(GameObject gameObject)
-    {
-        TestTilesGrid(gameObject);
-    }
-
-    private void TestDrawTiles(GameObject gameObject)
-    {
-        DrawTilesToTexture();
-        var subObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        subObject.transform.parent = gameObject.transform;
-        subObject.transform.localScale = new Vector3(10, 10, 10);
-        subObject.transform.position = new Vector3(120, 120, 120);
-        var meshRenderer = subObject.GetComponent<MeshRenderer>();
-        if (meshRenderer)
-        {
-            var material = new UnityEngine.Material(Shader.Find("Standard"));
-            if (material)
-            {
-                material.SetTexture("_MainTex", target);
-                material.SetFloat("_Glossiness", 0.0f);
-            }
-            meshRenderer.material = material;
-        }
-    }
-
-    private void TestTilesGrid(GameObject gameObject)
-    {
-        var grid = gameObject.AddComponent<TileGrid>();
-        gameObject.name = "DS1Level";
-        grid.SetLevelData(level);
-    }
-
 }

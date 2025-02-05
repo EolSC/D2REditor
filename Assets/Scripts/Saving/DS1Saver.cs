@@ -40,8 +40,8 @@ public class DS1Saver
             writer.Write('\0');
         }
 
-        writer.Write((int)level.wall.wall_num);
-        writer.Write((int)level.floor.floor_num);
+        writer.Write((int)level.wall.layers);
+        writer.Write((int)level.floor.layers);
 
         //TileData:
 
@@ -50,14 +50,14 @@ public class DS1Saver
         // shadows
         // tagged tiles
         var walls = level.wall;
-        for (int n = 0; n < walls.wall_num; ++n)
+        for (int n = 0; n < walls.layers; ++n)
         {
             // wall data first
             for (int y = 0; y < level.height; ++y)
             {
                 for (int x = 0; x < level.width; ++x)
                 {
-                    var tile = walls.wall_array[n, y, x];
+                    var tile = walls.data[n, y, x];
                     writer.Write(tile.prop1);
                     writer.Write(tile.prop2);
                     writer.Write(tile.prop3);
@@ -69,7 +69,7 @@ public class DS1Saver
             {
                 for (int x = 0; x < level.width; ++x)
                 {
-                    var tile = walls.wall_array[n, y, x];
+                    var tile = walls.data[n, y, x];
                     writer.Write(tile.orientation);
                     byte padding = 0;
                     // 3 zero bytes as padding
@@ -83,13 +83,13 @@ public class DS1Saver
 
         // floors
         var floors = level.floor;
-        for (int n = 0; n < floors.floor_num; ++n)
+        for (int n = 0; n < floors.layers; ++n)
         {
             for (int y = 0; y < level.height; ++y)
             {
                 for (int x = 0; x < level.width; ++x)
                 {
-                    var tile = floors.floor_array[n, y, x];
+                    var tile = floors.data[n, y, x];
                     writer.Write(tile.prop1);
                     writer.Write(tile.prop2);
                     writer.Write(tile.prop3);
@@ -99,13 +99,13 @@ public class DS1Saver
         }
 
         var shadows = level.shadow;
-        for (int n = 0; n < shadows.shadow_num; ++n)
+        for (int n = 0; n < shadows.layers; ++n)
         {
             for (int y = 0; y < level.height; ++y)
             {
                 for (int x = 0; x < level.width; ++x)
                 {
-                    var tile = shadows.shadow_array[n, y, x];
+                    var tile = shadows.data[n, y, x];
                     writer.Write(tile.prop1);
                     writer.Write(tile.prop2);
                     writer.Write(tile.prop3);
@@ -117,13 +117,13 @@ public class DS1Saver
         if (level.tag_type > 0)
         {
             var tagged = level.tagged;
-            for (int n = 0; n < tagged.tag_num; ++n)
+            for (int n = 0; n < tagged.layers; ++n)
             {
                 for (int y = 0; y < level.height; ++y)
                 {
                     for (int x = 0; x < level.width; ++x)
                     {
-                        var tile = tagged.tag_array[n, y, x];
+                        var tile = tagged.data[n, y, x];
                         writer.Write(tile.num);
 
                     }

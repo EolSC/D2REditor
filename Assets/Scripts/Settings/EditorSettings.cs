@@ -12,8 +12,9 @@ namespace Diablo2Editor
     public class EditorSettings
     {
         // Settungs file name
+        private const string DATA_ROOT_SETTINGS = "Settings/DataRootSettings.json";
         private const string SETTINGS_FILE = "Settings/D2REditorSettings.json";
-        private const string EXAMPLE_FILE = "Settings/D2REditorSettings_example.json";
+        private const string EXAMPLE_FILE = "Settings/DataRootSettingsExample.json";
         public class CommonSettings
         {
             public TextureLoadMode textureLoadMode = TextureLoadMode.All;
@@ -77,12 +78,23 @@ namespace Diablo2Editor
 
         public void Reload()
         {
+            string root_settings_path = Path.Combine(Application.dataPath, DATA_ROOT_SETTINGS);
+            if (File.Exists(root_settings_path))
+            {
+                var jsonContent = File.ReadAllText(root_settings_path);
+                JSONNode rootSettings = JSONNode.Parse(jsonContent);
+                paths.InitRootFolders(rootSettings["rootFolders"]);
+            }
+            else
+            {
+                Debug.Log("Settings file not found. Please copy it from  " + EXAMPLE_FILE + " and set main_folder as path to unpacked D2R data");
+            }
             string settings_full_path = Path.Combine(Application.dataPath, SETTINGS_FILE);
             if (File.Exists(settings_full_path))
             {
                 var jsonContent = File.ReadAllText(settings_full_path);
                 JSONNode settings = JSONNode.Parse(jsonContent);
-                paths.Init(settings["paths"].AsObject);
+                paths.Init(settings["paths"]);
                 common.Init(settings["common"]);
                 developer.Init(settings["developer"]);
                 camera.Init(settings["camera"]);
@@ -90,7 +102,7 @@ namespace Diablo2Editor
             }
             else
             {
-                Debug.Log("Settings file not found. Please copy it from  " + EXAMPLE_FILE + " and set data_root as path to unpacked D2R data");
+                Debug.Log("Settings file not found at path " + SETTINGS_FILE);
             }
             Debug.Log("Settings loaded: " + SETTINGS_FILE);
         }

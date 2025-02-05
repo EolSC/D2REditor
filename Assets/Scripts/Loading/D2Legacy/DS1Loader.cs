@@ -89,10 +89,10 @@ namespace Diablo2Editor
 
         // wall data and orientation data are located separately in ds1 file
         // so we need to know offset pointing for orientation data to load walls properly
-        private DS1WallCell ReadWallCell(byte[] content, 
+        private DS1WallTile ReadWallCell(byte[] content, 
             ref int streamPosition, long version)
         {
-           DS1WallCell tile = new DS1WallCell();
+           DS1WallTile tile = new DS1WallTile();
             tile.prop1 = content[streamPosition++];
             tile.prop2 = content[streamPosition++];
             tile.prop3 = content[streamPosition++];
@@ -100,10 +100,10 @@ namespace Diablo2Editor
            return tile;
         }
 
-        private DS1FloorCell ReadFloorCell(byte[] content, ref int streamPosition)
+        private DS1FloorTile ReadFloorCell(byte[] content, ref int streamPosition)
         {
 
-            DS1FloorCell tile = new DS1FloorCell();
+            DS1FloorTile tile = new DS1FloorTile();
             tile.prop1 = content[streamPosition++];
             tile.prop2 = content[streamPosition++];
             tile.prop3 = content[streamPosition++];
@@ -111,26 +111,26 @@ namespace Diablo2Editor
             return tile;
         }
 
-        private DS1ShadowCell ReadShadowCell(byte[] content, ref int streamPosition)
+        private DS1ShadowTile ReadShadowCell(byte[] content, ref int streamPosition)
         {
 
-            DS1ShadowCell tile = new DS1ShadowCell();
+            DS1ShadowTile tile = new DS1ShadowTile();
             tile.prop1 = content[streamPosition++];
             tile.prop2 = content[streamPosition++];
             tile.prop3 = content[streamPosition++];
             tile.prop4 = content[streamPosition++];
             return tile;
         }
-        private DS1TaggedCell ReadTaggedCell(byte[] content, ref int streamPosition)
+        private DS1TaggedTile ReadTaggedCell(byte[] content, ref int streamPosition)
         {
 
-            DS1TaggedCell tile = new DS1TaggedCell();
+            DS1TaggedTile tile = new DS1TaggedTile();
             tile.num = BitConverter.ToUInt32(content, streamPosition);
             streamPosition += sizeof(uint);
             return tile;
         }
 
-        private void ReadWallOrientation(DS1WallCell tile, byte[] content, int position, long version)
+        private void ReadWallOrientation(DS1WallTile tile, byte[] content, int position, long version)
         {
             byte orient_data = content[position];
 
@@ -258,27 +258,27 @@ namespace Diablo2Editor
             // layers num
             if (alwaysMaxLayers)
             {
-                level.floor.floor_num = DS1Consts.FLOOR_MAX_LAYER;
-                level.wall.wall_num = DS1Consts.WALL_MAX_LAYER;
+                level.floor.layers = DS1Consts.FLOOR_MAX_LAYER;
+                level.wall.layers = DS1Consts.WALL_MAX_LAYER;
             }
             else
             {
-                level.floor.floor_num = floorNumber;
-                level.wall.wall_num = wallNumber;
+                level.floor.layers = floorNumber;
+                level.wall.layers = wallNumber;
 
             }
-            level.shadow.shadow_num = shadowNumber;
-            level.tagged.tag_num = tagNumber;
+            level.shadow.layers = shadowNumber;
+            level.tagged.layers = tagNumber;
 
             /*
              * Create data arrays for all tile types
              */
-            level.floor.floor_array = new DS1FloorCell[floorNumber, level.height, level.width];
-            level.wall.wall_array = new DS1WallCell[wallNumber, level.height, level.width];
-            level.shadow.shadow_array = new DS1ShadowCell[shadowNumber, level.height, level.width];
-            if (level.tagged.tag_num > 0)
+            level.floor.data = new DS1FloorTile[floorNumber, level.height, level.width];
+            level.wall.data = new DS1WallTile[wallNumber, level.height, level.width];
+            level.shadow.data = new DS1ShadowTile[shadowNumber, level.height, level.width];
+            if (level.tagged.layers > 0)
             {
-                level.tagged.tag_array = new DS1TaggedCell[tagNumber, level.height, level.width];
+                level.tagged.data = new DS1TaggedTile[tagNumber, level.height, level.width];
 
             }
 
@@ -346,7 +346,7 @@ namespace Diablo2Editor
                             {
                                 int layerNumber = layerStreamingCache[n] - 1;
                                 var tile = ReadWallCell(content, ref streamPosition, level.version);
-                                level.wall.wall_array[layerNumber, y, x] = tile;
+                                level.wall.data[layerNumber, y, x] = tile;
                             }; break;
                             case 5: // orientation
                             case 6:
@@ -355,7 +355,7 @@ namespace Diablo2Editor
                                 {
                                     // Skip 4 bytes, this data is read in ReadWallCell
                                     int wallLayerNum = layerStreamingCache[n] - 5;
-                                    var wallCell = level.wall.wall_array[wallLayerNum, y, x];
+                                    var wallCell = level.wall.data[wallLayerNum, y, x];
                                     ReadWallOrientation(wallCell, content, streamPosition, level.version);
                                     streamPosition += 4;
                                 }; break;
@@ -364,20 +364,20 @@ namespace Diablo2Editor
                                 {
                                     int layerNumber = layerStreamingCache[n] - 9;
                                     var tile = ReadFloorCell(content, ref streamPosition);
-                                    level.floor.floor_array[layerNumber, y, x] = tile;
+                                    level.floor.data[layerNumber, y, x] = tile;
                                 }; break;
                             case 11:
                                 {
                                     int layerNumber = layerStreamingCache[n] - 11;
                                     var tile = ReadShadowCell(content, ref streamPosition);
-                                    level.shadow.shadow_array[layerNumber, y, x] = tile;
+                                    level.shadow.data[layerNumber, y, x] = tile;
 
                                 }; break;
                             case 12:
                                 {
                                     int layerNumber = layerStreamingCache[n] - 12;
                                     var tile = ReadTaggedCell(content, ref streamPosition);
-                                    level.tagged.tag_array[layerNumber, y, x] = tile;
+                                    level.tagged.data[layerNumber, y, x] = tile;
                                 }; break;
 
                         }

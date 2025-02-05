@@ -1,7 +1,5 @@
-using Diablo2Editor;
-using UnityEditor;
+
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public enum TileStatus
 {
@@ -86,9 +84,9 @@ public class Tile
 
     private void UpdateWalkableStatus(Material material, byte walkable)
     {
-        switch(walkable)
+        switch (walkable)
         {
-            
+
             case 0:
                 {
                     material.color = Color.green;
@@ -256,7 +254,7 @@ public class Tile
     public void UpdateStatus()
     {
         Color color = Color.gray;
-        switch(status)
+        switch (status)
         {
             case TileStatus.Special:
                 color = Color.yellow;
@@ -275,7 +273,7 @@ public class Tile
                 break;
         }
 
-        switch(hover)
+        switch (hover)
         {
             case TileHover.Hovered:
                 color = Color.cyan;
@@ -288,7 +286,7 @@ public class Tile
 
     public void Draw(Camera camera)
     {
-        Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, camera, 0 , null, false, false);
+        Graphics.DrawMesh(mesh, Matrix4x4.identity, material, 0, camera, 0, null, false, false);
     }
 
     public void DrawWalkableInfo(Camera camera)
@@ -305,149 +303,6 @@ public class Tile
 
     public bool Raycast(Ray ray, out RaycastHit hit, float distance)
     {
-        return collider.Raycast(ray, out hit, distance);    
+        return collider.Raycast(ray, out hit, distance);
     }
 }
-
-[ExecuteInEditMode]
-public class TileGrid : MonoBehaviour
-{
-    [SerializeField]
-    public bool drawWalkableInfo = false;
-
-    public DS1Level level;
-    Tile[][] tiles;
-    Tile selected = null;
-
-    public Tile GetSelectedTile()
-    {
-        return selected;
-    }
-
-    void OnDisable()
-    {
-        UpdateCameraCallback(false);
-    }
-
-    private void OnEnable()
-    {
-        UpdateCameraCallback(true);
-    }
-
-    public bool Raycast(Ray ray, bool mouseUp)
-    {
-        if (tiles == null)
-        {
-            return false;
-        }
-
-        for (int z = 0; z < tiles.Length; z++)
-        {
-            for (int x = 0; x < tiles[z].Length; x++)
-            {
-                var tile = tiles[z][x];
-                bool hovered = tile.Raycast(ray, out _, Mathf.Infinity);
-                if (hovered)
-                {
-                    if (mouseUp)
-                    {
-                        if (selected != null && tile != selected)
-                        {
-                            selected.SetSelection(TileSelection.None);
-                        }
-                        tile.SetSelection(TileSelection.Selected);
-                        selected = tile;
-                        return true;
-                    }
-                    else
-                    {
-                        tile.SetHover(TileHover.Hovered);
-                    }
-                }
-                else
-                {
-                    tile.SetHover(TileHover.None);
-                }
-            }
-        }
-        return false;
-    }
-
-    private void Draw(Camera camera)
-    {
-        if (tiles  == null)
-        {
-            return;
-        }
-
-        for (int z = 0; z < tiles.Length; z++)
-        {
-            for (int x = 0; x < tiles[z].Length; x++)
-            {
-                var tile = tiles[z][x];
-                tile.Draw(camera);
-                if (drawWalkableInfo)
-                {
-                    tile.DrawWalkableInfo(camera);
-                }
-            }
-        }
-    }
-
-    public void SetLevelData(DS1Level level)
-    {
-        this.level = level;
-
-        UpdateTileGrid();
-        this.enabled = true;
-    }
-
-    private void UpdateTileGrid()
-    {
-        if ((level.width > 0) && (level.height > 0))
-        {
-            tiles = new Tile[level.height][];
-
-
-            for (int y = 0; y < level.height; y++)
-            {
-                tiles[y] = new Tile[level.width];
-                for (int x = 0; x < level.width; x++)
-                {
-                    var tile = new Tile();
-                    var collider = gameObject.AddComponent<BoxCollider>();
-                    collider.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
-                    tile.Create(collider, x, 0, y);
-                    tiles[y][x] = tile;
-                    var walkableData = level.walkableInfo.GetWalkableData(x, y);
-
-                    tile.UpdateWalkableInfo(walkableData.walkable);
-                    tile.x = x;
-                    tile.y = y;
-
-                    if (level.HasSpecialTiles(x, y))
-                    {
-                        tile.SetStatus(TileStatus.Special);
-                    }
-                }
-            }
-        }
-    }
-
-    private void UpdateCameraCallback(bool isEnabled)
-    {
-        if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline == null) // built-in
-        {
-            if (isEnabled)
-            {
-                Camera.onPreCull += Draw;
-            }
-            else
-            {
-                Camera.onPreCull -= Draw;
-
-            }
-        }
-    }
-}
-

@@ -12,6 +12,9 @@ namespace Diablo2Editor
     {
         // Root folder for D2R content folder. It's user-specific setting, must be configured before any work
         private string dataRoot = "";
+        // Mod root folder for D2R content folder. It's user-specific setting, must be configured before any work
+        private string modRoot = "";
+
         // Path to .ds1 tiles in data folder. Remains the same for all users.
         private string tilesRoot = "";
         // Path to .json presets in data folder. Remains the same for all users.
@@ -30,13 +33,26 @@ namespace Diablo2Editor
         public const string JSON_EXT = ".json";
 
         /*
-         * Path setup. Must be called before any work to read proper paths.
+         * Root setup. Sets path to D2 resource folders. It's user-specific data so it
+         * needs separate settings object
          */
-        public void Init(JSONObject settings)
+        public void InitRootFolders(JSONNode settings)
         {
             if (settings.IsObject)
             {
-                dataRoot = Path.GetFullPath(settings["dataRoot"]);
+                dataRoot = Path.GetFullPath(settings["main_folder"]);
+                modRoot = Path.GetFullPath(settings["mod_folder"]);
+            }
+            ValidateDataRoot();
+        }
+
+        /*
+         * Path setup. Must be called before any work to read proper paths.
+         */
+        public void Init(JSONNode settings)
+        {
+            if (settings.IsObject)
+            {
                 tilesRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["tilesRoot"]));
                 presetRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["presetRoot"]));
                 palettesPath = Path.GetFullPath(Path.Combine(dataRoot, settings["palettePath"]));

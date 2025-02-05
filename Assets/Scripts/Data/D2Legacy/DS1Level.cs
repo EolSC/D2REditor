@@ -41,10 +41,10 @@ namespace Diablo2Editor
         public List<string> files = new List<string>();
 
         // tiles data
-        public DS1Floor floor = new DS1Floor();     // floor
-        public DS1Shadow shadow = new DS1Shadow();  // shadow
-        public DS1Wall wall = new DS1Wall();        // wall
-        public DS1Tagged tagged = new DS1Tagged();  // tagged
+        public DS1Container<DS1FloorTile> floor = new DS1Container<DS1FloorTile>();        // floor
+        public DS1Container<DS1ShadowTile> shadow = new DS1Container<DS1ShadowTile>();     // shadow
+        public DS1Container<DS1WallTile> wall = new DS1Container<DS1WallTile>();           // wall
+        public DS1Container<DS1TaggedTile> tagged = new DS1Container<DS1TaggedTile>();     // tagged
 
         // groupData
         public long group_num;
@@ -73,9 +73,9 @@ namespace Diablo2Editor
                 return false;
             }
 
-            for (int i =0; i < wall.wall_num; ++i)
+            for (int i =0; i < wall.layers; ++i)
             {
-                var tile = wall.wall_array[i, y, x];
+                var tile = wall.data[i, y, x];
                 if (tile.IsSpecial())
                 {
                     return true;
@@ -275,17 +275,17 @@ namespace Diablo2Editor
             {
                 for (int x = 0; x < width; x++)
                 {
-                    for (int i = 0; i < wall.wall_num; i++)
+                    for (int i = 0; i < wall.layers; i++)
                     {
                         InitWallBlock(x, y, i);
                     }
 
-                    for (int i = 0; i < floor.floor_num; i++)
+                    for (int i = 0; i < floor.layers; i++)
                     {
                         InitFloorBlock(x, y, i);
                     }
 
-                    for (int i = 0; i < shadow.shadow_num; i++)
+                    for (int i = 0; i < shadow.layers; i++)
                     {
                         InitShadowBlock(x, y, i);
                     }
@@ -296,7 +296,7 @@ namespace Diablo2Editor
 
         private void InitWallBlock(int x, int y, int layerIndex)
         {
-            var wallBlock = wall.wall_array[layerIndex, y, x];
+            var wallBlock = wall.data[layerIndex, y, x];
             wallBlock.bt_idx = -1;
             if (wallBlock.prop1 == 0)
             {
@@ -372,7 +372,7 @@ namespace Diablo2Editor
 
         private void InitFloorBlock(int x, int y, int layerIndex)
         {
-            var floorBlock = floor.floor_array[layerIndex, y, x];
+            var floorBlock = floor.data[layerIndex, y, x];
             floorBlock.bt_idx = -1;
             if (floorBlock.prop1 == 0)
             {
@@ -401,7 +401,7 @@ namespace Diablo2Editor
 
         private void InitShadowBlock(int x, int y, int layerIndex)
         {
-            var shadowBlock = shadow.shadow_array[layerIndex, y, x];
+            var shadowBlock = shadow.data[layerIndex, y, x];
             shadowBlock.bt_idx = -1;
             if (shadowBlock.prop1 == 0)
             {

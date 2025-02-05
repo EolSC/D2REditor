@@ -7,12 +7,15 @@ using UnityEngine;
 using static UnityEngine.Mesh;
 
 /*
- * Component storing all level data binding D2R + D2Legacy data and GameObject together
+ * Component storing all level data.
+ * Binds D2R + D2Legacy data and GameObject together 
+ * Actual instantiating is delegated to ComponentDrawer.
+ * Saving and loading is also performed by LevelComponent
  */
 public class LevelComponent : MonoBehaviour
 {
     // Loaded LevelPreset(D2R json data)
-    private Diablo2Editor.LevelPreset preset = null;
+    private Diablo2Editor.LevelPreset d2RPreset = null;
     // Loaded Level(D2 level data)
     private Diablo2Editor.DS1Level ds1Level = null;
     // Random seed for level preset
@@ -20,10 +23,23 @@ public class LevelComponent : MonoBehaviour
     // string name
     private string levelName;
 
+    private ContentDrawer drawer = new ContentDrawer();
+
     public string GetName()
     {
         return levelName;
     }
+
+    public DS1Level GetDS1Level()
+    {
+        return ds1Level;
+    }
+
+    public LevelPreset GetD2RLevel()
+    {
+        return d2RPreset;
+    }
+
 
     public void Load(string name, byte[] ds1Content, string jsonContent, bool instantiate = true)
     {
@@ -35,20 +51,11 @@ public class LevelComponent : MonoBehaviour
         LoadDS1Content(ds1Content);
         if (instantiate)
         {
-            ContentDrawer.InstantiateContent(gameObject, preset, ds1Level);
+            drawer.InstantiateContent(gameObject, this);
         }
-
-        gameObject.name = levelName;
-        // Flip hierarchy around X-axis
-        // D2 granny models use other coordinate system. To show level in same coordinates
-        // as game shows it
-        var presetGO = preset.gameObject;
-        presetGO.transform.localScale = new Vector3(-1, 1, 1);
 
         Debug.Log("Level loaded: " + levelName);
         EditorUtility.ClearProgressBar();
-
-
     }
 
     public void Save(string fileName)
@@ -56,7 +63,7 @@ public class LevelComponent : MonoBehaviour
         string path = Path.GetDirectoryName(fileName);
         string name_no_ext = Path.GetFileNameWithoutExtension(fileName);
 
-        JSONNode resultJson = preset.Serialize();
+        JSONNode resultJson = d2RPreset.Serialize();
         DS1Saver saver = new DS1Saver();
 
         byte[] resultDS1 = saver.SaveDS1(ds1Level);
@@ -73,9 +80,9 @@ public class LevelComponent : MonoBehaviour
 
     public bool Test(byte[] ds1Content, string jsonContent)
     {
-        if ((preset != null) && (ds1Level != null))
+        if ((d2RPreset != null) && (ds1Level != null))
         {
-            JSONNode resultJson = preset.Serialize();
+            JSONNode resultJson = d2RPreset.Serialize();
             JSONNode sourceJson = JSON.Parse(jsonContent);
 
             bool oldContentEqual = false;
@@ -97,7 +104,7 @@ public class LevelComponent : MonoBehaviour
     private void LoadJsonPreset(string jsonContent)
     {
         JSONNode jsonNode = JSON.Parse(jsonContent);
-        preset = new Diablo2Editor.LevelPreset(gameObject, jsonNode.AsObject, seed);
+        d2RPreset = new Diablo2Editor.LevelPreset(gameObject, jsonNode.AsObject, seed);
     }
 
     // Ds1-specific logic

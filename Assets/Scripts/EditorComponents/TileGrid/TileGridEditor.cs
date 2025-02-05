@@ -10,9 +10,6 @@ public class TileGridEditor : Editor
     bool[] floor_folders = new bool[DS1Consts.FLOOR_MAX_LAYER];
     bool shadow_folder = false;
     bool tagged_folder = false;
-
-
-
     void OnEnable()
     {
         grid = (TileGrid)target;
@@ -58,6 +55,8 @@ public class TileGridEditor : Editor
 
     private void DrawTileInspector(Tile selected)
     {
+        var level = grid.levelComponent.GetDS1Level();
+
         int x = selected.x;
         int y = selected.y;
         bool needUpdate = false;
@@ -68,9 +67,9 @@ public class TileGridEditor : Editor
         labelStyle.normal.textColor = Color.white;
         areaStyle.normal.textColor = Color.white;
 
-        for (int n = 0; n < grid.level.wall.wall_num; n++)
+        for (int n = 0; n < level.wall.layers; n++)
         {
-            DS1WallCell cell = grid.level.wall.wall_array[n, y, x];
+            DS1WallTile cell = level.wall.data[n, y, x];
 
             if (cell != null)
             {
@@ -83,9 +82,9 @@ public class TileGridEditor : Editor
             }
         }
 
-        for (int n = 0; n < grid.level.floor.floor_num; n++)
+        for (int n = 0; n < level.floor.layers; n++)
         {
-            DS1FloorCell cell = grid.level.floor.floor_array[n, y, x];
+            DS1FloorTile cell = level.floor.data[n, y, x];
 
             if (cell != null)
             {
@@ -98,9 +97,9 @@ public class TileGridEditor : Editor
             }
         }
 
-        for (int n = 0; n < grid.level.shadow.shadow_num; n++)
+        for (int n = 0; n < level.shadow.layers; n++)
         {
-            DS1ShadowCell cell = grid.level.shadow.shadow_array[n, y, x];
+            DS1ShadowTile cell = level.shadow.data[n, y, x];
 
             if (cell != null)
             {
@@ -112,9 +111,9 @@ public class TileGridEditor : Editor
             }
         }
 
-        for (int n = 0; n < grid.level.tagged.tag_num; n++)
+        for (int n = 0; n < level.tagged.layers; n++)
         {
-            DS1TaggedCell cell = grid.level.tagged.tag_array[n, y, x];
+            DS1TaggedTile cell = level.tagged.data[n, y, x];
 
             if (cell != null)
             {
@@ -128,21 +127,57 @@ public class TileGridEditor : Editor
 
         if (needUpdate)
         {
-            UpdateTile(selected);
+            UpdateTile(level, selected);
         }
     }
 
-    private void UpdateTile(Tile tile)
+    private bool DrawDS1Block(DS1Tile cell, GUIStyle labelStyle, GUIStyle areaStyle)
+    {
+        bool result = DrawProperties(cell, labelStyle, areaStyle);
+        result |= DrawFlags(cell, labelStyle, areaStyle);
+        return result;
+    }
+
+    private bool DrawWallTile(DS1WallTile cell, GUIStyle labelStyle, GUIStyle areaStyle)
+    {
+        bool result = DrawProperties(cell, labelStyle, areaStyle);
+
+        GUILayout.BeginVertical(areaStyle);
+        result |= DrawByteAttribute("Orientation: ", ref cell.orientation, labelStyle);
+        GUILayout.EndVertical();
+
+        result |= DrawFlags(cell, labelStyle, areaStyle);
+
+        GUILayout.BeginVertical(areaStyle);
+        bool isSpecial = cell.IsSpecial();
+        GUILayout.Label("Is special: " + isSpecial, labelStyle);
+        GUILayout.EndVertical();
+        return result;
+    }
+
+    private bool DrawTaggedTile(DS1TaggedTile cell, GUIStyle labelStyle, GUIStyle areaStyle)
+    {
+        bool result = false;
+
+
+        GUILayout.BeginVertical("Cell properties", areaStyle);
+        GUILayout.Space(20);
+        result |= DrawUintAttribute("Number: ", ref cell.num, labelStyle);
+        GUILayout.EndVertical();
+
+        return result;
+    }
+
+    private void UpdateTile(DS1Level level, Tile tile)
     {
         int x = tile.x;
         int y = tile.y;
-        DS1Level lvl = grid.level;
-        var walkInfo = lvl.walkableInfo;
+        var walkInfo = level.walkableInfo;
         walkInfo.UpdateWalkableInfo(x, y);
         var walkData = walkInfo.GetWalkableData(x, y);
         tile.UpdateWalkableInfo(walkData.walkable);
 
-        bool isSpecial = lvl.HasSpecialTiles(x, y);
+        bool isSpecial = level.HasSpecialTiles(x, y);
         if (isSpecial)
         {
             tile.SetStatus(TileStatus.Special);
@@ -152,6 +187,54 @@ public class TileGridEditor : Editor
             tile.SetStatus(TileStatus.Empty);
         }
     }
+    private bool DrawProperties(DS1Tile cell, GUIStyle labelStyle, GUIStyle areaStyle)
+    {
+        bool result = false;
+        if (cell.bt_idx != -1)
+        {
+            var level = grid.levelComponent.GetDS1Level();
+            GUIStyle previewStyle = GUI.skin.textArea;
+            var bitmaps = level.block_table[cell.bt_idx].tileData.bitmaps;
+            var previewIndex = level.block_table[cell.bt_idx].block_idx;
+            var preview = bitmaps[previewIndex];
+            GUILayout.Box(preview, previewStyle);
+        }
+
+        GUILayout.BeginVertical("Cell properties", areaStyle);
+        GUILayout.Space(20);
+        result |= DrawByteAttribute("Priority: ", ref cell.prop1, labelStyle);
+        result |= DrawByteAttribute("Sub index:", ref cell.prop2, labelStyle);
+        int mainIndex = cell.GetMainIndex();
+        if (DrawIntAttribute("Main index: ", ref mainIndex, labelStyle))
+        {
+            cell.SetMainIndex(mainIndex);
+            result = true;
+        }
+        GUILayout.EndVertical();
+        return result;
+    }
+
+    private bool DrawFlags(DS1Tile cell, GUIStyle labelStyle, GUIStyle areaStyle)
+    {
+        bool result = false;
+        GUILayout.BeginVertical(areaStyle);
+        bool hidden = cell.IsHidden();
+        if (DrawBoolAttribute("Is hidden: ", ref hidden, labelStyle))
+        {
+            result = true;
+            cell.SetHidden(hidden);
+        }
+        bool walkable = cell.IsWalkable();
+        if (DrawBoolAttribute("Is walkable: ", ref walkable, labelStyle))
+        {
+            result = true;
+            cell.SetWalkable(walkable);
+        }
+        GUILayout.EndVertical();
+
+        return result;
+    }
+
     private bool DrawByteAttribute(string name, ref byte attribute, GUIStyle labelStyle)
     {
         GUIStyle horizontalStyle = new()
@@ -232,90 +315,6 @@ public class TileGridEditor : Editor
         }
         GUILayout.EndHorizontal();
         return false;
-    }
-
-    private bool DrawProperties(DS1Block cell, GUIStyle labelStyle, GUIStyle areaStyle)
-    {
-        bool result = false;
-        if (cell.bt_idx != -1)
-        {
-            GUIStyle previewStyle = GUI.skin.textArea;
-            var bitmaps = grid.level.block_table[cell.bt_idx].tileData.bitmaps;
-            var previewIndex = grid.level.block_table[cell.bt_idx].block_idx;
-            var preview = bitmaps[previewIndex];
-            GUILayout.Box(preview, previewStyle);
-        }
-
-        GUILayout.BeginVertical("Cell properties", areaStyle);
-        GUILayout.Space(20);
-        result |= DrawByteAttribute("Priority: ", ref cell.prop1, labelStyle);
-        result |= DrawByteAttribute("Sub index:", ref cell.prop2, labelStyle);
-        int mainIndex = cell.GetMainIndex();
-        if (DrawIntAttribute("Main index: ", ref mainIndex, labelStyle))
-        {
-            cell.SetMainIndex(mainIndex);
-            result = true;
-        }
-        GUILayout.EndVertical();
-        return result;
-    }
-
-    private bool DrawFlags(DS1Block cell, GUIStyle labelStyle, GUIStyle areaStyle)
-    {
-        bool result = false;
-        GUILayout.BeginVertical(areaStyle);
-        bool hidden = cell.IsHidden();
-        if (DrawBoolAttribute("Is hidden: ", ref hidden, labelStyle))
-        {
-            result = true;
-            cell.SetHidden(hidden);
-        }
-        bool walkable = cell.IsWalkable();
-        if (DrawBoolAttribute("Is walkable: ", ref walkable, labelStyle))
-        {
-            result = true;
-            cell.SetWalkable(walkable);
-        }
-        GUILayout.EndVertical();
-
-        return result;
-    }
-
-    private bool DrawDS1Block(DS1Block cell, GUIStyle labelStyle, GUIStyle areaStyle)
-    {
-        bool result = DrawProperties(cell, labelStyle, areaStyle);
-        result |= DrawFlags(cell, labelStyle, areaStyle);
-        return result;
-    }
-
-    private bool DrawWallTile(DS1WallCell cell, GUIStyle labelStyle, GUIStyle areaStyle)
-    {
-        bool result = DrawProperties(cell, labelStyle, areaStyle);
-
-        GUILayout.BeginVertical(areaStyle);
-        result |= DrawByteAttribute("Orientation: ", ref cell.orientation, labelStyle);
-        GUILayout.EndVertical();
-
-        result |= DrawFlags(cell, labelStyle, areaStyle);
-
-        GUILayout.BeginVertical(areaStyle);
-        bool isSpecial = cell.IsSpecial();
-        GUILayout.Label("Is special: " + isSpecial, labelStyle);
-        GUILayout.EndVertical();
-        return result;
-    }
-
-    private bool DrawTaggedTile(DS1TaggedCell cell, GUIStyle labelStyle, GUIStyle areaStyle)
-    {
-        bool result = false;
-
-
-        GUILayout.BeginVertical("Cell properties", areaStyle);
-        GUILayout.Space(20);
-        result |= DrawUintAttribute("Number: ", ref cell.num, labelStyle);
-        GUILayout.EndVertical();
-
-        return result;
     }
 }
 

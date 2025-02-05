@@ -1,33 +1,51 @@
 using Diablo2Editor;
+using System.ComponentModel;
 using UnityEditor;
 using UnityEngine;
 
+/*
+ * Creates scene hierarchy based on level content
+ * 
+ */
 public class ContentDrawer
 {
-    public static void InstantiateContent(GameObject gameObject, Diablo2Editor.LevelPreset preset, Diablo2Editor.DS1Level ds1Level)
+    public void InstantiateContent(GameObject gameObject, LevelComponent component)
     {
-        if (preset != null)
+        var d2RData = component.GetD2RLevel();
+        var ds1Data = component.GetDS1Level();
+
+
+        if (d2RData != null)
         {
             EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", 0.0f);
-            preset.LoadResources();
+            d2RData.LoadResources();
 
 
             EditorUtility.DisplayProgressBar("Loading level", "Instantiating objects...", 0.8f);
-            preset.Instantiate();
+            d2RData.Instantiate();
             EditorUtility.ClearProgressBar();
         }
 
-        if (ds1Level != null)
+        if (ds1Data != null)
         {
             GameObject testDS1 = new GameObject();
             testDS1.transform.parent = gameObject.transform;
-            DS1Drawer drawer = new DS1Drawer(ds1Level);
-            drawer.Instantiate(testDS1);
+            var grid = CreateTileGrid(testDS1);
+            grid.levelComponent = component;
+
         }
+
+        gameObject.name = component.GetName();
+        // Flip hierarchy around X-axis
+        // D2 granny models use other coordinate system. To show level in same coordinates
+        // as game shows it
+        var presetGO = d2RData.gameObject;
+        presetGO.transform.localScale = new Vector3(-1, 1, 1);
+
         UpdateCameraSettings(gameObject);
     }
 
-    private static void UpdateCameraSettings(GameObject gameObject)
+    private void UpdateCameraSettings(GameObject gameObject)
     {
         Diablo2Editor.EditorSettings.CameraSettings camera = EditorMain.Settings().camera;
         SceneView.CameraSettings settings = new SceneView.CameraSettings();
@@ -50,6 +68,13 @@ public class ContentDrawer
             sceneView.pivot = center;
         }
         sceneView.Repaint();
+    }
+
+    private TileGrid CreateTileGrid(GameObject gameObject)
+    {
+        var grid = gameObject.AddComponent<TileGrid>();
+        gameObject.name = "DS1Level";
+        return grid;
     }
 
 }

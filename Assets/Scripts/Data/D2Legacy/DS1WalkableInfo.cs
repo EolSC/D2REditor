@@ -80,9 +80,9 @@ public class DS1WalkableInfo
         walkableData.Clear();
         int all_floor_props = 0;
         // floors
-        for (int f = 0; f < level.floor.floor_num; f++)
+        for (int f = 0; f < level.floor.layers; f++)
         {
-            var floorTile = level.floor.floor_array[f, y, x];
+            var floorTile = level.floor.data[f, y, x];
             all_floor_props |= floorTile.prop1 | floorTile.prop2 |
                                floorTile.prop3 | floorTile.prop4;
             if (!floorTile.IsWalkable())
@@ -104,18 +104,18 @@ public class DS1WalkableInfo
         }
 
         // if no floor at all (F1 & F2 layer) the tile is completly unwalkable
-        if (level.floor.floor_num == 1)
+        if (level.floor.layers == 1)
         {
-            var floorTile = level.floor.floor_array[0, y, x];
+            var floorTile = level.floor.data[0, y, x];
             if (floorTile.prop1 == 0)
             {
                 walkableData.MarkUnwalkable();
             }
         }
-        else if (level.floor.floor_num == 2)
+        else if (level.floor.layers == 2)
         {
-            var floorTile1 = level.floor.floor_array[0, y, x];
-            var floorTile2 = level.floor.floor_array[1, y, x];
+            var floorTile1 = level.floor.data[0, y, x];
+            var floorTile2 = level.floor.data[1, y, x];
 
             if ((floorTile1.prop1 == 0) && (floorTile2.prop1 == 0))
             {
@@ -124,9 +124,9 @@ public class DS1WalkableInfo
         }
 
         // walls
-        for (int w = 0; w < level.wall.wall_num; w++)
+        for (int w = 0; w < level.wall.layers; w++)
         {
-            var wallTile = level.wall.wall_array[w, y, x];
+            var wallTile = level.wall.data[w, y, x];
             if (!wallTile.IsWalkable())
             {
                 // this is a global unwalkable info

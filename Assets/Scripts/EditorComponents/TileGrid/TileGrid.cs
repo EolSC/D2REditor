@@ -7,17 +7,21 @@ public class TileGrid : MonoBehaviour
     [SerializeField]
     public bool drawWalkableInfo = false;
 
-    private LevelComponent mLevelComponent;
-
     [SerializeField]
+    private LevelComponent _levelComponent;
+
+    private LevelComponent _oldValue;
+
+    private bool _gridDirty = false;
+
     public LevelComponent levelComponent { 
         get
         { 
-            return mLevelComponent; 
+            return _levelComponent; 
         }
         set
         {
-            this.mLevelComponent = value;
+            this._levelComponent = value;
             UpdateLevelData();
         }
     }
@@ -33,6 +37,14 @@ public class TileGrid : MonoBehaviour
     void OnDisable()
     {
         UpdateCameraCallback(false);
+    }
+
+    private void OnValidate()
+    {
+        if (_oldValue != _levelComponent)
+        {
+            _gridDirty = true;
+        }
     }
 
     private void OnEnable()
@@ -81,6 +93,11 @@ public class TileGrid : MonoBehaviour
 
     private void Draw(Camera camera)
     {
+        if (_gridDirty)
+        {
+            UpdateLevelData();
+        }
+
         if (tiles  == null)
         {
             return;
@@ -103,35 +120,41 @@ public class TileGrid : MonoBehaviour
     public void UpdateLevelData()
     {
         UpdateTileGrid();
+        _oldValue = _levelComponent;
+        _gridDirty = false;
     }
 
     private void UpdateTileGrid()
     {
-        var level = levelComponent.GetDS1Level();
-        if ((level.width > 0) && (level.height > 0))
+        tiles = null;
+        if (_levelComponent != null)
         {
-            tiles = new Tile[level.height][];
-
-
-            for (int y = 0; y < level.height; y++)
+            var level = _levelComponent.GetDS1Level();
+            if ((level.width > 0) && (level.height > 0))
             {
-                tiles[y] = new Tile[level.width];
-                for (int x = 0; x < level.width; x++)
+                tiles = new Tile[level.height][];
+
+
+                for (int y = 0; y < level.height; y++)
                 {
-                    var tile = new Tile();
-                    var collider = gameObject.AddComponent<BoxCollider>();
-                    collider.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
-                    tile.Create(collider, x, 0, y);
-                    tiles[y][x] = tile;
-                    var walkableData = level.walkableInfo.GetWalkableData(x, y);
-
-                    tile.UpdateWalkableInfo(walkableData.walkable);
-                    tile.x = x;
-                    tile.y = y;
-
-                    if (level.HasSpecialTiles(x, y))
+                    tiles[y] = new Tile[level.width];
+                    for (int x = 0; x < level.width; x++)
                     {
-                        tile.SetStatus(TileStatus.Special);
+                        var tile = new Tile();
+                        var collider = gameObject.AddComponent<BoxCollider>();
+                        collider.hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector;
+                        tile.Create(collider, x, 0, y);
+                        tiles[y][x] = tile;
+                        var walkableData = level.walkableInfo.GetWalkableData(x, y);
+
+                        tile.UpdateWalkableInfo(walkableData.walkable);
+                        tile.x = x;
+                        tile.y = y;
+
+                        if (level.HasSpecialTiles(x, y))
+                        {
+                            tile.SetStatus(TileStatus.Special);
+                        }
                     }
                 }
             }

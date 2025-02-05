@@ -43,7 +43,7 @@ public class TileGridEditor : Editor
     {
         DrawDefaultInspector();
         TileGrid grid = (TileGrid)target;
-        if (grid != null)
+        if (grid != null && (grid.levelComponent != null))
         {
             Tile selected = grid.GetSelectedTile();
             if (selected != null)

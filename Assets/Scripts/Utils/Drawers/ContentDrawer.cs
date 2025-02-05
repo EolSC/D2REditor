@@ -29,6 +29,7 @@ public class ContentDrawer
         if (ds1Data != null)
         {
             GameObject testDS1 = new GameObject();
+            testDS1.name = "DS1Level";
             testDS1.transform.parent = gameObject.transform;
             var grid = CreateTileGrid(testDS1);
             grid.levelComponent = component;
@@ -72,8 +73,10 @@ public class ContentDrawer
 
     private TileGrid CreateTileGrid(GameObject gameObject)
     {
-        var grid = gameObject.AddComponent<TileGrid>();
-        gameObject.name = "DS1Level";
+        GameObject tileGridObject = new GameObject();
+        tileGridObject.name = "TileGrid";
+        tileGridObject.transform.parent = gameObject.transform;
+        var grid = tileGridObject.AddComponent<TileGrid>();
         return grid;
     }
 

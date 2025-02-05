@@ -33,7 +33,7 @@ public class ContentDrawer
             testDS1.transform.parent = gameObject.transform;
             var grid = CreateTileGrid(testDS1);
             grid.levelComponent = component;
-
+            CreateLevelObjects(testDS1, component.GetDS1Level());
         }
 
         gameObject.name = component.GetName();
@@ -78,6 +78,22 @@ public class ContentDrawer
         tileGridObject.transform.parent = gameObject.transform;
         var grid = tileGridObject.AddComponent<TileGrid>();
         return grid;
+    }
+
+    private void CreateLevelObjects(GameObject gameObject, DS1Level level)
+    {
+        GameObject objParent = new GameObject();
+        objParent.transform.parent = gameObject.transform;
+        objParent.name = "Objects";
+
+        var objects = level.objects;
+        for (int i =0; i < objects.Count; ++i)
+        {
+            GameObject objHolder = new GameObject();
+            objHolder.transform.parent = objParent.transform;
+            var objComponent = objHolder.AddComponent<LevelObjectComponent>();
+            objComponent.Init(level, i);
+        }
     }
 
 }

@@ -2,6 +2,8 @@
     "developer": {
         "testLevel": "data/global/tiles/act1/barracks/barew.ds1",
         "testLevel2":  "data/global/tiles/act1/outdoors/tower2.ds1",
+        "testObject":  "data/hd/objects/braziers/brazier.json",
+        "testMonster":  "data/hd/character/enemy/andariel.json",
     },
     "paths": {
         "presetRoot": "data/hd/env/preset",
@@ -10,6 +12,8 @@
         "levelPresets": "data/global/excel/lvlprest.txt",
 		"palettePath" : "data/global/palette",
 		"maplistPath" : "Assets/Resources/maplist.csv",
+		"monstersPath" : "data/hd/character/monsters.json",
+		"objectsPath" : "data/hd/objects/objects.json",
     },
 	"common": {
 		"textureLoadMode" : "Albedo"

@@ -57,7 +57,13 @@ namespace Diablo2Editor
         {
             base.Instantiate();
             // using seed to get determinated result
-            int seed = GetPreset().seed;
+            var preset = GetPreset() as LevelPreset;
+
+            int seed = 0;
+            if (preset != null)
+            {
+                seed = preset.seed;
+            }
             Random.InitState(seed);
             if (variations.Count > 0)
             {

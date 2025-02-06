@@ -12,12 +12,12 @@ namespace Diablo2Editor
     {
         public string type;
         public string name;
-        public Int64 id;
+        public long id;
         public List<LevelEntityComponent> components;
-        public LevelPreset preset;
+        public JsonPreset preset;
         public GameObject gameObject;
 
-        public LevelEntity(LevelPreset parent) {
+        public LevelEntity(JsonPreset parent) {
             this.preset = parent;
         }
 

@@ -46,7 +46,7 @@ namespace Diablo2Editor
         }
 
 
-        protected LevelPreset GetPreset()
+        protected JsonPreset GetPreset()
         {
             return entity.preset;
         }

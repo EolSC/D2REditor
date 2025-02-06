@@ -19,6 +19,7 @@ public class EditorMain : MonoBehaviour
     public static Diablo2Editor.EditorSettings settings = new Diablo2Editor.EditorSettings();
 
     private static LevelContentLoader loader = new LevelContentLoader();
+    private static ObjectsLoader objectsLoader = new ObjectsLoader();
 
     [MenuItem("Diablo Level Editor/Open level...")]
     private static void OpenLevel()
@@ -52,6 +53,20 @@ public class EditorMain : MonoBehaviour
         // Use path from settings without opening Browse dialog
         string path = Settings().developer.testLevel;
         OpenLevel(path, true, true);
+    }
+
+    [MenuItem("Diablo Level Editor/Developer/Test object")]
+    private static void TestObject()
+    {
+        string path = Settings().developer.testObject;
+        objectsLoader.Load(path, true);
+    }
+
+    [MenuItem("Diablo Level Editor/Developer/Test monster")]
+    private static void TestMonster()
+    {
+        string path = Settings().developer.testMonster;
+        objectsLoader.Load(path, true);
     }
 
 

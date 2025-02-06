@@ -23,8 +23,11 @@ namespace Diablo2Editor
         AudioEnvironmentOverrideComponent,
         ModelPlatformTierComponent,
         DecalDefinitionComponent,
-
+        UnitRootComponent,
+        UnitPartComponent,
+        SkeletonComponent,
     }
+
     public class ComponentFactory
     {
         static Dictionary<ComponentTypes, Type> componentTypes = new Dictionary<ComponentTypes, Type>
@@ -44,6 +47,9 @@ namespace Diablo2Editor
             { ComponentTypes.AudioEnvironmentOverrideComponent, typeof(AudioEnvironmentOverrideComponent) },
             { ComponentTypes.ModelPlatformTierComponent, typeof(ModelPlatformTierComponent) },
             { ComponentTypes.DecalDefinitionComponent, typeof(DecalDefinitionComponent) },
+            { ComponentTypes.UnitRootComponent, typeof(UnitRootComponent) },
+            { ComponentTypes.UnitPartComponent, typeof(UnitPartComponent) },
+            { ComponentTypes.SkeletonComponent, typeof(SkeletonComponent) },
 
         };
              

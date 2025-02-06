@@ -10,43 +10,25 @@ namespace Diablo2Editor
      * serialized back to .json
      * 
      */
-   public class LevelPreset : ISerializable
+   public class LevelPreset : JsonPreset
    {
         public int seed = 0;
-        public string type;
-        public string name;
-        public LevelPresetDependencies dependencies;
-        public List<LevelEntity> entities;
         public LevelEntity terrain;
         public string biomeFilename;
         public List<TileBiomeOverrides> perTileBiomeOverrides;
         SpecialTile specialTiles;
-        public GameObject gameObject;
-
 
         public LevelPreset(GameObject gameObject, JSONObject json, int seed)
+            : base(gameObject)
         {
             this.seed = seed;
-            GameObject obj = new GameObject();
-            obj.transform.parent = gameObject.transform;
-            obj.name = "json";
-            this.gameObject = obj;
             Deserialize(json);
         }
 
-        public void Deserialize(JSONObject json)
+        public override void Deserialize(JSONObject json)
         {
-            dependencies = new LevelPresetDependencies();
-            dependencies.Deserialize(json["dependencies"].AsObject);
-            type = json["type"];
-            name = json["name"];
-            entities = new List<LevelEntity>();
-            foreach (JSONObject item in json["entities"])
-            {
-                LevelEntity entity = new LevelEntity(this);
-                entity.Deserialize(item);
-                entities.Add(entity);
-            }
+            base.Deserialize(json);
+
             terrain = new LevelEntity(this);
             terrain.Deserialize(json["terrain"].AsObject);
             biomeFilename = json["biomeFilename"];
@@ -55,35 +37,21 @@ namespace Diablo2Editor
             specialTiles.Deserialize(json["specialTiles"].AsObject);
         }
 
-        public void LoadResources()
+        public override JSONObject Serialize()
         {
-            dependencies.LoadResources();
-        }
-
-        public void Instantiate()
-        {
-            foreach (var entity in entities)
-            {
-                entity.Instantiate();
-            }
-            terrain.Instantiate();
-        }
-
-
-
-        public JSONObject Serialize()
-        {
-            JSONObject result = new JSONObject();
-            result["dependencies"] = this.dependencies.Serialize();
-            result["type"] = type;
-            result["name"] = name;
-            result["entities"] = ISerializable.SerializeList(entities);
+            JSONObject result = base.Serialize();
             result["terrain"] = terrain.Serialize();
             result["biomeFilename"] = biomeFilename;
             result["perTileBiomeOverrides"] = ISerializable.SerializeList(perTileBiomeOverrides);
             result["specialTiles"] = specialTiles.Serialize();
 
             return result;
+        }
+
+        public override void Instantiate()
+        {
+            base.Instantiate();
+            terrain.Instantiate();
         }
     }
 }

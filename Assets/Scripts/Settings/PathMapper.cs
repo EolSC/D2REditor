@@ -27,6 +27,10 @@ namespace Diablo2Editor
         private string mapListPath = "";
         // Palettes directory
         private string palettesPath = "";
+        // Path to monsters.json storing all possible monster presets
+        private string monstersPath = "";
+        // Path to objects.json storing all possible environment objects presets
+        private string objectsPath = "";
         // DS1 extension
         // JSON preset extension
         public const string DS1_EXT = ".ds1";
@@ -56,6 +60,8 @@ namespace Diablo2Editor
                 tilesRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["tilesRoot"]));
                 presetRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["presetRoot"]));
                 palettesPath = Path.GetFullPath(Path.Combine(dataRoot, settings["palettePath"]));
+                monstersPath = Path.GetFullPath(Path.Combine(dataRoot, settings["monstersPath"]));
+                objectsPath = Path.GetFullPath(Path.Combine(dataRoot, settings["objectsPath"]));
                 levelTypesPath = settings["levelTypes"];
                 levelPresetsPath = settings["levelPresets"];
                 mapListPath = settings["maplistPath"];
@@ -106,6 +112,15 @@ namespace Diablo2Editor
         public string GetPalettesPath()
         {
             return GetAbsolutePath(palettesPath);
+        }
+
+        public string GetMonstersPath()
+        {
+            return GetAbsolutePath(monstersPath);
+        }
+        public string GetObjectsPath()
+        {
+            return GetAbsolutePath(objectsPath);
         }
 
         public string GetTilesRoot()

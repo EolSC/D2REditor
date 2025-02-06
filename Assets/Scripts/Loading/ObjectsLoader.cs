@@ -7,6 +7,7 @@ using UnityEngine;
 public class ObjectsLoader
 {
     private ObjectPreset preset;
+    private ObjectsMap map = null;
     public void Load(string path, bool instantiate)
     {
         string full_path = EditorMain.Settings().paths.GetAbsolutePath(path);
@@ -30,43 +31,18 @@ public class ObjectsLoader
         }
     }
 
-    public string FindObjectPreset(long type, long id)
+    public string FindObjectPreset(int act, long type, long id)
     {
-        string contentFile = "";
-        PathMapper pathMapper = EditorMain.Settings().paths;
-        switch (type)
+        if (map == null)
         {
-            
-            case 1:
-                {
-                    contentFile = pathMapper.GetMonstersPath();
-
-                }; break;
-            case 2:
-                {
-                    contentFile = pathMapper.GetObjectsPath();
-                }; break;
-            default:
-                break;
+            map = new ObjectsMap();
         }
-        if (contentFile.Length > 0)
-        {
-            return FindPreset(id, contentFile);
+        string presetName = map.FindObjectPresetName(act, type, id);
+        if (presetName.Length > 0) {
+            // TODO: find preset in monsters and npc folders for monsters
+            // and in objects for objects
+            return presetName;
         }
         return "";
     }
-
-    private string FindPreset(long id, string fileName)
-    {
-        if (File.Exists(fileName))
-        {
-            string jsonContent = File.ReadAllText(fileName);
-
-            JSONNode jsonNode = JSON.Parse(jsonContent);
-
-            return "";
-        }
-        return "";
-    }
-
 }

@@ -14,6 +14,10 @@
 		"maplistPath" : "Assets/Resources/maplist.csv",
 		"monstersPath" : "data/hd/character/monsters.json",
 		"objectsPath" : "data/hd/objects/objects.json",
+		"superuniques" : "data/global/excel/superuniques.txt",
+		"monpreset" : "data/global/excel/monpreset.txt",
+		"objpreset" : "data/global/excel/objpreset.txt",		
+		"monstats" : "data/global/excel/monstats.txt",		
     },
 	"common": {
 		"textureLoadMode" : "Albedo"

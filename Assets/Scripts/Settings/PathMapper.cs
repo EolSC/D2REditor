@@ -31,6 +31,17 @@ namespace Diablo2Editor
         private string monstersPath = "";
         // Path to objects.json storing all possible environment objects presets
         private string objectsPath = "";
+
+        // Path to superuniques.txt
+        private string superuniques = "";
+        // Path to monpreset.txt
+        private string monpreset = "";
+        // Path to objpreset.txt
+        private string objpreset = "";
+        // Path to monstats.txt
+        private string monstats = "";
+
+
         // DS1 extension
         // JSON preset extension
         public const string DS1_EXT = ".ds1";
@@ -65,6 +76,10 @@ namespace Diablo2Editor
                 levelTypesPath = settings["levelTypes"];
                 levelPresetsPath = settings["levelPresets"];
                 mapListPath = settings["maplistPath"];
+                superuniques = settings["superuniques"];
+                monpreset = settings["monpreset"];
+                objpreset = settings["objpreset"];
+                monstats = settings["monstats"];
             }
             ValidateDataRoot();
         }
@@ -121,6 +136,24 @@ namespace Diablo2Editor
         public string GetObjectsPath()
         {
             return GetAbsolutePath(objectsPath);
+        }
+
+        public string GetSuperUniques()
+        {
+            return GetAbsolutePath(superuniques);
+        }
+        public string GetMonPreset()
+        {
+            return GetAbsolutePath(monpreset);
+        }
+        public string GetObjPreset()
+        {
+            return GetAbsolutePath(objpreset);
+        }
+
+        public string GetMonStats()
+        {
+            return GetAbsolutePath(monstats);
         }
 
         public string GetTilesRoot()

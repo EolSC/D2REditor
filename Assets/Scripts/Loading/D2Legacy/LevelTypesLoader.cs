@@ -10,7 +10,8 @@ namespace Diablo2Editor
         public List<DT1Data> FindTilesForLevel(MapListLevelData levelData, D2Palette palettes)
         {
             List<DT1Data> result = new List<DT1Data>();
-            string[][] levelTypes = ReadLevelTypes();
+            string pathToLevelTypes = EditorMain.Settings().paths.GetPathToLevelTypes();
+            string[][] levelTypes = CSVReader.ReadFile(pathToLevelTypes);
             if (levelTypes != null && levelTypes.Length >= 3)
             {
                 for (int i = 2; i < levelTypes.Length; i++)
@@ -57,24 +58,7 @@ namespace Diablo2Editor
             }
             else
             {
-                string pathToLevelTypes = EditorMain.Settings().paths.GetPathToLevelTypes();
                 Debug.LogError("Can't lvltypes.txt: path in settings " + pathToLevelTypes);
-            }
-
-            return result;
-        }
-
-        private string [][] ReadLevelTypes()
-        {
-            string[][] result = null;
-            string pathToLevelTypes = EditorMain.Settings().paths.GetPathToLevelTypes();
-            if (System.IO.File.Exists(pathToLevelTypes))
-            { 
-                string[] lines = File.ReadAllLines(pathToLevelTypes);
-                result = new string[lines.Length][];
-                for (int i = 0; i < lines.Length; i++) {
-                    result[i] = lines[i].Split('\t');
-                }
             }
 
             return result;

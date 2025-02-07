@@ -1,8 +1,6 @@
 using SimpleJSON;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using UnityEditor;
 using UnityEngine;
 namespace Diablo2Editor
 {
@@ -90,15 +88,17 @@ namespace Diablo2Editor
             // Now traversing the monpresets
             if (monpresets != null)
             {
-                int prev_act = 1;
+                int prev_act = 0;
                 long objIndex = 0;
                 for (int i = 1; i < monpresets.Length; i++)
                 {
-                    int act = int.Parse(monpresets[i][0]);
+                    // Zero based act
+                    int act = int.Parse(monpresets[i][0]) - 1;
                     // if act changed - we need to reset index 'cause indexes are relative to act
                     if (prev_act != act)
                     {
                         objIndex = 0;
+                        prev_act = act;
                     }
                     // init with empty string for debug purposes
                     var indexDictionary = monsterPresets[act].data;
@@ -108,7 +108,7 @@ namespace Diablo2Editor
                     string type = "";
                     // Did we find any ID 
                     bool found = false;
-                    if (uniqueTypes[name] != null)
+                    if (uniqueTypes.ContainsKey(name))
                     {
                         // it's superUnique - get type from Dictionary
                         type = uniqueTypes[name];
@@ -119,15 +119,13 @@ namespace Diablo2Editor
                         // legacy ids, need some processing
                         if (name.StartsWith("place_"))
                         {
-                            if (name == "place_nothing")
+                            if (name != "place_nothing")
                             {
-                                // empty id, skip it
-                                continue;
+                                // cut out 'place_' prefix
+                                string id = name.Replace("place_", "");
+                                // try to find something meaningful
+                                found = TryFindStatsID(id, out type, monstats);
                             }
-                            // cut out 'place_' prefix
-                            string id = name.Replace("place_", "");
-                            // try to find something meaningful
-                            found = TryFindStatsID(id, out type, monstats);
                         }
                         else
                         {
@@ -135,29 +133,27 @@ namespace Diablo2Editor
                             // We 'll look for exact match in monstats
                             if (SearchMonStatsID(name, monstats))
                             {
-                                // if npc is found - his type == name
+                                // if npc is found - his type equals name
                                 found = true;
                                 type = name;
                             }
                         }
-
-                        // all searches done
-                        // need to do some final checks
-                        if (found)
-                        {
-                            if (SearchMonStatsID(type, monstats))
-                            {
-                                // if type found and it is in monstats
-                                // write it to final map
-                                indexDictionary[objIndex] = type;
-                            }    
-                        }
-
                     }
 
+                    // all searches done
+                    // need to do some final checks
+                    if (found)
+                    {
+                        if (SearchMonStatsID(type, monstats))
+                        {
+                            // if type found and it is in monstats
+                            // write it to final map
+                            indexDictionary[objIndex] = type;
+                        }
+                    }
+                    objIndex++;
                 }
             }
-
         }
 
         private void InitObjectPresets()
@@ -166,28 +162,50 @@ namespace Diablo2Editor
             var pathMapper = EditorMain.Settings().paths;
             // Read files of interest
             string[][] objpresets = CSVReader.ReadFile(pathMapper.GetObjPreset());
-            var monstersJsonFile = pathMapper.GetMonstersPath();
-            if (File.Exists(monstersJsonFile))
+            string[][] objtxt = CSVReader.ReadFile(pathMapper.GetObjTxt());
+
+            var objectsJsonFile = pathMapper.GetObjectsPath();
+            if (File.Exists(objectsJsonFile))
             {
-                var jsonContent = File.ReadAllText(pathMapper.GetMonstersPath());
-                JSONNode monstersJson = JSON.Parse(jsonContent);
-                if (objpresets != null && monstersJson != null)
+                var jsonContent = File.ReadAllText(objectsJsonFile);
+                JSONNode objectsJson = JSON.Parse(jsonContent);
+                if (objpresets != null && objectsJson != null)
                 {
                     // first of all read key fields from json to use later
-                    string[]keys = new string[monstersJson.Count];
+                    string[]keys = new string[objectsJson.Count];
                     int index = 0;
-                    foreach (string k in monstersJson.Keys)
+                    foreach (string k in objectsJson.Keys)
                     {
-                        keys[index] = k;
+                        keys[index++] = k;
                     }
 
                     for (int i = 1; i < objpresets.Length; i++)
                     {
-                        int act = int.Parse(objpresets[i][1]);
+                        // Zero based act
+                        int act = int.Parse(objpresets[i][1]) - 1;
                         long objIndex = long.Parse(objpresets[i][0]);
-                        string name = keys[objIndex];
-                        // just write jsonKey for proper index and act
-                        objectPresets[act].data[index] = name;
+                        string id = objpresets[i][2];
+                        // search objects.txt by id in 3rd column
+                        int objTxtIndex = SearchObjectsID(id, objtxt);
+                        if (objTxtIndex >= 0) // if we're good - write value from keys as result
+                        {
+                            if (objTxtIndex < keys.Length)
+                            {
+                                var presetName = keys[objTxtIndex];
+                                objectPresets[act].data[objIndex] = presetName;
+                            }
+                            else
+                            {
+                                Debug.LogError("Invalid obj " + id + " with index " + objTxtIndex);
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogError("Invalid obj " + id + " with index " + objTxtIndex);
+                            objectPresets[act].data[objIndex] = "";
+                        }
+
+                        
                     }
                 }
 
@@ -224,6 +242,25 @@ namespace Diablo2Editor
                 }
             }
             return false;
+        }
+
+        /*
+         * Search objects.txt for specific ID. 
+         * Returns zero-based object index which is valid for objects.json
+         * Returns -1 if no matches found
+         */
+        private int SearchObjectsID(string id, string[][] objtxt)
+        {
+            for (int i = 1; i < objtxt.Length; i++)
+            {
+                string row_id = objtxt[i][0];
+                // case insensitive search 
+                if (row_id.ToLower() == id.ToLower())
+                {
+                    return i - 1;
+                }
+            }
+            return -1;
         }
 
         /*

@@ -55,18 +55,10 @@ public class EditorMain : MonoBehaviour
         OpenLevel(path, true, true);
     }
 
-    [MenuItem("Diablo Level Editor/Developer/Test object")]
+    [MenuItem("Diablo Level Editor/Developer/Test object map")]
     private static void TestObject()
     {
-        string path = Settings().developer.testObject;
-        objectsLoader.Load(path, true);
-    }
-
-    [MenuItem("Diablo Level Editor/Developer/Test monster")]
-    private static void TestMonster()
-    {
-        string path = Settings().developer.testMonster;
-        objectsLoader.Load(path, true);
+        Diablo2Editor.ObjectsMap map = new Diablo2Editor.ObjectsMap();
     }
 
 

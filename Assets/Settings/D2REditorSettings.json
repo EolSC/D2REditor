@@ -17,6 +17,7 @@
 		"superuniques" : "data/global/excel/superuniques.txt",
 		"monpreset" : "data/global/excel/monpreset.txt",
 		"objpreset" : "data/global/excel/objpreset.txt",		
+		"objtxt" : "data/global/excel/objects.txt",		
 		"monstats" : "data/global/excel/monstats.txt",		
     },
 	"common": {

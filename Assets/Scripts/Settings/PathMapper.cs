@@ -38,6 +38,8 @@ namespace Diablo2Editor
         private string monpreset = "";
         // Path to objpreset.txt
         private string objpreset = "";
+        // Path to objects.txt
+        private string objtxt = "";
         // Path to monstats.txt
         private string monstats = "";
 
@@ -79,6 +81,7 @@ namespace Diablo2Editor
                 superuniques = settings["superuniques"];
                 monpreset = settings["monpreset"];
                 objpreset = settings["objpreset"];
+                objtxt = settings["objtxt"];
                 monstats = settings["monstats"];
             }
             ValidateDataRoot();
@@ -149,6 +152,11 @@ namespace Diablo2Editor
         public string GetObjPreset()
         {
             return GetAbsolutePath(objpreset);
+        }
+
+        public string GetObjTxt()
+        {
+            return GetAbsolutePath(objtxt);
         }
 
         public string GetMonStats()

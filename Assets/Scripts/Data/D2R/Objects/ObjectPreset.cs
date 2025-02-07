@@ -10,6 +10,9 @@ namespace Diablo2Editor
         public ObjectPreset(GameObject gameObject)
             :base(gameObject)
         {
+            // Don't check for components in objects
+            // We 're not serializing them so errors can be skipped
+            checkMissingComponents = false;
         }
 
         public override void Deserialize(JSONObject json)

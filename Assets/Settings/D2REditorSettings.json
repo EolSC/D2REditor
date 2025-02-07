@@ -1,9 +1,8 @@
 {
     "developer": {
-        "testLevel": "data/global/tiles/act1/barracks/barew.ds1",
+        "testLevel3": "data/global/tiles/act1/barracks/barew.ds1",
         "testLevel2":  "data/global/tiles/act1/outdoors/tower2.ds1",
-        "testObject":  "data/hd/objects/braziers/brazier.json",
-        "testMonster":  "data/hd/character/enemy/andariel.json",
+        "testLevel":  "data/global/tiles/act1/catacomb/andy3.ds1",
     },
     "paths": {
         "presetRoot": "data/hd/env/preset",

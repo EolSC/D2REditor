@@ -13,12 +13,18 @@ namespace Diablo2Editor
         public LevelPresetDependencies dependencies;
         public List<LevelEntity> entities;
         public GameObject gameObject;
+        protected bool checkMissingComponents = true;
+
 
         public JsonPreset(GameObject gameObject)
         {
             this.gameObject = gameObject;
         }
 
+        public bool NeedCheckMissingComponents()
+        {
+            return checkMissingComponents;
+        }
         public virtual void Deserialize(JSONObject json)
         {
             dependencies = new LevelPresetDependencies();

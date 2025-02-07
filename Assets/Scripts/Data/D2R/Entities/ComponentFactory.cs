@@ -26,6 +26,10 @@ namespace Diablo2Editor
         UnitRootComponent,
         UnitPartComponent,
         SkeletonComponent,
+        OverrideModelDefinitionComponent,
+        AudioEmitterComponent,
+        TransformVariationDefinitionComponent,
+        ObjectMountPointComponent,
     }
 
     public class ComponentFactory
@@ -50,10 +54,14 @@ namespace Diablo2Editor
             { ComponentTypes.UnitRootComponent, typeof(UnitRootComponent) },
             { ComponentTypes.UnitPartComponent, typeof(UnitPartComponent) },
             { ComponentTypes.SkeletonComponent, typeof(SkeletonComponent) },
+            { ComponentTypes.OverrideModelDefinitionComponent, typeof(OverrideModelDefinitionComponent) },
+            { ComponentTypes.AudioEmitterComponent, typeof(AudioEmitterComponent) },
+            { ComponentTypes.TransformVariationDefinitionComponent, typeof(TransformVariationDefinitionComponent) },
+            { ComponentTypes.ObjectMountPointComponent, typeof(ObjectMountPointComponent) },
 
         };
              
-        public static LevelEntityComponent CreateComponentByType(string type, GameObject gameObject)
+        public static LevelEntityComponent CreateComponentByType(string type, GameObject gameObject, bool checkMissingComponents)
         {
             object componentType;
             if (Enum.TryParse(typeof(ComponentTypes), type, out componentType))
@@ -62,7 +70,10 @@ namespace Diablo2Editor
                 Type typeToCreate = componentTypes[parsedType];
                 return gameObject.AddComponent(typeToCreate) as LevelEntityComponent;
             }
-            Debug.Log("Unknown component: " + type);
+            if (checkMissingComponents)
+            {
+                Debug.Log("Unknown component: " + type);
+            }
             return gameObject.AddComponent<LevelComponentUnknown>();
         }
     }

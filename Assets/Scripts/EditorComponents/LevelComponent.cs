@@ -104,7 +104,10 @@ public class LevelComponent : MonoBehaviour
     private void LoadJsonPreset(string jsonContent)
     {
         JSONNode jsonNode = JSON.Parse(jsonContent);
-        d2RPreset = new Diablo2Editor.LevelPreset(gameObject, jsonNode.AsObject, seed);
+        GameObject jsonObj = new GameObject();
+        jsonObj.name = "json";
+        jsonObj.transform.parent = transform;
+        d2RPreset = new Diablo2Editor.LevelPreset(jsonObj, jsonNode.AsObject, seed);
     }
 
     // Ds1-specific logic

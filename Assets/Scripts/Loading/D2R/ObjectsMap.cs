@@ -52,7 +52,17 @@ namespace Diablo2Editor
                     var key = indexData[index];
                     if (json[key] != null) 
                     {
-                        return json[key].ToString();
+                        if (type == 1) // for monsters and npcs - fleName is json value 
+                        {
+                            return json[key] + PathMapper.JSON_EXT;
+                        }
+                        if (type == 2)// for objects - fleName is in asset_path value and key is fileName
+                        {
+                            JSONObject obj = json[key].AsObject;
+                            var path = obj["asset_path"];
+                            return Path.Combine(path, key + PathMapper.JSON_EXT);
+
+                        }
                     }
                 }
             }

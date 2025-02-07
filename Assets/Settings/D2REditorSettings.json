@@ -19,6 +19,9 @@
 		"objpreset" : "data/global/excel/objpreset.txt",		
 		"objtxt" : "data/global/excel/objects.txt",		
 		"monstats" : "data/global/excel/monstats.txt",		
+		"npcRoot": "data/hd/character/npc",
+		"monsterRoot": "data/hd/character/enemy",
+		"objectsRoot": "data/hd/objects",
     },
 	"common": {
 		"textureLoadMode" : "Albedo"

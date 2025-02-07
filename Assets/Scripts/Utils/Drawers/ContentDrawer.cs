@@ -23,7 +23,6 @@ public class ContentDrawer
 
             EditorUtility.DisplayProgressBar("Loading level", "Instantiating objects...", 0.8f);
             d2RData.Instantiate();
-            EditorUtility.ClearProgressBar();
         }
 
         if (ds1Data != null)
@@ -44,6 +43,8 @@ public class ContentDrawer
         presetGO.transform.localScale = new Vector3(-1, 1, 1);
 
         UpdateCameraSettings(gameObject);
+
+        EditorUtility.ClearProgressBar();
     }
 
     private void UpdateCameraSettings(GameObject gameObject)
@@ -82,6 +83,7 @@ public class ContentDrawer
 
     private void CreateLevelObjects(GameObject gameObject, DS1Level level)
     {
+        ObjectsLoader loader = new ObjectsLoader();
         GameObject objParent = new GameObject();
         objParent.transform.parent = gameObject.transform;
         objParent.name = "Objects";
@@ -92,8 +94,13 @@ public class ContentDrawer
             GameObject objHolder = new GameObject();
             objHolder.transform.parent = objParent.transform;
             var objComponent = objHolder.AddComponent<LevelObjectComponent>();
-            objComponent.Init(level, i);
+            objComponent.Init(loader, level, i);
         }
+
+        // Flip hierarchy around X-axis
+        // D2 granny models use other coordinate system. To show level in same coordinates
+        // as game shows it
+        objParent.transform.localScale = new Vector3(-1, 1, 1);
     }
 
 }

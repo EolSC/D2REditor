@@ -43,6 +43,12 @@ namespace Diablo2Editor
         // Path to monstats.txt
         private string monstats = "";
 
+        // Path to npc presets folder
+        private string npcRoot = "";
+        // Path to enemy presets folder
+        private string monsterRoot = "";
+        // Path to objects presets folder
+        private string objectsRoot = "";
 
         // DS1 extension
         // JSON preset extension
@@ -83,6 +89,11 @@ namespace Diablo2Editor
                 objpreset = settings["objpreset"];
                 objtxt = settings["objtxt"];
                 monstats = settings["monstats"];
+
+                npcRoot = settings["npcRoot"];
+                monsterRoot = settings["monsterRoot"];
+                objectsRoot = settings["objectsRoot"];
+
             }
             ValidateDataRoot();
         }
@@ -162,6 +173,20 @@ namespace Diablo2Editor
         public string GetMonStats()
         {
             return GetAbsolutePath(monstats);
+        }
+
+        public string GetNPCRoot()
+        {
+            return npcRoot;
+        }
+
+        public string GetMonsterRoot()
+        {
+            return monsterRoot;
+        }
+        public string GetObjectsRoot()
+        {
+            return objectsRoot;
         }
 
         public string GetTilesRoot()

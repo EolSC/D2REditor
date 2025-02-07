@@ -1,6 +1,9 @@
 using Diablo2Editor;
+using NUnit.Framework;
 using SimpleJSON;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,30 +11,36 @@ public class ObjectsLoader
 {
     private ObjectPreset preset;
     private ObjectsMap map = null;
-    public void Load(string path, bool instantiate)
+
+
+    public void Load(int act, long type, long id, GameObject gameObject)
     {
-        string full_path = EditorMain.Settings().paths.GetAbsolutePath(path);
+        var actZeroBased = act - 1;
+        var path = FindObjectPreset(actZeroBased, type, id);
+        if (path.Length > 0)
+        {
+            Load(path, gameObject);
+        }
+    }
+
+    public void Load(string full_path, GameObject gameObject)
+    {
         if (File.Exists(full_path))
         {
             string name = Path.GetFileNameWithoutExtension(full_path);
-            GameObject gameObject = new GameObject();
             gameObject.name = name;
 
             string jsonContent = File.ReadAllText(full_path);
             JSONNode jsonNode = JSON.Parse(jsonContent);
             preset = new ObjectPreset(gameObject);
             preset.Deserialize(jsonNode.AsObject);
-            if (instantiate)
-            {
-                EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", 0.0f);
-                preset.LoadResources();
-                preset.Instantiate();
-                EditorUtility.ClearProgressBar();
-            }
+
+            preset.LoadResources();
+            preset.Instantiate();
         }
     }
 
-    public string FindObjectPreset(int act, long type, long id)
+    private string FindObjectPreset(int act, long type, long id)
     {
         if (map == null)
         {
@@ -39,9 +48,40 @@ public class ObjectsLoader
         }
         string presetName = map.FindObjectPresetName(act, type, id);
         if (presetName.Length > 0) {
-            // TODO: find preset in monsters and npc folders for monsters
-            // and in objects for objects
-            return presetName;
+            return FindPresetOnDisc(type, presetName);
+        }
+        return "";
+    }
+
+    private string FindPresetOnDisc(long type, string presetName)
+    {
+        List<string> folders = new List<string>();
+        var pathMapper = EditorMain.Settings().paths;
+        if (type == 1) // npc or enemy
+        {
+            // add both folders in search
+            folders.Add(pathMapper.GetMonsterRoot());
+            folders.Add(pathMapper.GetNPCRoot());
+        }
+        if (type == 2) // object
+        {
+            // search objects
+            folders.Add(pathMapper.GetObjectsRoot());
+        }
+        return GetFullPresetName(pathMapper, presetName, folders);
+    }
+
+    private string GetFullPresetName(PathMapper mapper, string presetName, List<string> folders)
+    {
+
+        foreach (var folder in folders)
+        {
+            var path = Path.Combine(folder, presetName);
+            var abs_path = mapper.GetAbsolutePath(path);
+            if (File.Exists(abs_path))
+            {
+                return abs_path;
+            }
         }
         return "";
     }

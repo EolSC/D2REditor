@@ -17,11 +17,13 @@ public class LevelObjectComponent : MonoBehaviour
     [SerializeField]
     private int flags;
 
-    public void Init(DS1Level owner, int index)
+    public void Init(ObjectsLoader loader, DS1Level owner, int index)
     {
         this.owner = owner;
         ds1Object = owner.objects[index];
         UpdateProperties();
+        loader.Load((int)owner.act, this.type, this.id, gameObject);
+        gameObject.transform.position = FromSubtileToPosition(x, y);
     }
 
     private void UpdateProperties()
@@ -31,6 +33,12 @@ public class LevelObjectComponent : MonoBehaviour
         x = (int)ds1Object.x;
         y = (int)ds1Object.y;
         flags = ds1Object.flags;
+    }
+
+    private Vector3 FromSubtileToPosition(int subtileX, int subtileY)
+    {
+        var subtileStep = CoordinateSystem.SUBTILE_GRID_STEP;
+        return new Vector3(subtileStep.x * subtileX, subtileStep.y, subtileStep.z * subtileY);
     }
 
     public DS1Object SerializeToObject()

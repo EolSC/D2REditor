@@ -20,15 +20,9 @@ public enum TileSelection
 
 public class Tile
 {
-    // Distance between cells in Unity units
-    static float TILE_GRID_SIZE = 10.0f;
-    static float SUBTILE_SIZE_X = TILE_GRID_SIZE / DT1Block.SUBTILES_X;
-    static float SUBTILE_SIZE_Y = TILE_GRID_SIZE / DT1Block.SUBTILES_Y;
-
-    // Distance between cells in Unity units
-    static Vector3 TILE_GRID_STEP = new Vector3(10.0f, 0.0f, 10.0f);
-
     static float LINE_THICKNESS = 1.0f;
+    static float TILE_GRID_Z = 0.1f;
+    static float WALKABLE_Z = 0.15f;
 
     private Mesh mesh;
 
@@ -129,12 +123,12 @@ public class Tile
                 material = new Material(Shader.Find("Standard"));
                 material.SetFloat("_Glossiness", 0.0f);
                 material.color = Color.red;
-                var position = tile_world_pos + new Vector3(x * SUBTILE_SIZE_X, 0.0f, y * SUBTILE_SIZE_Y);
+                var position = tile_world_pos + new Vector3(x * CoordinateSystem.SUBTILE_SIZE_X, 0.0f, y * CoordinateSystem.SUBTILE_SIZE_Y);
 
-                Vector3 v1 = position + new Vector3(0.0f, 0.15f, 0.0f);
-                Vector3 v2 = new Vector3(SUBTILE_SIZE_X, 0.0f, 0.0f);
-                Vector3 v3 = new Vector3(0.0f, 0.0f, SUBTILE_SIZE_Y);
-                Vector3 v4 = new Vector3(SUBTILE_SIZE_X, 0.0f, SUBTILE_SIZE_Y);
+                Vector3 v1 = position + new Vector3(0.0f, WALKABLE_Z, 0.0f);
+                Vector3 v2 = new Vector3(CoordinateSystem.SUBTILE_SIZE_X, 0.0f, 0.0f);
+                Vector3 v3 = new Vector3(0.0f, 0.0f, CoordinateSystem.SUBTILE_SIZE_Y);
+                Vector3 v4 = new Vector3(CoordinateSystem.SUBTILE_SIZE_X, 0.0f, CoordinateSystem.SUBTILE_SIZE_Y);
 
 
                 Vector3[] vertices = new Vector3[]
@@ -169,23 +163,27 @@ public class Tile
 
     public void Create(BoxCollider boxCollider, int x, int y, int z)
     {
-        Vector3 world_pos = new Vector3(x * TILE_GRID_STEP.x, y * TILE_GRID_STEP.y + 0.1f, z * TILE_GRID_STEP.z);
+        Vector3 world_pos = new Vector3(
+            x * CoordinateSystem.TILE_GRID_STEP.x, 
+            y * CoordinateSystem.TILE_GRID_STEP.y + TILE_GRID_Z, 
+            z * CoordinateSystem.TILE_GRID_STEP.z
+            );
         CreateWalkableInfo(world_pos);
 
         mesh = new Mesh();
         material = new Material(Shader.Find("Standard"));
         material.SetFloat("_Glossiness", 0.0f);
         Vector3 v1 = world_pos;
-        Vector3 v2 = new Vector3(TILE_GRID_SIZE, 0.0f, 0.0f);
+        Vector3 v2 = new Vector3(CoordinateSystem.TILE_GRID_SIZE, 0.0f, 0.0f);
         Vector3 v3 = new Vector3(0.0f, 0.0f, LINE_THICKNESS);
-        Vector3 v4 = new Vector3(TILE_GRID_SIZE, 0.0f, LINE_THICKNESS);
+        Vector3 v4 = new Vector3(CoordinateSystem.TILE_GRID_SIZE, 0.0f, LINE_THICKNESS);
 
 
         Vector3 v5 = v1 + v2;
 
-        Vector3 v6 = new Vector3(0.0f, 0.0f, TILE_GRID_SIZE);
+        Vector3 v6 = new Vector3(0.0f, 0.0f, CoordinateSystem.TILE_GRID_SIZE);
         Vector3 v7 = new Vector3(-LINE_THICKNESS, 0.0f, 0.0f);
-        Vector3 v8 = new Vector3(-LINE_THICKNESS, 0.0f, TILE_GRID_SIZE);
+        Vector3 v8 = new Vector3(-LINE_THICKNESS, 0.0f, CoordinateSystem.TILE_GRID_SIZE);
 
         Vector3 v9 = v1 + new Vector3(LINE_THICKNESS, 0.0f, 0.0f);
 
@@ -193,7 +191,7 @@ public class Tile
         Vector3 v11 = v7;
         Vector3 v12 = v8;
 
-        Vector3 v13 = v1 + new Vector3(0.0f, 0.0f, TILE_GRID_SIZE - LINE_THICKNESS);
+        Vector3 v13 = v1 + new Vector3(0.0f, 0.0f, CoordinateSystem.TILE_GRID_SIZE - LINE_THICKNESS);
 
         Vector3 v14 = v2;
         Vector3 v15 = v3;
@@ -242,7 +240,7 @@ public class Tile
 
         var center = mesh.bounds.center;
         boxCollider.center = center;
-        boxCollider.size = new Vector3(TILE_GRID_SIZE, 0.1f, TILE_GRID_SIZE);
+        boxCollider.size = new Vector3(CoordinateSystem.TILE_GRID_SIZE, 0.1f, CoordinateSystem.TILE_GRID_SIZE);
 
         collider = boxCollider;
 

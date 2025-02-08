@@ -1,9 +1,40 @@
 using Diablo2Editor;
+using JetBrains.Annotations;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
+
+[Serializable]
+public class ObjectData
+{
+    [SerializeField]
+    public int type;
+    [SerializeField]
+    public int id;
+    [SerializeField]
+    public int x;
+    [SerializeField]
+    public int y;
+    [SerializeField]
+    public int flags;
+    public bool IsEqual(ObjectData other)
+    {
+        return x == other.x && y == other.y 
+            && id == other.id && type == other.type && flags == other.flags;
+    }
+    public void Copy(ObjectData other)
+    {
+        this.type = other.type;
+        this.id = other.id;
+        this.x = other.x;
+        this.y = other.y;
+        this.flags = other.y;
+    }
+
+}
 [Serializable]
 public class ObjectPathPoint
 {
@@ -21,7 +52,7 @@ public class ObjectPathPoint
         this.action = action;
     }
 
-    public bool Equal(ObjectPathPoint point)
+    public bool IsEqual(ObjectPathPoint point)
     {
         return x == point.x && y == point.y && action == point.action;
     }
@@ -31,17 +62,12 @@ public class ObjectPathPoint
 public class LevelObjectComponent : MonoBehaviour
 {
     private DS1Level owner;
+    private ObjectsLoader loader;
     private DS1Object ds1Object;
+
     [SerializeField]
-    private int type;
-    [SerializeField]
-    private int id;
-    [SerializeField]
-    private int x;
-    [SerializeField]
-    private int y;
-    [SerializeField]
-    private int flags;
+    ObjectData data = new ObjectData();
+    ObjectData oldData = new ObjectData();
 
     [SerializeField]
     private List<ObjectPathPoint> points = new List<ObjectPathPoint>();
@@ -51,20 +77,39 @@ public class LevelObjectComponent : MonoBehaviour
     public void Init(ObjectsLoader loader, DS1Level owner, int index)
     {
         this.owner = owner;
+        this.loader = loader;
         ds1Object = owner.objects[index];
         UpdateProperties();
+        oldData.Copy(data);
         oldpoints.Clear();
         foreach(var p in points)
         {
             oldpoints.Add(new ObjectPathPoint(p.x, p.y, p.action));
         }
 
-        loader.Load((int)owner.act, this.type, this.id, gameObject);
+        loader.Load((int)owner.act, this.data.type, this.data.id, gameObject, false);
         UpdatePositions();
     }
     void Update()
     {
         bool pathChanged = IsPathChanged();
+        bool objectChanged = !oldData.IsEqual(data);
+        if (objectChanged)
+        {
+            if ((oldData.type != data.type) || (oldData.id != data.id))
+            {
+                if (loader != null)
+                {
+                    loader.Load((int)owner.act, data.type, data.id, gameObject, true);
+                }
+            }
+            if ((oldData.x != data.x) || (oldData.y != data.y))
+            {
+                gameObject.transform.localPosition = FromSubtileToPosition(data.x, data.y);
+            }
+            oldData.Copy(data);
+
+        }
         if (transform.hasChanged)
         {
             UpdatePosFromTransform();
@@ -89,7 +134,7 @@ public class LevelObjectComponent : MonoBehaviour
 
     private void UpdatePositions()
     {
-        gameObject.transform.localPosition = FromSubtileToPosition(x, y);
+        gameObject.transform.localPosition = FromSubtileToPosition(data.x, data.y);
         gameObject.transform.hasChanged = false;
         if (ds1Object.paths.Count > 0)
         {
@@ -105,8 +150,8 @@ public class LevelObjectComponent : MonoBehaviour
         int newSubtileY = (int)System.Math.Floor(pos.z / subtileStep.z);
 
         ClampPositionByLevel(ref newSubtileX, ref newSubtileY);
-        x = newSubtileX;
-        y = newSubtileY;
+        data.x = newSubtileX;
+        data.y = newSubtileY;
     }
 
     public void ClampPositionByLevel(ref int x, ref int y)
@@ -149,7 +194,7 @@ public class LevelObjectComponent : MonoBehaviour
             return true;
         }
         for (int i = 0; i < oldpoints.Count; i++) { 
-            if (!oldpoints[i].Equal(points[i]))
+            if (!oldpoints[i].IsEqual(points[i]))
             {
                 return true;
             }    
@@ -160,11 +205,12 @@ public class LevelObjectComponent : MonoBehaviour
 
     private void UpdateProperties()
     {
-        type = (int)ds1Object.type;
-        id = (int)ds1Object.id;
-        x = (int)ds1Object.x;
-        y = (int)ds1Object.y;
-        flags = (int)ds1Object.ds1_flags;
+        data.type = (int)ds1Object.type;
+        data.id = (int)ds1Object.id;
+        data.x = (int)ds1Object.x;
+        data.y = (int)ds1Object.y;
+        data.flags = (int)ds1Object.ds1_flags;
+
         foreach (var p in ds1Object.paths)
         {
             int x = (int)p.x;
@@ -213,11 +259,12 @@ public class LevelObjectComponent : MonoBehaviour
     public DS1Object SerializeToObject()
     {
         DS1Object obj = new DS1Object();
-        obj.type = type;
-        obj.id = id;
-        obj.x = x;
-        obj.y = y;
-        obj.ds1_flags = flags;
+        obj.type = data.type;
+        obj.id = data.id;
+        obj.x = data.x;
+        obj.y = data.y;
+        obj.ds1_flags = data.flags;
+
         obj.paths.Clear();
 
         for (int i = 0; i < points.Count; ++i)

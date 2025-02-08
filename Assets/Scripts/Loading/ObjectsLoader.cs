@@ -13,30 +13,48 @@ public class ObjectsLoader
     private ObjectsMap map = null;
 
 
-    public void Load(int act, long type, long id, GameObject gameObject)
+    public void Load(int act, long type, long id, GameObject gameObject, bool isReloading)
     {
         var actZeroBased = act - 1;
         var path = FindObjectPreset(actZeroBased, type, id);
         if (path.Length > 0)
         {
-            Load(path, gameObject);
+            Load(path, gameObject, isReloading);
         }
     }
 
-    public void Load(string full_path, GameObject gameObject)
+    public void Load(string full_path, GameObject gameObject, bool isReloading)
     {
+        if (isReloading)
+        {
+            foreach (Transform child in gameObject.transform)
+            {
+                Object.DestroyImmediate(child.gameObject);
+            }
+        }
         if (File.Exists(full_path))
         {
+            GameObject child = new GameObject();
+            child.name = "json";
+            child.transform.parent = gameObject.transform;
+
             string name = Path.GetFileNameWithoutExtension(full_path);
             gameObject.name = name;
 
             string jsonContent = File.ReadAllText(full_path);
             JSONNode jsonNode = JSON.Parse(jsonContent);
-            preset = new ObjectPreset(gameObject);
+            preset = new ObjectPreset(child);
             preset.Deserialize(jsonNode.AsObject);
 
             preset.LoadResources();
             preset.Instantiate();
+
+            if(isReloading)
+            {
+                // reset position 
+                child.transform.localPosition = Vector3.zero;
+
+            }
         }
     }
 

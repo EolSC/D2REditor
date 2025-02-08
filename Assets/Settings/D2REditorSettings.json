@@ -2,7 +2,7 @@
     "developer": {
         "testLevel3": "data/global/tiles/act1/barracks/barew.ds1",
         "testLevel2":  "data/global/tiles/act1/outdoors/tower2.ds1",
-        "testLevel":  "data/global/tiles/act1/catacomb/andy3.ds1",
+		"testLevel":  "data/global/tiles/act1/town/towne1.ds1",
     },
     "paths": {
         "presetRoot": "data/hd/env/preset",

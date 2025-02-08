@@ -144,7 +144,7 @@ public class DS1Saver
             writer.Write((int)obj.x);
             writer.Write((int)obj.y);
             writer.Write((int)obj.ds1_flags);
-            if (obj.path_num > 0)
+            if (obj.paths.Count > 0)
             {
                 npc.Add(i);
             }
@@ -172,10 +172,10 @@ public class DS1Saver
         foreach (var n in npc)
         {
             var obj = level.objects[n];
-            writer.Write((int)obj.path_num);
+            writer.Write((int)obj.paths.Count);
             writer.Write((int)obj.x);
             writer.Write((int)obj.y);
-            for (int path = 0; path < obj.path_num; path++)
+            for (int path = 0; path < obj.paths.Count; path++)
             {
                 writer.Write((int)obj.paths[path].x);
                 writer.Write((int)obj.paths[path].y);

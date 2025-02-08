@@ -8,10 +8,6 @@ namespace Diablo2Editor
     {
         // Max number of DT1 in level
         public const int DT1_IN_DS1_MAX = 33;
-        // Max number of levels
-        public const int DS1_MAX = 100;
-        // Max number of DT1
-        public const int DT1_MAX = 300;
         // Max number of acts
         public const int ACT_MAX = 5;
         // Max number of floor tiles

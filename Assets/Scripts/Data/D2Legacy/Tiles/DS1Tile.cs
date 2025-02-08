@@ -14,7 +14,6 @@ public class DS1Tile
     public byte prop3;  // main_index
     public byte prop4;  // main_index + flags
     public int bt_idx;
-    public byte flags;
 
     public int GetMainIndex()
     {

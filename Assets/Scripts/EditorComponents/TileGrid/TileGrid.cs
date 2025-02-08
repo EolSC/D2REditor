@@ -8,6 +8,9 @@ public class TileGrid : MonoBehaviour
     public bool drawWalkableInfo = false;
 
     [SerializeField]
+    public bool visible = false;
+
+    [SerializeField]
     private LevelComponent _levelComponent;
 
     private LevelComponent _oldValue;
@@ -93,6 +96,11 @@ public class TileGrid : MonoBehaviour
 
     private void Draw(Camera camera)
     {
+        if (!visible)
+        {
+            return;
+        }
+
         if (_gridDirty)
         {
             UpdateLevelData();

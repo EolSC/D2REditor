@@ -46,7 +46,7 @@ namespace Diablo2Editor
         {
             int dataSize = sizeof(uint);
             int dataEnd = streamPosition + dataSize;
-            if (dataEnd < content.Length)
+            if (dataEnd <= content.Length)
             {
                 value = BitConverter.ToUInt32(content, streamPosition);
                 streamPosition += dataSize;
@@ -394,8 +394,8 @@ namespace Diablo2Editor
                 // no objects on level
             }
 
-            int max_subtile_width = (int)level.width * 5;
-            int max_subtile_height = (int)level.height * 5;
+            int max_subtile_width = (int)level.width * DT1Block.SUBTILES_X;
+            int max_subtile_height = (int)level.height * DT1Block.SUBTILES_X;
             for (int n = 0; n < level.obj_num; n++)
             {
                 DS1Object levelObject = new DS1Object();
@@ -413,19 +413,6 @@ namespace Diablo2Editor
                 // integrity check (not done by the game I believe)
                 if ((levelObject.x >= 0) && (levelObject.x < max_subtile_width) && (levelObject.y >= 0) && (levelObject.y < max_subtile_height))
                 {
-                    // some init for the paths of this object
-                    levelObject.path_num = 0;
-                    levelObject.desc_idx = -1;
-                    levelObject.flags = 0;
-
-                    levelObject.frame_delta = (byte)(UnityEngine.Random.Range(0, 255) % 256);
-
-                    levelObject.label.rx = 0;
-                    levelObject.label.ry = 0;
-                    levelObject.label.w = 0;
-                    levelObject.label.h = 0;
-                    levelObject.label.flags = 0;
-                    // TODO: fill object label
                     level.objects.Add(levelObject);
                 }
                 else
@@ -550,10 +537,9 @@ namespace Diablo2Editor
                         {
 
                             if ((levelObject.x == x) && (levelObject.y == y) &&
-                                (levelObject.path_num != 0))
+                                (levelObject.paths.Count != 0))
                             {
                                 levelObject.paths.Clear();
-                                levelObject.path_num = 0;
                             }
                         }
 
@@ -607,9 +593,7 @@ namespace Diablo2Editor
 
                             // all ok for assigning the paths to this object
                             var levelObject = level.objects[cur_obj];
-                            levelObject.path_num = path_count;
-
-                            for (int p = 0; p < levelObject.path_num; p++)
+                            for (int p = 0; p < path_count; p++)
                             {
                                 DS1ObjectPath pathObject = new DS1ObjectPath();
                                 pathObject.x = ReadUint(content, ref streamPosition);

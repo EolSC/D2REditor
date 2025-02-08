@@ -65,7 +65,7 @@ public class LevelComponent : MonoBehaviour
 
         JSONNode resultJson = d2RPreset.Serialize();
         DS1Saver saver = new DS1Saver();
-
+        UpdateObjectsData(ds1Level);
         byte[] resultDS1 = saver.SaveDS1(ds1Level);
 
         string jsonFileName = Path.Combine(path, name_no_ext + PathMapper.JSON_EXT);
@@ -76,6 +76,17 @@ public class LevelComponent : MonoBehaviour
         File.WriteAllBytes(ds1FileName, resultDS1);
         Debug.Log("Level ds1 saved: " + ds1FileName);
         Debug.Log("Level json saved: " + jsonFileName);
+    }
+
+    private void UpdateObjectsData(DS1Level level)
+    {
+        level.objects.Clear();
+        var objectsComponents = gameObject.GetComponentsInChildren<LevelObjectComponent>();
+        foreach(var obj in objectsComponents)
+        {
+            var ds1Object = obj.SerializeToObject();
+            level.objects.Add(ds1Object);
+        }
     }
 
     public bool Test(byte[] ds1Content, string jsonContent)

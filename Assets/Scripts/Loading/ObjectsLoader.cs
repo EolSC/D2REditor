@@ -46,7 +46,7 @@ public class ObjectsLoader
             preset = new ObjectPreset(child);
             preset.Deserialize(jsonNode.AsObject);
 
-            preset.LoadResources();
+            preset.LoadResources(!isReloading);
             preset.Instantiate();
 
             if(isReloading)

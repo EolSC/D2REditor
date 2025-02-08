@@ -71,7 +71,7 @@ namespace Diablo2Editor
             }
         }
 
-        public void LoadResources()
+        public void LoadResources(bool displayProgress = true)
         {
             if (dependencies.Count > 0)
             {
@@ -88,7 +88,10 @@ namespace Diablo2Editor
                 {
                     foreach (var item in value)
                     {
-                        EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", startProgress);
+                        if (displayProgress)
+                        {
+                            EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", startProgress);
+                        }
                         item.LoadResource();
                         startProgress += step;
                     }

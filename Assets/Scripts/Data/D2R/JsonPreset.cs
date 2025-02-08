@@ -51,9 +51,9 @@ namespace Diablo2Editor
             return result;
         }
 
-        public void LoadResources()
+        public void LoadResources(bool displayProgress = true)
         {
-            dependencies.LoadResources();
+            dependencies.LoadResources(displayProgress);
         }
 
         public virtual void Instantiate()

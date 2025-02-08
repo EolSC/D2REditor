@@ -22,7 +22,7 @@ namespace Diablo2Editor
         // TODO: transfer it to editor settings, support different LODS
         public static string lod_level = "_lod0.model";
 
-        public override void LoadResource()
+        protected override void LoadResource()
         {
             PathMapper mapper = EditorMain.Settings().paths;
             // Find absolute path to model file

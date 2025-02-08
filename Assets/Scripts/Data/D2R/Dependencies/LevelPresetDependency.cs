@@ -27,9 +27,22 @@ namespace Diablo2Editor
             return result;
         }
 
-        public virtual void LoadResource()
+        protected virtual void LoadResource()
         {
 
+        }
+
+        public void TryLoadResource(ResourceCache cache)
+        {
+            var res_path = path.ToLower();
+            object cached = null;
+            if (cache.Get(res_path, ref cached))
+            {
+                resource = cached;
+                return;
+            }
+            LoadResource();
+            cache.AddResource(res_path, resource);
         }
 
         public object GetResource()

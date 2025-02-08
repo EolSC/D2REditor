@@ -19,7 +19,8 @@ public class EditorMain : MonoBehaviour
     public static Diablo2Editor.EditorSettings settings = new Diablo2Editor.EditorSettings();
 
     private static LevelContentLoader loader = new LevelContentLoader();
-    private static ObjectsLoader objectsLoader = new ObjectsLoader();
+    public static ResourceCache cache = new ResourceCache();
+
 
     [MenuItem("Diablo Level Editor/Open level...")]
     private static void OpenLevel()

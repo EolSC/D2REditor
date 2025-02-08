@@ -29,7 +29,7 @@ namespace Diablo2Editor
                          return false;
             }
         }
-        public override void LoadResource()
+        protected override void LoadResource()
         {
             if(NeedLoadTexture(path))
             {

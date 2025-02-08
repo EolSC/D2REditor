@@ -3,6 +3,7 @@ using UnityEngine;
 using SimpleJSON;
 using System.IO;
 using UnityEditor;
+using static UnityEditor.Progress;
 
 namespace Diablo2Editor
 {
@@ -19,6 +20,11 @@ namespace Diablo2Editor
         public object GetResource(string resourcePath, DependencyType type)
         {
             var res_path = resourcePath.ToLower();
+            object cached = null;
+            if (EditorMain.cache.Get(resourcePath, ref cached))
+            {
+                return cached;
+            }
             string name = GetJsonAttributeName(type);
             List<LevelPresetDependency> resources = dependencies[name];
             foreach(var resource in resources) 
@@ -84,19 +90,21 @@ namespace Diablo2Editor
                 float startProgress = 0.0f;
                 float endProgress = 0.8f;
                 float step = (endProgress - startProgress) / total;
+                var cache = EditorMain.cache;
                 foreach (var value in dependencies.Values)
                 {
-                    foreach (var item in value)
+                    if (displayProgress)
                     {
-                        if (displayProgress)
-                        {
-                            EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", startProgress);
-                        }
-                        item.LoadResource();
-                        startProgress += step;
+                        EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", startProgress);
                     }
-                }
 
+                    for (int i = 0; i < value.Count; i++)
+                    {
+                        value[i].TryLoadResource(cache);
+                    }
+                    startProgress += step * value.Count;
+
+                }
             }
         }
 

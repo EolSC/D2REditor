@@ -2,10 +2,9 @@
   "developer": {
     "testLevel3": "data/global/tiles/act1/barracks/barew.ds1",
     "testLevel2": "data/global/tiles/act1/outdoors/tower2.ds1",
-    "testLevel": "data/global/tiles/act1/outdoors/lriver.ds1",
+    "testLevel": "data/global/tiles/act2/tomb/tombne3.ds1",
     "unitTestFolders": [
-      "data/global/tiles/act1",
-      "data/global/tiles/act2"
+      "data/global/tiles/act3"
     ]
   },
   "paths": {

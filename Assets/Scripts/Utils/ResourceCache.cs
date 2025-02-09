@@ -20,4 +20,9 @@ public class ResourceCache
         }
         return false;
     }
+
+    public void Clear()
+    {
+        storage.Clear();
+    }
 }

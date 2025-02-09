@@ -88,6 +88,7 @@ public class EditorMain : MonoBehaviour
         {
             float step = 1/(float)files.Count;
             float progress = 0.0f;
+            int counter = 0;
             foreach (var file in files)
             {
                 var name = Path.GetFileName(file);
@@ -107,6 +108,7 @@ public class EditorMain : MonoBehaviour
                     Debug.Log("Loading of level " + file + "failed with error " + ex.Message);
                 }
                 progress += step;
+                counter++;
             }
         }
         developerSettings.isUnitTestMode = false;

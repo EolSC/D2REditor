@@ -90,6 +90,12 @@ namespace Diablo2Editor
 
         private float RandomizeFloat(float min, float max, float step)
         {
+            if (max < min)
+            {
+                float temp = min;
+                min = max;
+                max = temp;
+            }
             if (step > 0)
             {
                 int stepCount = (int)Math.Floor(max - min/step);

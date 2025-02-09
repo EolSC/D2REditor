@@ -41,21 +41,30 @@ public class LevelComponent : MonoBehaviour
     }
 
 
-    public void Load(string name, byte[] ds1Content, string jsonContent, bool instantiate = true)
+    public void Load(string name, byte[] ds1Content, string jsonContent, bool instantiate = true, bool displayProgress = true)
     {
         this.levelName = name;
 
-        EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.0f);
+        if (displayProgress)
+        {
+            EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.0f);
+        }
         LoadJsonPreset(jsonContent);
-        EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.3f);
+        if (displayProgress)
+        {
+            EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.3f);
+        }
+
         LoadDS1Content(ds1Content);
         if (instantiate)
         {
-            drawer.InstantiateContent(gameObject, this);
+            drawer.InstantiateContent(gameObject, this, displayProgress);
         }
-
-        Debug.Log("Level loaded: " + levelName);
-        EditorUtility.ClearProgressBar();
+        if (displayProgress)
+        {
+            Debug.Log("Level loaded: " + levelName);
+            EditorUtility.ClearProgressBar();
+        }
     }
 
     public void Save(string fileName)

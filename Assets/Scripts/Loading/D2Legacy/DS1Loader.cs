@@ -63,11 +63,7 @@ namespace Diablo2Editor
              {
                 return result;
             }
-            else
-            {
-                Debug.Log("Error reading ds1: End of content.");
-            }
-            return 0;
+            throw new Exception("Read DS1 failed. Position " + streamPosition + " file size is " + content.Length);
         }
 
         private string ReadString(byte[] content, ref int streamPosition)

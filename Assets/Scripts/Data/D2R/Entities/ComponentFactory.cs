@@ -70,11 +70,15 @@ namespace Diablo2Editor
                 Type typeToCreate = componentTypes[parsedType];
                 return gameObject.AddComponent(typeToCreate) as LevelEntityComponent;
             }
-            if (checkMissingComponents)
+            if (false)
             {
-                Debug.Log("Unknown component: " + type);
+                throw new Exception("Unknown component: " + type);
             }
-            return gameObject.AddComponent<LevelComponentUnknown>();
+            else
+            {
+                return gameObject.AddComponent<LevelComponentUnknown>();
+            }
+            
         }
     }
 }

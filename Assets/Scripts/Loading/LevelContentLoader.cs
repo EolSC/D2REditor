@@ -15,12 +15,12 @@ public class LevelContentLoader
     /*
      * Load level content. This function fully constructs LevelPreset and Ds1Preset within Scene
      */
-    public void LoadLevel(string levelName, byte[] ds1Content, string jsonContent, bool instantiate)
+    public void LoadLevel(string levelName, byte[] ds1Content, string jsonContent, bool instantiate, bool displayProgress)
     {
         ClearScene();
         GameObject root = new GameObject();
         var component = root.AddComponent<LevelComponent>();
-        component.Load(levelName, ds1Content, jsonContent, instantiate); 
+        component.Load(levelName, ds1Content, jsonContent, instantiate, displayProgress); 
     }
 
     /*
@@ -54,9 +54,8 @@ public class LevelContentLoader
     /*
      * Clean up all the objects before loading
      */
-    private void ClearScene()
+    public static void ClearScene()
     {
-       EditorUtility.ClearProgressBar();
        LevelComponent[] objects = Object.FindObjectsByType<LevelComponent>(FindObjectsSortMode.InstanceID);
         foreach (var obj in objects)
         {

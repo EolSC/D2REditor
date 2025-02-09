@@ -9,7 +9,7 @@ using UnityEngine;
  */
 public class ContentDrawer
 {
-    public void InstantiateContent(GameObject gameObject, LevelComponent component)
+    public void InstantiateContent(GameObject gameObject, LevelComponent component, bool displayProgress = true)
     {
         var d2RData = component.GetD2RLevel();
         var ds1Data = component.GetDS1Level();
@@ -17,12 +17,17 @@ public class ContentDrawer
 
         if (d2RData != null)
         {
-            EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", 0.0f);
-            d2RData.LoadResources();
 
-
-            EditorUtility.DisplayProgressBar("Loading level", "Instantiating objects...", 0.8f);
+            if (displayProgress)
+            {
+                EditorUtility.DisplayProgressBar("Loading level", "Instantiating preset...", 0.0f);
+            }
+            
             d2RData.Instantiate();
+            if (displayProgress)
+            {
+                EditorUtility.ClearProgressBar();
+            }
         }
 
         if (ds1Data != null)
@@ -43,8 +48,6 @@ public class ContentDrawer
         presetGO.transform.localScale = new Vector3(-1, 1, 1);
 
         UpdateCameraSettings(gameObject);
-
-        EditorUtility.ClearProgressBar();
     }
 
     private void UpdateCameraSettings(GameObject gameObject)

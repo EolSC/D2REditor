@@ -17,6 +17,12 @@ namespace Diablo2Editor
     {
         private bool NeedLoadTexture(string path)
         {
+            if (EditorMain.Settings().developer.isUnitTestMode)
+            {
+                // Skip loading in unit test mode
+                return false;
+            }
+
             TextureLoadMode mode = EditorMain.Settings().common.textureLoadMode;
             switch (mode)
             {

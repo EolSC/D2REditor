@@ -68,7 +68,10 @@ namespace Diablo2Editor
                                 var mapData = GetLevelData(index);
                                 if (mapData != null)
                                 {
-                                    mapData.dt1Mask = dt1Mask;
+                                    foreach (var level in  mapData)
+                                    {
+                                        level.dt1Mask = dt1Mask;
+                                    }
                                 }
                             }
                         }
@@ -89,16 +92,17 @@ namespace Diablo2Editor
             return null;
         }
 
-        private MapListLevelData GetLevelData(int levelPresetIndex)
+        private List<MapListLevelData> GetLevelData(int levelPresetIndex)
         {
+            List<MapListLevelData> result = new List<MapListLevelData>();
             foreach (var data in lvlData)
             {
                 if (data.lvlPresetId == levelPresetIndex)
                 {
-                    return data;
+                    result.Add(data);
                 }
             }
-            return null;
+            return result;
         }
 
 

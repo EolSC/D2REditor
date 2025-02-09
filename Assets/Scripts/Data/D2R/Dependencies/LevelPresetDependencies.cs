@@ -20,8 +20,9 @@ namespace Diablo2Editor
         public object GetResource(string resourcePath, DependencyType type)
         {
             var res_path = resourcePath.ToLower();
+            var cache = EditorMain.cache;
             object cached = null;
-            if (EditorMain.cache.Get(resourcePath, ref cached))
+            if (cache.Get(resourcePath, ref cached))
             {
                 return cached;
             }
@@ -31,7 +32,7 @@ namespace Diablo2Editor
             {
                 if (res_path == resource.path.ToLower())
                 {
-                    return resource.GetResource();
+                    return resource.GetResource(cache);
                 }
             }
             Debug.LogError("Resource of type " + type.ToString() + " is not found " + resourcePath);
@@ -76,38 +77,6 @@ namespace Diablo2Editor
                 }
             }
         }
-
-        public void LoadResources(bool displayProgress = true)
-        {
-            if (dependencies.Count > 0)
-            {
-                float total = 0;
-                foreach (var value in dependencies.Values)
-                {
-                    total += value.Count;
-                }
-
-                float startProgress = 0.0f;
-                float endProgress = 0.8f;
-                float step = (endProgress - startProgress) / total;
-                var cache = EditorMain.cache;
-                foreach (var value in dependencies.Values)
-                {
-                    if (displayProgress)
-                    {
-                        EditorUtility.DisplayProgressBar("Loading level", "Loading resources...", startProgress);
-                    }
-
-                    for (int i = 0; i < value.Count; i++)
-                    {
-                        value[i].TryLoadResource(cache);
-                    }
-                    startProgress += step * value.Count;
-
-                }
-            }
-        }
-
 
         public JSONObject Serialize()
         {

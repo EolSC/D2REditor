@@ -56,17 +56,16 @@ namespace Diablo2Editor
             // Path to test level in data folder to speed up menuing
 
             public string testLevel;
-            // Path to test object in data folder to speed up menuing
-            public string testObject;
-            // Path to test enemy in data folder to speed up menuing
-            public string testMonster;
+            // Unit-testing mode. Affects texture loading
+            public bool isUnitTestMode = false;
+            // Folder for testing loading/saving
+            public string unitTestFolder;
             public void Init(JSONNode obj)
             {
                 if (obj != null && obj.IsObject)
                 {
                     testLevel = obj["testLevel"];
-                    testObject = obj["testObject"];
-                    testMonster = obj["testMonster"];
+                    unitTestFolder = obj["unitTestFolder"];
                 }
             }
         }

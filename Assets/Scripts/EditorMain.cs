@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -62,13 +63,66 @@ public class EditorMain : MonoBehaviour
         Settings().Reload();
     }
 
+    [MenuItem("Diablo Level Editor/Developer/UnitTestFolder")]
+    private static void UnitTestFolder()
+    {
+        // Collect all *.ds1 files in unit test dir
+        var pathMapper = Settings().paths;
+        var developerSettings = Settings().developer;
+        developerSettings.isUnitTestMode = true;
+        var testDir = pathMapper.GetAbsolutePath(Settings().developer.unitTestFolder);
+        string[] files =
+        Directory.GetFiles(testDir, "*.ds1", SearchOption.AllDirectories);
+
+        bool testResult = true;
+        if (files.Length > 0)
+        {
+            float step = 1/(float)files.Length;
+            float progress = 0.0f;
+            foreach (var file in files)
+            {
+                var name = Path.GetFileName(file);
+                EditorUtility.DisplayProgressBar("Unit test", "Processing level: " + name, progress);
+                if (!testResult)
+                {
+                    break;
+                }
+
+                try
+                {
+                    OpenLevel(file, true, true, false);
+                }
+                catch (Exception ex)
+                {
+                    testResult = false;
+                    Debug.Log("Loading of level " + file + "failed with error " + ex.Message);
+                }
+                progress += step;
+            }
+        }
+        developerSettings.isUnitTestMode = false;
+
+        EditorUtility.ClearProgressBar();
+        LevelContentLoader.ClearScene();
+        if (testResult)
+        {
+            Debug.Log("Test folder success!");
+        }
+        else
+        {
+            Debug.Log("Test folder failed");
+
+        }
+
+    }
+
     public static Diablo2Editor.EditorSettings Settings()
     {
         return settings;
     }
 
 
-    private static void OpenLevel(string path, bool instantiate = true, bool test_serialization = false)
+    private static void OpenLevel(string path, bool instantiate = true, bool test_serialization = false, bool displayProgress = true)
     {
         /*
          * D2R uses hybid level data so we need both ds1 and json preset to load level properly
@@ -79,22 +133,38 @@ public class EditorMain : MonoBehaviour
         string pathToJson = Settings().paths.GetPresetForLevel(local_path);
         byte[] dsContent = { };
         string jsonContent = "";
-        if (File.Exists(absolute_path))
+
+        bool levelExists = File.Exists(absolute_path);
+        bool jsonExists = File.Exists(pathToJson);
+        if (levelExists)
         {
 
             dsContent = File.ReadAllBytes(absolute_path);
         }
-        if (File.Exists(pathToJson))
+        else
+        {
+            Debug.LogWarning("Level not found " + absolute_path);
+        }
+
+        if (jsonExists)
         {
 
             jsonContent = File.ReadAllText(pathToJson);
         }
-        // Load preset
-        loader.LoadLevel(fileName, dsContent, jsonContent, instantiate);
-        //Perform some tests if they are needed
-        if (test_serialization)
+        else
         {
-            loader.TestLevelLoading(dsContent, jsonContent);
+            Debug.LogWarning("Preset for level " + absolute_path + " is not found in path " + pathToJson);
+        }
+
+        if (levelExists && jsonExists)
+        {
+            // Load preset
+            loader.LoadLevel(fileName, dsContent, jsonContent, instantiate, displayProgress);
+            //Perform some tests if they are needed
+            if (test_serialization)
+            {
+                loader.TestLevelLoading(dsContent, jsonContent);
+            }
         }
     }
 }

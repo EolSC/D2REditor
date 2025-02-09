@@ -2,7 +2,9 @@
     "developer": {
         "testLevel3": "data/global/tiles/act1/barracks/barew.ds1",
         "testLevel2":  "data/global/tiles/act1/outdoors/tower2.ds1",
-		"testLevel":  "data/global/tiles/act3/docktown/docktown3.ds1",
+		"testLevel":  "data/global/tiles/act1/barracks/bare2.ds1",
+		
+		"unitTestFolder": "data/global/tiles/act1",
     },
     "paths": {
         "presetRoot": "data/hd/env/preset",

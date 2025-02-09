@@ -32,7 +32,7 @@ namespace Diablo2Editor
 
         }
 
-        public void TryLoadResource(ResourceCache cache)
+        private void TryLoadResource(ResourceCache cache)
         {
             var res_path = path.ToLower();
             object cached = null;
@@ -45,8 +45,12 @@ namespace Diablo2Editor
             cache.AddResource(res_path, resource);
         }
 
-        public object GetResource()
+        public object GetResource(ResourceCache cache)
         {
+            if (resource == null)
+            {
+                TryLoadResource(cache);
+            }
             return resource;
         }
     }

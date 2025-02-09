@@ -1,4 +1,5 @@
 using SimpleJSON;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using UnityEditor;
@@ -59,13 +60,19 @@ namespace Diablo2Editor
             // Unit-testing mode. Affects texture loading
             public bool isUnitTestMode = false;
             // Folder for testing loading/saving
-            public string unitTestFolder;
+            public List<string> unitTestFolders = new List<string>();
             public void Init(JSONNode obj)
             {
                 if (obj != null && obj.IsObject)
                 {
                     testLevel = obj["testLevel"];
-                    unitTestFolder = obj["unitTestFolder"];
+                    unitTestFolders.Clear();
+                    JSONArray folders_obj = obj["unitTestFolders"].AsArray;
+                    foreach(var path in folders_obj.Values)
+                    {
+                        unitTestFolders.Add(path);
+                    }
+                    
                 }
             }
         }

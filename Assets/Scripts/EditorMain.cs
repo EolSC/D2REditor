@@ -1,4 +1,6 @@
+using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -70,14 +72,21 @@ public class EditorMain : MonoBehaviour
         var pathMapper = Settings().paths;
         var developerSettings = Settings().developer;
         developerSettings.isUnitTestMode = true;
-        var testDir = pathMapper.GetAbsolutePath(Settings().developer.unitTestFolder);
-        string[] files =
-        Directory.GetFiles(testDir, "*.ds1", SearchOption.AllDirectories);
+        var folders = Settings().developer.unitTestFolders;
+        List<string> files = new List<string>();
+
+        foreach (var folder in folders)
+        {
+            var testDir = pathMapper.GetAbsolutePath(folder);
+            string[] folderFiles =
+            Directory.GetFiles(testDir, "*.ds1", SearchOption.AllDirectories);
+            files.AddRange(folderFiles);
+        }
 
         bool testResult = true;
-        if (files.Length > 0)
+        if (files.Count > 0)
         {
-            float step = 1/(float)files.Length;
+            float step = 1/(float)files.Count;
             float progress = 0.0f;
             foreach (var file in files)
             {

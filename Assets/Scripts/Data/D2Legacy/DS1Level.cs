@@ -84,6 +84,11 @@ namespace Diablo2Editor
             return false;
         }
 
+        public void InitWalkableData()
+        {
+            // update walkable data when all block info is in place
+            walkableInfo.Init(this);
+        }
 
         public void InitBlockTable(List<DT1Data> tileData)
         {
@@ -165,8 +170,7 @@ namespace Diablo2Editor
 
             CheckConflicts();
             InitTilesIndexes();
-            // update walkable data when all block info is in place
-            walkableInfo.Init(this);
+
         }
 
         private void CheckConflicts()

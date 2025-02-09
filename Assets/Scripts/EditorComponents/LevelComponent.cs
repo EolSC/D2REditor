@@ -147,14 +147,13 @@ public class LevelComponent : MonoBehaviour
         if (levelData != null)
         {
             var tileTables = levelTypes.FindTilesForLevel(levelData, palletes);
-            if (tileTables.Count > 0)
-            {
-                ds1Level.InitBlockTable(tileTables);
-            }
+            ds1Level.InitBlockTable(tileTables);
         }
         else
         {
             Debug.LogError("Level data not found for level " + levelName + " in maplist.csv");
         }
+        ds1Level.InitWalkableData();
+
     }
 }

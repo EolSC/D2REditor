@@ -1,36 +1,38 @@
 {
-    "developer": {
-        "testLevel3": "data/global/tiles/act1/barracks/barew.ds1",
-        "testLevel2":  "data/global/tiles/act1/outdoors/tower2.ds1",
-		"testLevel":  "data/global/tiles/act1/barracks/bare2.ds1",
-		
-		"unitTestFolder": "data/global/tiles/act1",
-    },
-    "paths": {
-        "presetRoot": "data/hd/env/preset",
-        "tilesRoot": "data/global/tiles",
-        "levelTypes": "data/global/excel/lvltypes.txt",
-        "levelPresets": "data/global/excel/lvlprest.txt",
-		"palettePath" : "data/global/palette",
-		"maplistPath" : "Assets/Resources/maplist.csv",
-		"monstersPath" : "data/hd/character/monsters.json",
-		"objectsPath" : "data/hd/objects/objects.json",
-		"superuniques" : "data/global/excel/superuniques.txt",
-		"monpreset" : "data/global/excel/monpreset.txt",
-		"objpreset" : "data/global/excel/objpreset.txt",		
-		"objtxt" : "data/global/excel/objects.txt",		
-		"monstats" : "data/global/excel/monstats.txt",		
-		"npcRoot": "data/hd/character/npc",
-		"monsterRoot": "data/hd/character/enemy",
-		"objectsRoot": "data/hd/objects",
-    },
-	"common": {
-		"textureLoadMode" : "Albedo"
-	},
-	"camera": {
-		"nearClip" : 0.01,
-		"farClip" : 1000,
-		"occlusionCulling" : false,
-		"zoom" : 22
-	}
+  "developer": {
+    "testLevel3": "data/global/tiles/act1/barracks/barew.ds1",
+    "testLevel2": "data/global/tiles/act1/outdoors/tower2.ds1",
+    "testLevel": "data/global/tiles/act1/outdoors/lriver.ds1",
+    "unitTestFolders": [
+      "data/global/tiles/act1",
+      "data/global/tiles/act2"
+    ]
+  },
+  "paths": {
+    "presetRoot": "data/hd/env/preset",
+    "tilesRoot": "data/global/tiles",
+    "levelTypes": "data/global/excel/lvltypes.txt",
+    "levelPresets": "data/global/excel/lvlprest.txt",
+    "palettePath": "data/global/palette",
+    "maplistPath": "Assets/Resources/maplist.csv",
+    "monstersPath": "data/hd/character/monsters.json",
+    "objectsPath": "data/hd/objects/objects.json",
+    "superuniques": "data/global/excel/superuniques.txt",
+    "monpreset": "data/global/excel/monpreset.txt",
+    "objpreset": "data/global/excel/objpreset.txt",
+    "objtxt": "data/global/excel/objects.txt",
+    "monstats": "data/global/excel/monstats.txt",
+    "npcRoot": "data/hd/character/npc",
+    "monsterRoot": "data/hd/character/enemy",
+    "objectsRoot": "data/hd/objects"
+  },
+  "common": {
+    "textureLoadMode": "Albedo"
+  },
+  "camera": {
+    "nearClip": 0.01,
+    "farClip": 1000,
+    "occlusionCulling": false,
+    "zoom": 22
+  }
 }

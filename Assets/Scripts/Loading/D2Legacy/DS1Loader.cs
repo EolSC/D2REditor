@@ -190,10 +190,11 @@ namespace Diablo2Editor
                 }
             }
 
-            // skip 2 dwords ?
+            
             if ((level.version >= 9) && (level.version <= 13))
             {
-                streamPosition += sizeof(ulong) * 2;
+                // skip 2 ints( 8 bytes)
+                streamPosition += sizeof(int) * 2;
             }
                 
 

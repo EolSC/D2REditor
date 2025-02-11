@@ -62,7 +62,6 @@ public class LevelContentLoader
             GameObject gameObject = obj.gameObject;
             Object.DestroyImmediate(gameObject);
         }
-        System.GC.Collect();
     }
 
     /*

@@ -1,9 +1,9 @@
-using NUnit.Framework;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.WSA;
 
 
 /*
@@ -72,43 +72,40 @@ public class EditorMain : MonoBehaviour
         var pathMapper = Settings().paths;
         var developerSettings = Settings().developer;
         developerSettings.isUnitTestMode = true;
+
         var folders = Settings().developer.unitTestFolders;
-        List<string> files = new List<string>();
+        int count = 0;
 
         foreach (var folder in folders)
         {
             var testDir = pathMapper.GetAbsolutePath(folder);
             string[] folderFiles =
             Directory.GetFiles(testDir, "*.ds1", SearchOption.AllDirectories);
-            files.AddRange(folderFiles);
+            count += folderFiles.Length;
         }
 
         bool testResult = true;
-        if (files.Count > 0)
+        if (count > 0)
         {
-            float step = 1/(float)files.Count;
+            float step = 1/(float)count;
             float progress = 0.0f;
-            int counter = 0;
-            foreach (var file in files)
-            {
-                var name = Path.GetFileName(file);
-                EditorUtility.DisplayProgressBar("Unit test", "Processing level: " + name, progress);
-                if (!testResult)
-                {
-                    break;
-                }
 
-                try
+            foreach (var file in folders)
+            {
+                var testDir = pathMapper.GetAbsolutePath(file);
+                // Search directory
+                testResult = UnitTestOneFolder(testDir, step, ref progress);
+                var subdirs = Directory.GetDirectories(testDir);
+                // Then subdirectories
+                foreach (var subdir in subdirs)
                 {
-                    OpenLevel(file, true, true, false);
+                    // Test 1 folder
+                    testResult = UnitTestOneFolder(subdir, step, ref progress);
+                    if (!testResult)
+                    {
+                        break;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    testResult = false;
-                    Debug.Log("Loading of level " + file + "failed with error " + ex.Message);
-                }
-                progress += step;
-                counter++;
             }
         }
         developerSettings.isUnitTestMode = false;
@@ -117,17 +114,59 @@ public class EditorMain : MonoBehaviour
         LevelContentLoader.ClearScene();
         if (testResult)
         {
-            Debug.Log("Test folder success!");
+            UnityEngine.Debug.Log("Test folder success!");
         }
         else
         {
-            Debug.Log("Test folder failed");
+            UnityEngine.Debug.Log("Test folder failed");
 
         }
 
     }
+    
+    private static async void CleanUpMemory()
+    {
+        // Do some cleaning 'cause Unit test can be very memory-demanding
 
-    public static Diablo2Editor.EditorSettings Settings()
+        cache.Clear();                                 // Cache is likely to be ineffective for separate folders so it's good idea to clean it up here
+        var task = Resources.UnloadUnusedAssets();     // Unused assets can also have big impact. 
+        while (!task.isDone)
+        {
+            await task;
+        }
+        System.GC.Collect(0, GCCollectionMode.Forced, true);                            // Run GC to sweep all unused data
+    }
+
+    private static bool UnitTestOneFolder(string folder, float step, ref float progress)
+    {
+        bool testResult = true;
+        string[] folderFiles =
+        Directory.GetFiles(folder, "*.ds1", SearchOption.AllDirectories);
+        foreach (var file in folderFiles)
+        {
+            CleanUpMemory();
+            var name = Path.GetFileName(file);
+            EditorUtility.DisplayProgressBar("Unit test", "Processing level: " + name, progress);
+            if (!testResult)
+            {
+                break;
+            }
+
+            try
+            {
+                OpenLevel(file, true, true, false);
+            }
+            catch (Exception ex)
+            {
+                testResult = false;
+                UnityEngine.Debug.Log("Loading of level " + file + "failed with error " + ex.Message);
+            }
+            progress += step;
+        }
+        return testResult;
+    }
+
+public static Diablo2Editor.EditorSettings Settings()
     {
         return settings;
     }
@@ -154,7 +193,7 @@ public class EditorMain : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Level not found " + absolute_path);
+            UnityEngine.Debug.LogWarning("Level not found " + absolute_path);
         }
 
         if (jsonExists)
@@ -164,7 +203,7 @@ public class EditorMain : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("Preset for level " + absolute_path + " is not found in path " + pathToJson);
+            UnityEngine.Debug.LogWarning("Preset for level " + absolute_path + " is not found in path " + pathToJson);
         }
 
         if (levelExists && jsonExists)

@@ -70,6 +70,7 @@ public class EditorMain : MonoBehaviour
     [MenuItem("Diablo Level Editor/Developer/UnitTestFolder")]
     private static void UnitTestFolder()
     {
+        var testStartTime = Time.realtimeSinceStartup;
         // Collect all *.ds1 files in unit test dir
         var pathMapper = Settings().paths;
         var developerSettings = Settings().developer;
@@ -116,15 +117,13 @@ public class EditorMain : MonoBehaviour
         LevelContentLoader.ClearScene();
         dt1Cache.Clear();
 
-        if (testResult)
-        {
-            UnityEngine.Debug.Log("Test folder success!");
-        }
-        else
-        {
-            UnityEngine.Debug.Log("Test folder failed");
+        var testEndTime = Time.realtimeSinceStartup;
+        var diffTime = testEndTime - testStartTime;
 
-        }
+        string resultString = testResult ? "Success. " : "Failure. ";
+        string elapesdTime = "Elapsed time is " + diffTime + " seconds ";
+        string statsString = "Tested " + count + " levels in " + folders.Count + " folders. Test result is " + resultString + elapesdTime;
+        UnityEngine.Debug.Log(statsString);
 
     }
     
@@ -214,7 +213,7 @@ public static Diablo2Editor.EditorSettings Settings()
         if (levelExists && jsonExists)
         {
             // Load preset
-            loader.LoadLevel(fileName, dsContent, jsonContent, instantiate, displayProgress);
+            loader.LoadLevel(fileName, dsContent, jsonContent, instantiate, displayProgress, loadJson);
             //Perform some tests if they are needed
             if (test_serialization)
             {

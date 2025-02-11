@@ -49,7 +49,6 @@ public class DT1SubTile
 
 public class DT1Data
 {
-    public NativeArray<Color> palette;
     public string fileName;
     public byte[] content;
     public long x1; // signature (7)
@@ -89,7 +88,7 @@ public class DT1Data
     }
 
 
-    public void UpdateStructure()
+    public void UpdateStructure(NativeArray<Color> palette)
     {
         if (content != null && content.Length > 0)
         {
@@ -100,7 +99,7 @@ public class DT1Data
             bh_start = BitConverter.ToUInt32(content, streamPosition + Offsets.BLOCK_HEADER_OFFSET);
             blocks = new DT1Block[block_num];
             UpdateBlocks();
-            LoadBlockTextures();
+            LoadBlockTextures(palette);
         }
     }
 
@@ -154,7 +153,7 @@ public class DT1Data
         }
     }
 
-    private void LoadBlockTextures()
+    private void LoadBlockTextures(NativeArray<Color> palette)
     {
         int block_index = 0;
         bitmaps = new List<Texture2D>();

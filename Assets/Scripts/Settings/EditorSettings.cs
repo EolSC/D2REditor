@@ -82,6 +82,8 @@ namespace Diablo2Editor
         public DeveloperSettings developer = new DeveloperSettings();
         public CameraSettings camera = new CameraSettings();
         public MapList mapList = new MapList();
+        public D2Palette pallete = new D2Palette();
+        public LevelTypesLoader levelTypesLoader = new LevelTypesLoader();
 
         public EditorSettings()
         {
@@ -116,6 +118,11 @@ namespace Diablo2Editor
             {
                 Debug.Log("Settings file not found at path " + SETTINGS_FILE);
             }
+            var paletteDir = paths.GetPalettesPath();
+            pallete.Load(paletteDir);
+            var levelTypesPath = paths.GetPathToLevelTypes();
+            levelTypesLoader.Init(levelTypesPath);
+
             Debug.Log("Settings loaded: " + SETTINGS_FILE);
         }
     }

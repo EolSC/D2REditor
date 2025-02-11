@@ -14,24 +14,31 @@ namespace Diablo2Editor
         const string PAL_FILE_NAME = "pal.pl2";
         const string PAL_PATH_PREFIX = "act";
         const string GAMMA_FILE = "Assets\\Resources\\gamma.dat";
-        byte[][] gamma_table;
-        public int cur_gamma = DEFAULT_GAMMA;
+        byte[][] gammaTable;
+        public int curGamma = DEFAULT_GAMMA;
         NativeArray<Color>[] palettes;
-        NativeArray<Color> default_palette;
+        NativeArray<Color> defaultPalette;
+        string palletteDirectory;
         public D2Palette()
         {
-            LoadDefaultPalette();
             LoadGamma();
         }
         ~D2Palette()
         {
             CleanUp();
-            default_palette.Dispose();
         }
 
-        public void LoadPalleteFiles()
+        public void Load(string palletteDirectory)
+        {
+            this.palletteDirectory = palletteDirectory;
+            LoadPalleteFiles();
+        }
+
+        private void LoadPalleteFiles()
         {
             CleanUp();
+
+            LoadDefaultPalette();
             palettes = new NativeArray<Color>[DS1Consts.ACT_MAX];
             for (int i = 0; i < DS1Consts.ACT_MAX; ++i)
             {
@@ -45,13 +52,13 @@ namespace Diablo2Editor
             if (File.Exists(pathToGammaFile))
             {
                 byte[] content = File.ReadAllBytes(pathToGammaFile);
-                gamma_table = new byte[GAMMA_LEVELS][];
+                gammaTable = new byte[GAMMA_LEVELS][];
                 for (int i = 0; i < GAMMA_LEVELS; ++i)
                 {
-                    gamma_table[i] = new byte[PALLETE_SIZE];
+                    gammaTable[i] = new byte[PALLETE_SIZE];
                     for (int j = 0; j < PALLETE_SIZE; j++)
                     {
-                        gamma_table[i][j] = content[i * PALLETE_SIZE + j];
+                        gammaTable[i][j] = content[i * PALLETE_SIZE + j];
                     }
                 }
             }
@@ -69,11 +76,12 @@ namespace Diablo2Editor
                 }
             }
             Debug.LogError("[GetPaletteForAct] Palette for " + act + " is not loaded");
-            return default_palette;
+            return defaultPalette;
         }
 
         private void CleanUp()
         {
+            defaultPalette.Dispose();
             if (palettes != null && palettes.Length > 0)
             {
                 for (int i = 0; i < palettes.Length; ++i)
@@ -85,19 +93,18 @@ namespace Diablo2Editor
 
         private void LoadDefaultPalette()
         {
-            default_palette = new NativeArray<Color>(PALLETE_SIZE, Allocator.Persistent);
+            defaultPalette = new NativeArray<Color>(PALLETE_SIZE, Allocator.Persistent);
             for (int i = 0; i < PALLETE_SIZE; i++)
             {
-                default_palette[i] = Color.black;
+                defaultPalette[i] = Color.black;
             }
         }
 
         private NativeArray<Color> LoadPalleteForAct(int act)
         {
             NativeArray<Color> result = new NativeArray<Color>(PALLETE_SIZE, Allocator.Persistent);
-            string paletteFolder = EditorMain.Settings().paths.GetPalettesPath();
             string pathToPalette = PAL_PATH_PREFIX + (act + 1);
-            string fullPath = Path.Combine(paletteFolder, pathToPalette, PAL_FILE_NAME);
+            string fullPath = Path.Combine(palletteDirectory, pathToPalette, PAL_FILE_NAME);
 
             if (File.Exists(fullPath))
             {
@@ -110,11 +117,11 @@ namespace Diablo2Editor
                     byte g = content[ridx + 1];
                     byte b = content[ridx + 2];
 
-                    if (gamma_table != null)
+                    if (gammaTable != null)
                     {
-                        r = gamma_table[cur_gamma][r];
-                        g = gamma_table[cur_gamma][g];
-                        b = gamma_table[cur_gamma][b];
+                        r = gammaTable[curGamma][r];
+                        g = gammaTable[curGamma][g];
+                        b = gammaTable[curGamma][b];
                     }
 
                     Color color = new Color();

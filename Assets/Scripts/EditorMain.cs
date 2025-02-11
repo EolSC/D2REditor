@@ -23,6 +23,8 @@ public class EditorMain : MonoBehaviour
 
     private static LevelContentLoader loader = new LevelContentLoader();
     public static ResourceCache cache = new ResourceCache();
+    public static ObjectsLoader objectLoader = new ObjectsLoader();
+    public static DT1Cache dt1Cache = new DT1Cache();
 
 
     [MenuItem("Diablo Level Editor/Open level...")]
@@ -94,13 +96,13 @@ public class EditorMain : MonoBehaviour
             {
                 var testDir = pathMapper.GetAbsolutePath(file);
                 // Search directory
-                testResult = UnitTestOneFolder(testDir, step, ref progress);
+                testResult = UnitTestOneFolder(testDir, step, ref progress, SearchOption.TopDirectoryOnly);
                 var subdirs = Directory.GetDirectories(testDir);
                 // Then subdirectories
                 foreach (var subdir in subdirs)
                 {
                     // Test 1 folder
-                    testResult = UnitTestOneFolder(subdir, step, ref progress);
+                    testResult = UnitTestOneFolder(subdir, step, ref progress, SearchOption.AllDirectories);
                     if (!testResult)
                     {
                         break;
@@ -112,6 +114,8 @@ public class EditorMain : MonoBehaviour
 
         EditorUtility.ClearProgressBar();
         LevelContentLoader.ClearScene();
+        dt1Cache.Clear();
+
         if (testResult)
         {
             UnityEngine.Debug.Log("Test folder success!");
@@ -137,14 +141,15 @@ public class EditorMain : MonoBehaviour
         System.GC.Collect(0, GCCollectionMode.Forced, true);                            // Run GC to sweep all unused data
     }
 
-    private static bool UnitTestOneFolder(string folder, float step, ref float progress)
+    private static bool UnitTestOneFolder(string folder, float step, ref float progress, SearchOption option)
     {
+        CleanUpMemory();
+
         bool testResult = true;
         string[] folderFiles =
-        Directory.GetFiles(folder, "*.ds1", SearchOption.AllDirectories);
+        Directory.GetFiles(folder, "*.ds1", option);
         foreach (var file in folderFiles)
         {
-            CleanUpMemory();
             var name = Path.GetFileName(file);
             EditorUtility.DisplayProgressBar("Unit test", "Processing level: " + name, progress);
             if (!testResult)
@@ -154,7 +159,7 @@ public class EditorMain : MonoBehaviour
 
             try
             {
-                OpenLevel(file, true, true, false);
+                OpenLevel(file, false, false, false, false);
             }
             catch (Exception ex)
             {
@@ -172,7 +177,7 @@ public static Diablo2Editor.EditorSettings Settings()
     }
 
 
-    private static void OpenLevel(string path, bool instantiate = true, bool test_serialization = false, bool displayProgress = true)
+    private static void OpenLevel(string path, bool instantiate = true, bool test_serialization = false, bool displayProgress = true, bool loadJson = true)
     {
         /*
          * D2R uses hybid level data so we need both ds1 and json preset to load level properly

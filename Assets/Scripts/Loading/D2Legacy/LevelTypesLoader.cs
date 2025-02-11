@@ -7,11 +7,15 @@ namespace Diablo2Editor
 {
     public class LevelTypesLoader
     {
-        public List<DT1Data> FindTilesForLevel(MapListLevelData levelData, D2Palette palettes)
+        string[][] levelTypes;
+
+        public void Init(string pathToLevelTypes)
+        {
+            levelTypes = CSVReader.ReadFile(pathToLevelTypes);
+        }
+        public List<DT1Data> FindTilesForLevel(MapListLevelData levelData, DT1Cache dt1Cache, D2Palette palettes)
         {
             List<DT1Data> result = new List<DT1Data>();
-            string pathToLevelTypes = EditorMain.Settings().paths.GetPathToLevelTypes();
-            string[][] levelTypes = CSVReader.ReadFile(pathToLevelTypes);
             if (levelTypes != null && levelTypes.Length >= 3)
             {
                 for (int i = 2; i < levelTypes.Length; i++)
@@ -35,7 +39,13 @@ namespace Diablo2Editor
                                     bool needLoad = maskBit == 1;
                                     if (needLoad)
                                     {
-                                        var dt1Data = DT1Loader.ReadDT1DataFromFile(fileName, actPallette);
+                                        DT1Data dt1Data = null;
+                                        dt1Cache.Get(fileName, ref dt1Data);
+                                        if (dt1Data == null)
+                                        {
+                                            dt1Data = DT1Loader.ReadDT1DataFromFile(fileName, actPallette);
+                                            dt1Cache.Add(dt1Data);
+                                        }
                                         if (dt1Data != null)
                                         {
                                             result.Add(dt1Data);
@@ -58,7 +68,7 @@ namespace Diablo2Editor
             }
             else
             {
-                Debug.LogError("Can't lvltypes.txt: path in settings " + pathToLevelTypes);
+                Debug.LogError("LEvel types is not initialized. Check levelTypes in D2REditorSettings");
             }
 
             return result;

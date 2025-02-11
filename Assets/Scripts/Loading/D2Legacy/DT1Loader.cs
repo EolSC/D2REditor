@@ -12,10 +12,9 @@ public class DT1Loader
         if (File.Exists(absolute_path))
         {
             DT1Data data = new DT1Data();
-            data.fileName = absolute_path;
+            data.fileName = pathToFile;
             data.content = File.ReadAllBytes(absolute_path);
-            data.palette = palette;
-            data.UpdateStructure();
+            data.UpdateStructure(palette);
             return data;
 
 

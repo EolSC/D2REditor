@@ -41,7 +41,7 @@ public class LevelComponent : MonoBehaviour
     }
 
 
-    public void Load(string name, byte[] ds1Content, string jsonContent, bool instantiate = true, bool displayProgress = true)
+    public void Load(string name, byte[] ds1Content, string jsonContent, bool instantiate = true, bool displayProgress = true, bool loadJson = true)
     {
         this.levelName = name;
 
@@ -49,7 +49,10 @@ public class LevelComponent : MonoBehaviour
         {
             EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.0f);
         }
-        LoadJsonPreset(jsonContent);
+        if (loadJson)
+        {
+            LoadJsonPreset(jsonContent);
+        }
         if (displayProgress)
         {
             EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.3f);
@@ -133,20 +136,17 @@ public class LevelComponent : MonoBehaviour
     // Ds1-specific logic
     private void LoadDS1Content(byte[] ds1Content)
     {
-        // Reload palettes
-        D2Palette palletes = new D2Palette();
-        palletes.LoadPalleteFiles();
-
-
+        D2Palette pallete = EditorMain.Settings().pallete;
+        DT1Cache dt1Cache = EditorMain.dt1Cache;
         DS1Loader loader = new DS1Loader();
         ds1Level = loader.ReadDS1(ds1Content);
-        LevelTypesLoader levelTypes = new LevelTypesLoader();
+        LevelTypesLoader levelTypes = EditorMain.Settings().levelTypesLoader;
 
         // Find level data using filename including extension
         MapListLevelData levelData = EditorMain.Settings().mapList.GetLevelData(levelName + PathMapper.DS1_EXT);
         if (levelData != null)
         {
-            var tileTables = levelTypes.FindTilesForLevel(levelData, palletes);
+            var tileTables = levelTypes.FindTilesForLevel(levelData, dt1Cache, pallete);
             ds1Level.InitBlockTable(tileTables);
         }
         else

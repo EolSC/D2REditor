@@ -86,7 +86,8 @@ public class ContentDrawer
 
     private void CreateLevelObjects(GameObject gameObject, DS1Level level)
     {
-        ObjectsLoader loader = new ObjectsLoader();
+        var loader = EditorMain.objectLoader;
+
         GameObject objParent = new GameObject();
         objParent.transform.parent = gameObject.transform;
         objParent.name = "Objects";

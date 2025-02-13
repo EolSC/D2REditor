@@ -15,6 +15,15 @@ public class DS1Tile
     public byte prop4;  // main_index + flags
     public int bt_idx;
 
+    public DS1Tile()
+    {
+        prop1 = GetNormalPriority();
+        prop2 = 0;
+        prop3 = 0;
+        prop4 = 0;
+        bt_idx = 0;
+    }
+
     public int GetMainIndex()
     {
         return (prop3 >> 4) + ((prop4 & BIT_12) << 4);

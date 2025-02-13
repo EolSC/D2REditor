@@ -42,9 +42,47 @@ public class TileGridEditor : Editor
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
+
         TileGrid grid = (TileGrid)target;
+
+
         if (grid != null && (grid.levelComponent != null))
         {
+            if (GUILayout.Button("Resize"))
+            {
+                int newX = grid.newX;
+                int newY = grid.newY;
+                if (newX <= 0)
+                {
+                    newX = 1;
+                }
+                if (newY <= 0)
+                {
+                    newY = 1;
+                }
+
+
+                var level = grid.levelComponent.GetDS1Level();
+                bool needResize = true;
+                if (level.width >  newX || level.height > newY)
+                {
+                    // height/width are less than it was - show clipping promt
+                    bool result = EditorUtility.DisplayDialog("Warning",
+                        "New grid dimensions are less than it was, some clipping will occur. Proceed?", 
+                        "Yes", "No");
+                    if (!result)
+                    {
+                        needResize = false;
+                    }
+                }
+                if (needResize)
+                {
+                    grid.Resize(newX, newY);
+                }
+
+                grid.newX = newX;
+                grid.newY = newY;
+            }
             Tile selected = grid.GetSelectedTile();
             if (selected != null)
             {

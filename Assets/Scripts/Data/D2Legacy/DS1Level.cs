@@ -431,6 +431,23 @@ namespace Diablo2Editor
                 blockIndex++;
             }
         }
+
+        public void Resize(int x, int y)
+        {
+            int oldX = (int)width;
+            int oldY = (int)width;
+            wall.Resize(oldX, oldY, x, y);
+            floor.Resize(oldX, oldY, x, y);
+            shadow.Resize(oldX, oldY, x, y);
+            tagged.Resize(oldX, oldY, x, y);
+            width = x;
+            height = y;
+
+            CheckConflicts();
+            InitTilesIndexes();
+            InitWalkableData();
+
+        }
     }
 }
 

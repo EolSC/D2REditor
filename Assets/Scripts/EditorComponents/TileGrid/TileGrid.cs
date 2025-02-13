@@ -11,6 +11,12 @@ public class TileGrid : MonoBehaviour
     public bool visible = false;
 
     [SerializeField]
+    public int newX;
+
+    [SerializeField]
+    public int newY;
+
+    [SerializeField]
     private LevelComponent _levelComponent;
 
     private LevelComponent _oldValue;
@@ -132,6 +138,22 @@ public class TileGrid : MonoBehaviour
         _gridDirty = false;
     }
 
+    public void Resize(int newX, int newY)
+    {
+        var level = levelComponent.GetDS1Level();
+        if (level != null)
+        {
+            int oldX = (int)level.width;
+            int oldY = (int)level.height;
+            if (oldX == newX && oldY == newY)
+            {
+                return;
+            }
+            level.Resize(newX, newY);
+            UpdateTileGrid();
+        }
+    }
+
     private void UpdateTileGrid()
     {
         tiles = null;
@@ -140,6 +162,9 @@ public class TileGrid : MonoBehaviour
             var level = _levelComponent.GetDS1Level();
             if ((level.width > 0) && (level.height > 0))
             {
+                newX = (int)level.width;
+                newY = (int)level.height;
+
                 tiles = new Tile[level.height][];
 
 

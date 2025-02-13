@@ -17,7 +17,6 @@ public class LevelContentLoader
      */
     public void LoadLevel(string levelName, byte[] ds1Content, string jsonContent, bool instantiate, bool displayProgress, bool loadJson)
     {
-        ClearScene();
         GameObject root = new GameObject();
         var component = root.AddComponent<LevelComponent>();
         component.Load(levelName, ds1Content, jsonContent, instantiate, displayProgress, loadJson); 

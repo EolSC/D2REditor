@@ -58,6 +58,7 @@ public class EditorMain : MonoBehaviour
     {
         // Use path from settings without opening Browse dialog
         string path = Settings().developer.testLevel;
+        LevelContentLoader.ClearScene();
         OpenLevel(path, true, true);
     }
 
@@ -158,6 +159,7 @@ public class EditorMain : MonoBehaviour
 
             try
             {
+                LevelContentLoader.ClearScene();
                 OpenLevel(file, false, false, false, false);
             }
             catch (Exception ex)

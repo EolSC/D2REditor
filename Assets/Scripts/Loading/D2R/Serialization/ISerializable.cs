@@ -75,6 +75,24 @@ namespace Diablo2Editor
             return json.AsFloat;
         }
 
+        public static Vector3 DeserializeVector(JSONObject obj)
+        {   
+            Vector3 vector3 = new Vector3();
+            vector3.x = ISerializable.DeserializeFloat(obj["x"]);
+            vector3.y = ISerializable.DeserializeFloat(obj["y"]);
+            vector3.z = ISerializable.DeserializeFloat(obj["z"]);
+            return vector3;
+        }
+
+        public static JSONObject SerializeVector(Vector3 vector)
+        {
+            JSONObject obj = new JSONObject();
+            obj["x"] = vector.x;
+            obj["y"] = vector.y;
+            obj["z"] = vector.z;
+            return obj;
+        }
+
         public static float SerializeFloat(float value)
         {
             return value;

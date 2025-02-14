@@ -8,7 +8,7 @@ public class TileGrid : MonoBehaviour
     public bool drawWalkableInfo = false;
 
     [SerializeField]
-    public bool visible = false;
+    public bool visible = true;
 
     [SerializeField]
     public int newX;

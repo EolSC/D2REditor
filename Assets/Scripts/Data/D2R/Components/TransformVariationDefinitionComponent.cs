@@ -27,43 +27,24 @@ namespace Diablo2Editor
             UpdateObjectTransform();
         }
 
+        private void SaveCurrentTrasform()
+        {
+            position = gameObject.transform.position;
+            position.x = -position.x;
+        }
+
         public override void Deserialize(JSONObject obj)
         {
             base.Deserialize(obj);
-            JSONObject position = obj["position"].AsObject;
-            this.position.x = ISerializable.DeserializeFloat(position["x"]);
-            this.position.y = ISerializable.DeserializeFloat(position["y"]);
-            this.position.z = ISerializable.DeserializeFloat(position["z"]);
+            this.position = ISerializable.DeserializeVector(obj["position"].AsObject);
 
-            JSONObject minRotation = obj["minRotation"].AsObject;
-            this.minRotation.x = ISerializable.DeserializeFloat(minRotation["x"]);
-            this.minRotation.y = ISerializable.DeserializeFloat(minRotation["y"]);
-            this.minRotation.z = ISerializable.DeserializeFloat(minRotation["z"]);
+            this.minRotation = ISerializable.DeserializeVector(obj["minRotation"].AsObject);
+            this.maxRotation = ISerializable.DeserializeVector(obj["maxRotation"].AsObject);
+            this.rotationIncrement = ISerializable.DeserializeVector(obj["rotationIncrement"].AsObject);
 
-            JSONObject maxRotation = obj["maxRotation"].AsObject;
-            this.maxRotation.x = ISerializable.DeserializeFloat(maxRotation["x"]);
-            this.maxRotation.y = ISerializable.DeserializeFloat(maxRotation["y"]);
-            this.maxRotation.z = ISerializable.DeserializeFloat(maxRotation["z"]);
-
-            JSONObject rotationIncrement = obj["rotationIncrement"].AsObject;
-            this.rotationIncrement.x = ISerializable.DeserializeFloat(rotationIncrement["x"]);
-            this.rotationIncrement.y = ISerializable.DeserializeFloat(rotationIncrement["y"]);
-            this.rotationIncrement.z = ISerializable.DeserializeFloat(rotationIncrement["z"]);
-
-            JSONObject minScale = obj["minScale"].AsObject;
-            this.minScale.x = ISerializable.DeserializeFloat(minScale["x"]);
-            this.minScale.y = ISerializable.DeserializeFloat(minScale["y"]);
-            this.minScale.z = ISerializable.DeserializeFloat(minScale["z"]);
-
-            JSONObject maxScale = obj["maxScale"].AsObject;
-            this.maxScale.x = ISerializable.DeserializeFloat(maxScale["x"]);
-            this.maxScale.y = ISerializable.DeserializeFloat(maxScale["y"]);
-            this.maxScale.z = ISerializable.DeserializeFloat(maxScale["z"]);
-
-            JSONObject scaleIncrement = obj["scaleIncrement"].AsObject;
-            this.scaleIncrement.x = ISerializable.DeserializeFloat(scaleIncrement["x"]);
-            this.scaleIncrement.y = ISerializable.DeserializeFloat(scaleIncrement["y"]);
-            this.scaleIncrement.z = ISerializable.DeserializeFloat(scaleIncrement["z"]);
+            this.minScale = ISerializable.DeserializeVector(obj["minScale"].AsObject);
+            this.maxScale = ISerializable.DeserializeVector(obj["maxScale"].AsObject);
+            this.scaleIncrement = ISerializable.DeserializeVector(obj["scaleIncrement"].AsObject);
 
             RandomizeTransform();
             UpdateObjectTransform();
@@ -109,48 +90,16 @@ namespace Diablo2Editor
         {
             JSONObject result = base.Serialize();
 
-            JSONObject pos_object = new JSONObject();
-            pos_object["x"] = ISerializable.SerializeFloat(this.position.x);
-            pos_object["y"] = ISerializable.SerializeFloat(this.position.y);
-            pos_object["z"] = ISerializable.SerializeFloat(this.position.z);
-            result["position"] = pos_object;
+            SaveCurrentTrasform();
+            result["position"] = ISerializable.SerializeVector(this.position);
 
-            JSONObject min_rotatation_object = new JSONObject();
-            min_rotatation_object["x"] = ISerializable.SerializeFloat(this.minRotation.x);
-            min_rotatation_object["y"] = ISerializable.SerializeFloat(this.minRotation.y);
-            min_rotatation_object["z"] = ISerializable.SerializeFloat(this.minRotation.z);
-            result["minRotation"] = min_rotatation_object;
+            result["minRotation"] = ISerializable.SerializeVector(this.minRotation);
+            result["maxRotation"] = ISerializable.SerializeVector(this.maxRotation);
+            result["rotationIncrement"] = ISerializable.SerializeVector(this.rotationIncrement);
 
-            JSONObject max_rotation_object = new JSONObject();
-            max_rotation_object["x"] = ISerializable.SerializeFloat(this.maxRotation.x);
-            max_rotation_object["y"] = ISerializable.SerializeFloat(this.maxRotation.y);
-            max_rotation_object["z"] = ISerializable.SerializeFloat(this.maxRotation.z);
-            result["maxRotation"] = max_rotation_object;
-
-            JSONObject rotation_increment_object = new JSONObject();
-            rotation_increment_object["x"] = ISerializable.SerializeFloat(this.rotationIncrement.x);
-            rotation_increment_object["y"] = ISerializable.SerializeFloat(this.rotationIncrement.y);
-            rotation_increment_object["z"] = ISerializable.SerializeFloat(this.rotationIncrement.z);
-            result["rotationIncrement"] = rotation_increment_object;
-
-            JSONObject min_scale_object = new JSONObject();
-            min_scale_object["x"] = ISerializable.SerializeFloat(this.minScale.x);
-            min_scale_object["y"] = ISerializable.SerializeFloat(this.minScale.y);
-            min_scale_object["z"] = ISerializable.SerializeFloat(this.minScale.z);
-            result["minScale"] = min_scale_object;
-
-            JSONObject max_scale_object = new JSONObject();
-            max_scale_object["x"] = ISerializable.SerializeFloat(this.maxScale.x);
-            max_scale_object["y"] = ISerializable.SerializeFloat(this.maxScale.y);
-            max_scale_object["z"] = ISerializable.SerializeFloat(this.maxScale.z);
-            result["maxScale"] = max_scale_object;
-
-            JSONObject scale_increment_object = new JSONObject();
-            scale_increment_object["x"] = ISerializable.SerializeFloat(this.scaleIncrement.x);
-            scale_increment_object["y"] = ISerializable.SerializeFloat(this.scaleIncrement.y);
-            scale_increment_object["z"] = ISerializable.SerializeFloat(this.scaleIncrement.z);
-            result["scaleIncrement"] = scale_increment_object;
-
+            result["minScale"] = ISerializable.SerializeVector(this.minScale);
+            result["maxScale"] = ISerializable.SerializeVector(this.maxScale);
+            result["scaleIncrement"] = ISerializable.SerializeVector(this.scaleIncrement);
 
             return result;
         }

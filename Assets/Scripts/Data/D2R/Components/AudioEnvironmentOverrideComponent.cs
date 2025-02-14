@@ -14,33 +14,16 @@ namespace Diablo2Editor
         {
             base.Deserialize(json);
             overrideEnvironment = json["overrideEnvironment"];
-
-            var minJson = json["min"].AsObject;
-            min.x = ISerializable.DeserializeFloat(minJson["x"]);
-            min.y = ISerializable.DeserializeFloat(minJson["y"]);
-            min.z = ISerializable.DeserializeFloat(minJson["z"]);
-
-            var maxJson = json["max"].AsObject;
-            max.x = ISerializable.DeserializeFloat(maxJson["x"]);
-            max.y = ISerializable.DeserializeFloat(maxJson["y"]);
-            max.z = ISerializable.DeserializeFloat(maxJson["z"]);
+            min = ISerializable.DeserializeVector(json["min"].AsObject);
+            max = ISerializable.DeserializeVector(json["max"].AsObject);
         }
         public override JSONObject Serialize()
         {
             JSONObject result = base.Serialize();
             result["overrideEnvironment"] = overrideEnvironment;
 
-            var minJson = new JSONObject();
-            minJson["x"] = ISerializable.SerializeFloat(min.x);
-            minJson["y"] = ISerializable.SerializeFloat(min.y);
-            minJson["z"] = ISerializable.SerializeFloat(min.z);
-            result["min"] = minJson;
-
-            var maxJson = new JSONObject();
-            maxJson["x"] = ISerializable.SerializeFloat(max.x);
-            maxJson["y"] = ISerializable.SerializeFloat(max.y);
-            maxJson["z"] = ISerializable.SerializeFloat(max.z);
-            result["max"] = maxJson;
+            result["min"] = ISerializable.SerializeVector(min);
+            result["max"] = ISerializable.SerializeVector(max);
 
             return result;
         }

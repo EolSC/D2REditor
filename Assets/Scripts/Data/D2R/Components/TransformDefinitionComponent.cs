@@ -30,7 +30,8 @@ namespace Diablo2Editor
 
         private void SaveCurrentTrasform()
         {
-            position = gameObject.transform.localPosition;
+            position = gameObject.transform.position;
+            position.x = -position.x;
             orientation = gameObject.transform.localRotation;
             scale = gameObject.transform.localScale;
         }
@@ -44,21 +45,14 @@ namespace Diablo2Editor
         public override void Deserialize(JSONObject obj)
         {
             base.Deserialize(obj);
-            JSONObject position = obj["position"].AsObject;
-            this.position.x = ISerializable.DeserializeFloat(position["x"]);
-            this.position.y = ISerializable.DeserializeFloat(position["y"]);
-            this.position.z = ISerializable.DeserializeFloat(position["z"]);
+            this.position = ISerializable.DeserializeVector(obj["position"].AsObject);
+            this.scale = ISerializable.DeserializeVector(obj["scale"].AsObject);
 
             JSONObject orientation = obj["orientation"].AsObject;
             this.orientation.x = ISerializable.DeserializeFloat(orientation["x"]);
             this.orientation.y = ISerializable.DeserializeFloat(orientation["y"]);
             this.orientation.z = ISerializable.DeserializeFloat(orientation["z"]);
             this.orientation.w = ISerializable.DeserializeFloat(orientation["w"]);
-
-            JSONObject scale = obj["scale"].AsObject;
-            this.scale.x = ISerializable.DeserializeFloat(scale["x"]);
-            this.scale.y = ISerializable.DeserializeFloat(scale["y"]);
-            this.scale.z = ISerializable.DeserializeFloat(scale["z"]);
 
             this.inheritOnlyPosition = obj["inheritOnlyPosition"].AsBool;
         }
@@ -68,25 +62,15 @@ namespace Diablo2Editor
 
             JSONObject result = base.Serialize();
 
-            JSONObject pos_object = new JSONObject();
-            pos_object["x"] = ISerializable.SerializeFloat(this.position.x);
-            pos_object["y"] = ISerializable.SerializeFloat(this.position.y);
-            pos_object["z"] = ISerializable.SerializeFloat(this.position.z);
-
             JSONObject orientation_object = new JSONObject();
             orientation_object["x"] = ISerializable.SerializeFloat(this.orientation.x);
             orientation_object["y"] = ISerializable.SerializeFloat(this.orientation.y);
             orientation_object["z"] = ISerializable.SerializeFloat(this.orientation.z);
             orientation_object["w"] = ISerializable.SerializeFloat(this.orientation.w);
 
-            JSONObject scale_object = new JSONObject();
-            scale_object["x"] = ISerializable.SerializeFloat(this.scale.x);
-            scale_object["y"] = ISerializable.SerializeFloat(this.scale.y);
-            scale_object["z"] = ISerializable.SerializeFloat(this.scale.z);
-
-            result["position"] = pos_object;
+            result["position"] = ISerializable.SerializeVector(position);
+            result["scale"] = ISerializable.SerializeVector(scale);
             result["orientation"] = orientation_object;
-            result["scale"] = scale_object;
             result["inheritOnlyPosition"] = this.inheritOnlyPosition;
 
             return result;

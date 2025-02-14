@@ -30,6 +30,8 @@ namespace Diablo2Editor
         AudioEmitterComponent,
         TransformVariationDefinitionComponent,
         ObjectMountPointComponent,
+        FadeTargetComponent,
+        VisualDataBoxDefinitionComponent,
     }
 
     public class ComponentFactory
@@ -58,7 +60,8 @@ namespace Diablo2Editor
             { ComponentTypes.AudioEmitterComponent, typeof(AudioEmitterComponent) },
             { ComponentTypes.TransformVariationDefinitionComponent, typeof(TransformVariationDefinitionComponent) },
             { ComponentTypes.ObjectMountPointComponent, typeof(ObjectMountPointComponent) },
-
+            { ComponentTypes.FadeTargetComponent, typeof(FadeTargetComponent) },
+            { ComponentTypes.VisualDataBoxDefinitionComponent, typeof(VisualDataBoxDefinitionComponent) },
         };
              
         public static LevelEntityComponent CreateComponentByType(string type, GameObject gameObject, bool checkMissingComponents)

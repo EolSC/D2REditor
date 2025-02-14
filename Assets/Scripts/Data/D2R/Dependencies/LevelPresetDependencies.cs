@@ -20,6 +20,11 @@ namespace Diablo2Editor
         public object GetResource(string resourcePath, DependencyType type)
         {
             var res_path = resourcePath.ToLower();
+            if (res_path.Length == 0)
+            {
+                // Empty path is invalid so let's just quit with no errors
+                return null;
+            }
             var cache = EditorMain.cache;
             object cached = null;
             if (cache.Get(resourcePath, ref cached))

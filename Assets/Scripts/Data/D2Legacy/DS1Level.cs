@@ -446,7 +446,44 @@ namespace Diablo2Editor
             CheckConflicts();
             InitTilesIndexes();
             InitWalkableData();
+        }
 
+        public void UpdateTileBlockData()
+        {
+            CheckConflicts();
+            InitTilesIndexes();
+            InitWalkableData();
+        }
+
+        public void ReplaceTile(int sourceX, int sourceY, int destX, int destY)
+        {
+            for (int n = 0; n < wall.layers; ++n)
+            {
+                var source = wall.data[n, sourceX, sourceY];
+                var dest = wall.data[n, destX, destY];
+                dest.DeepCopy(source);
+            }
+
+            for (int n = 0; n < floor.layers; ++n)
+            {
+                var source = floor.data[n, sourceX, sourceY];
+                var dest = floor.data[n, destX, destY];
+                dest.DeepCopy(source);
+            }
+
+            for (int n = 0; n < shadow.layers; ++n)
+            {
+                var source = shadow.data[n, sourceX, sourceY];
+                var dest = shadow.data[n, destX, destY];
+                dest.DeepCopy(source);
+            }
+
+            for (int n = 0; n < tagged.layers; ++n)
+            {
+                var source = tagged.data[n, sourceX, sourceY];
+                var dest = tagged.data[n, destX, destY];
+                dest.DeepCopy(source);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using Diablo2Editor;
 using UnityEngine;
 
+
 [ExecuteInEditMode]
 public class TileGrid : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class TileGrid : MonoBehaviour
 
     private bool _gridDirty = false;
 
+    private Tile copy;
+
+
     public LevelComponent levelComponent { 
         get
         { 
@@ -43,6 +47,25 @@ public class TileGrid : MonoBehaviour
         return selected;
     }
 
+    public void CopyTileAt(int x, int y)
+    {
+        if (x >= 0 && x <= tiles.Length)
+        {
+            if (y >= 0 && y <= tiles[x].Length)
+            {
+                copy = tiles[x][y];
+            }
+        }
+    }
+
+    public void PasteTileAt(int x, int y)
+    {
+        var level = levelComponent.GetDS1Level();
+        if (level != null)
+        {
+            level.ReplaceTile(copy.x, copy.y, y, x);
+        }
+    }
     void OnDisable()
     {
         UpdateCameraCallback(false);

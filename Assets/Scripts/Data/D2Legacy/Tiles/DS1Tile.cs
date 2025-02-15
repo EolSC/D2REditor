@@ -6,6 +6,7 @@ public class DS1Tile
 {
     private const byte BIT_2 = 0x02;
     private const byte BIT_12 = 0x03;
+    private const byte BIT_56 = 0x30;
     private const byte BIT_8 = 0x80;
     private const byte BIT_LOWER_HALF = 0x0F;
 
@@ -32,7 +33,7 @@ public class DS1Tile
     public virtual void SetMainIndex(long main_index)
     {
         prop3 = (byte)((main_index & BIT_LOWER_HALF) << 4);
-        prop4 = (byte)((main_index & BIT_12) >> 4);
+        prop4 = (byte)((main_index & BIT_56) >> 4);
     }
 
     public virtual byte GetNormalPriority()
@@ -77,5 +78,14 @@ public class DS1Tile
     public bool IsHidden()
     {
         return (prop4 & BIT_8) != 0;
+    }
+
+    public void DeepCopy(DS1Tile other)
+    {
+        prop1 = other.prop1;
+        prop2 = other.prop2;
+        prop3 = other.prop3;
+        prop4 = other.prop4;
+        bt_idx  = other.bt_idx;
     }
 }

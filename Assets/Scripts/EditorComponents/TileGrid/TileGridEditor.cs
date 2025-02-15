@@ -105,6 +105,21 @@ public class TileGridEditor : Editor
         labelStyle.normal.textColor = Color.white;
         areaStyle.normal.textColor = Color.white;
 
+        GUILayout.Label("Tile content(" + x+ ", " + y + ")");
+        GUILayout.BeginHorizontal(areaStyle);
+        if (GUILayout.Button("Copy"))
+        {
+            grid.CopyTileAt(selected.x, selected.y);
+        }
+
+        if (GUILayout.Button("Paste"))
+        {
+            needUpdate = true;
+            grid.PasteTileAt(selected.x, selected.y);
+        }
+        GUILayout.EndHorizontal();
+
+
         for (int n = 0; n < level.wall.layers; n++)
         {
             DS1WallTile cell = level.wall.data[n, y, x];
@@ -208,21 +223,25 @@ public class TileGridEditor : Editor
 
     private void UpdateTile(DS1Level level, Tile tile)
     {
-        int x = tile.x;
-        int y = tile.y;
-        var walkInfo = level.walkableInfo;
-        walkInfo.UpdateWalkableInfo(x, y);
-        var walkData = walkInfo.GetWalkableData(x, y);
-        tile.UpdateWalkableInfo(walkData.walkable);
+        if (level != null && tile != null)
+        {
+            level.UpdateTileBlockData();
+            int x = tile.x;
+            int y = tile.y;
+            var walkInfo = level.walkableInfo;
+            walkInfo.UpdateWalkableInfo(x, y);
+            var walkData = walkInfo.GetWalkableData(x, y);
+            tile.UpdateWalkableInfo(walkData.walkable);
 
-        bool isSpecial = level.HasSpecialTiles(x, y);
-        if (isSpecial)
-        {
-            tile.SetStatus(TileStatus.Special);
-        }
-        else
-        {
-            tile.SetStatus(TileStatus.Empty);
+            bool isSpecial = level.HasSpecialTiles(x, y);
+            if (isSpecial)
+            {
+                tile.SetStatus(TileStatus.Special);
+            }
+            else
+            {
+                tile.SetStatus(TileStatus.Empty);
+            }
         }
     }
     private bool DrawProperties(DS1Tile cell, GUIStyle labelStyle, GUIStyle areaStyle)

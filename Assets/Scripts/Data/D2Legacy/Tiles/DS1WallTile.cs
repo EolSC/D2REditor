@@ -14,4 +14,10 @@ public class DS1WallTile : DS1Tile
     {
         return orientation == 11 || orientation == 10;
     }
+
+    public void DeepCopy(DS1WallTile other)
+    {
+        base.DeepCopy(other);
+        orientation = other.orientation;
+    }
 }

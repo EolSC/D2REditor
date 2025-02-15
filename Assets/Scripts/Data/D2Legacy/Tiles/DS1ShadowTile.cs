@@ -17,4 +17,9 @@ public class DS1ShadowTile : DS1Tile
         SetHidden(true);
     }
 
+    public void DeepCopy(DS1ShadowTile other)
+    {
+        base.DeepCopy(other);
+    }
+
 }

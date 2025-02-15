@@ -11,4 +11,8 @@ public class DS1FloorTile : DS1Tile
         return DEFAULT_FLOOR_PRIORITY;
     }
 
+    public void DeepCopy(DS1FloorTile other)
+    {
+        base.DeepCopy(other);
+    }
 }

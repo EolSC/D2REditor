@@ -1,10 +1,14 @@
 {
   "developer": {
-    "testLevel": "data/global/tiles/act3/travincal/travs.ds1",
+    "testLevel": "data/global/tiles/expansion/mountaintop/mtntop.ds1",
     "testLevel2": "data/global/tiles/act1/outdoors/tower2.ds1",
     "testLevel3": "data/global/tiles/act2/tomb/tombne3.ds1",
     "unitTestFolders": [
-      "data/global/tiles/act3/travincal"
+      "data/global/tiles/act1",
+      "data/global/tiles/act2",
+      "data/global/tiles/act3",
+      "data/global/tiles/act4",
+      "data/global/tiles/expansion"
     ]
   },
   "paths": {

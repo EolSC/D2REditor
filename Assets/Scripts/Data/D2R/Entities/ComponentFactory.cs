@@ -37,6 +37,7 @@ namespace Diablo2Editor
         LevelHeightOffsetComponent,
         ChangeVisibilityOnDataEventComponent,
         DefaultAttachmentTransformComponent,
+        ParallaxOffsetComponent,
     }
 
     public class ComponentFactory
@@ -72,6 +73,7 @@ namespace Diablo2Editor
             { ComponentTypes.LevelHeightOffsetComponent, typeof(LevelHeightOffsetComponent) },
             { ComponentTypes.ChangeVisibilityOnDataEventComponent, typeof(ChangeVisibilityOnDataEventComponent) },
             { ComponentTypes.DefaultAttachmentTransformComponent, typeof(DefaultAttachmentTransformComponent) },
+            { ComponentTypes.ParallaxOffsetComponent, typeof(ParallaxOffsetComponent) },
         };
              
         public static LevelEntityComponent CreateComponentByType(string type, GameObject gameObject, ref bool componentValid)

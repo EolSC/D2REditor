@@ -1,15 +1,20 @@
 using Diablo2Editor;
-using System.ComponentModel;
 using UnityEditor;
 using UnityEngine;
-
 /*
  * Creates scene hierarchy based on level content
  * 
  */
-public class ContentDrawer
+public class D2RHierarchyLoader
 {
-    public void InstantiateContent(GameObject gameObject, LevelComponent component, bool displayProgress = true)
+    private LevelLoadingStrategy strategy;
+
+    public D2RHierarchyLoader(LevelLoadingStrategy strategy)
+    {
+        this.strategy = strategy;
+    }
+
+    public void InstantiateContent(GameObject gameObject, LevelComponent component, ObjectsLoader objLoader, bool displayProgress = true)
     {
         var d2RData = component.GetD2RLevel();
         var ds1Data = component.GetDS1Level();
@@ -37,13 +42,16 @@ public class ContentDrawer
             testDS1.transform.parent = gameObject.transform;
             var grid = CreateTileGrid(testDS1);
             grid.levelComponent = component;
-            CreateLevelObjects(testDS1, component.GetDS1Level());
+            CreateLevelObjects(testDS1, component.GetDS1Level(), objLoader);
         }
         gameObject.name = component.GetName();
-        UpdateCameraSettings(gameObject);
+        FlipRootObject(component);
+
+        var cameraSettings = strategy.settings.camera;
+        UpdateCameraSettings(gameObject, cameraSettings);
     }
 
-    public void FlipRootObject(LevelComponent component)
+    private void FlipRootObject(LevelComponent component)
     {
         var d2RData = component.GetD2RLevel();
 
@@ -55,9 +63,8 @@ public class ContentDrawer
 
     }
 
-    private void UpdateCameraSettings(GameObject gameObject)
+    private void UpdateCameraSettings(GameObject gameObject, Diablo2Editor.EditorSettings.CameraSettings camera)
     {
-        Diablo2Editor.EditorSettings.CameraSettings camera = EditorMain.Settings().camera;
         SceneView.CameraSettings settings = new SceneView.CameraSettings();
         settings.nearClip = camera.nearClip;
         settings.farClip = camera.farClip;
@@ -89,10 +96,8 @@ public class ContentDrawer
         return grid;
     }
 
-    private void CreateLevelObjects(GameObject gameObject, DS1Level level)
+    private void CreateLevelObjects(GameObject gameObject, DS1Level level, ObjectsLoader loader)
     {
-        var loader = EditorMain.objectLoader;
-
         GameObject objParent = new GameObject();
         objParent.transform.parent = gameObject.transform;
         objParent.name = "Objects";

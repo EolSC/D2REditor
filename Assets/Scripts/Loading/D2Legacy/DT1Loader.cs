@@ -2,11 +2,11 @@ using UnityEngine;
 using System.IO;
 using System;
 using Unity.Collections;
+using Diablo2Editor;
 public class DT1Loader
 {
-    public static DT1Data ReadDT1DataFromFile(string pathToFile, NativeArray<Color> palette)
+    public static DT1Data ReadDT1DataFromFile(PathMapper pathMapper, string pathToFile, NativeArray<Color> palette)
     { 
-        var pathMapper = EditorMain.Settings().paths;
         string localPath = Path.Combine(pathMapper.GetTilesRoot(), pathToFile);
         string absolute_path = pathMapper.GetAbsolutePath(localPath);
         if (File.Exists(absolute_path))

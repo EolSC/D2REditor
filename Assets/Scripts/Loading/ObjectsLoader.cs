@@ -11,11 +11,19 @@ public class ObjectsLoader
 {
     private ObjectPreset preset;
     private ObjectsMap map = null;
+    private LevelLoadingStrategy strategy;
+
+    public ObjectsLoader(LevelLoadingStrategy strategy)
+    {
+        this.strategy = strategy;
+        map = new ObjectsMap(this.strategy.settings.paths);
+    }
 
 
     public void Load(int act, long type, long id, GameObject gameObject, bool isReloading)
     {
         var actZeroBased = act - 1;
+        var pathMapper = strategy.settings.paths;
         var path = FindObjectPreset(actZeroBased, type, id);
         if (path.Length > 0)
         {
@@ -43,7 +51,7 @@ public class ObjectsLoader
 
             string jsonContent = File.ReadAllText(full_path);
             JSONNode jsonNode = JSON.Parse(jsonContent);
-            preset = new ObjectPreset(child);
+            preset = new ObjectPreset(child, strategy);
             preset.Deserialize(jsonNode.AsObject);
 
             preset.Instantiate();
@@ -59,10 +67,6 @@ public class ObjectsLoader
 
     private string FindObjectPreset(int act, long type, long id)
     {
-        if (map == null)
-        {
-            map = new ObjectsMap();
-        }
         string presetName = map.FindObjectPresetName(act, type, id);
         if (presetName.Length > 0) {
             return FindPresetOnDisc(type, presetName);
@@ -73,7 +77,7 @@ public class ObjectsLoader
     private string FindPresetOnDisc(long type, string presetName)
     {
         List<string> folders = new List<string>();
-        var pathMapper = EditorMain.Settings().paths;
+        var pathMapper = strategy.settings.paths;
         if (type == 1) // npc or enemy
         {
             // add both folders in search

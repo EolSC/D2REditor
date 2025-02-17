@@ -5,41 +5,18 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-/*
- * Data used to load and instantiate the level
- * Diffrent flags can be used in different scenarios. Default loading 
- * does instantiating with no json validation test and displays progress
- */
-public class LevelLoadingContext
+public class LevelLoadingStrategy
 {
-    public string name;
-    public byte[] ds1Content;
-    public string jsonContent;
-    public bool instantiate = true;
-    public bool test = true;
-    public bool loadJson = true;
-    public bool displayProgress = true;
+    public Diablo2Editor.EditorSettings settings;
+    public ResourceCache cache;
+    public DT1Cache dt1Cache;
 
-    public static LevelLoadingContext GetUnitTestContext()
+    public LevelLoadingStrategy()
     {
-        var result = new LevelLoadingContext();
-        result.instantiate = false;
-        result.test = true;
-        result.loadJson = true;
-        result.displayProgress = false;
-        return result;
+        settings = new Diablo2Editor.EditorSettings();
+        cache = new ResourceCache();
+        dt1Cache = new DT1Cache();
     }
-
-    public static LevelLoadingContext GetDefaultContext()
-    {
-        var result = new LevelLoadingContext();
-        result.instantiate = true;
-        result.test = true;
-        result.loadJson = true;
-        result.displayProgress = true;
-        return result;
-    }
-
 }
 /*
  * Component storing all level data.
@@ -57,8 +34,7 @@ public class LevelComponent : MonoBehaviour
     private int seed = 0;
     // string name
     private string levelName;
-
-    private ContentDrawer drawer = new ContentDrawer();
+ 
 
     public string GetName()
     {
@@ -76,8 +52,9 @@ public class LevelComponent : MonoBehaviour
     }
 
 
-    public bool Load(LevelLoadingContext context)
+    public bool Load(LevelLoadingContext context, LevelLoadingStrategy strategy)
     {
+
         bool result = true;
         this.levelName = context.name;
         if (context.displayProgress)
@@ -86,28 +63,19 @@ public class LevelComponent : MonoBehaviour
         }
         if (context.loadJson)
         {
-            LoadJsonPreset(context.jsonContent);
+            LoadJsonPreset(context.jsonContent, strategy);
         }
         if (context.displayProgress)
         {
             EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.3f);
         }
 
-        LoadDS1Content(context.ds1Content);
-        if (context.instantiate)
-        {
-            drawer.InstantiateContent(gameObject, this, context.displayProgress);
-        }
-        drawer.FlipRootObject(this);
+        LoadDS1Content(context.ds1Content, strategy);
         if (context.test)
         {
             result = Test(context.ds1Content, context.jsonContent);
         }
-        if (context.displayProgress)
-        {
-            Debug.Log("Level loaded: " + levelName);
-            EditorUtility.ClearProgressBar();
-        }
+
         return result;
     }
 
@@ -153,7 +121,6 @@ public class LevelComponent : MonoBehaviour
             }
             JSONNode resultJson = d2RPreset.Serialize();
             JSONNode sourceJson = JSON.Parse(jsonContent);
-
             bool oldContentEqual = false;
             if (ds1Level != null)
             {
@@ -170,29 +137,31 @@ public class LevelComponent : MonoBehaviour
     }
 
     // Json-specific logic
-    private void LoadJsonPreset(string jsonContent)
+    private void LoadJsonPreset(string jsonContent, LevelLoadingStrategy strategy)
     {
         JSONNode jsonNode = JSON.Parse(jsonContent);
         GameObject jsonObj = new GameObject();
         jsonObj.name = "json";
         jsonObj.transform.parent = transform;
-        d2RPreset = new Diablo2Editor.LevelPreset(jsonObj, jsonNode.AsObject, seed);
+        d2RPreset = new LevelPreset(jsonObj, strategy, jsonNode.AsObject, seed);
     }
 
     // Ds1-specific logic
-    private void LoadDS1Content(byte[] ds1Content)
+    private void LoadDS1Content(byte[] ds1Content, LevelLoadingStrategy strategy)
     {
-        D2Palette pallete = EditorMain.Settings().pallete;
-        DT1Cache dt1Cache = EditorMain.dt1Cache;
+        var settings = strategy.settings;
+        PathMapper pathMapper = strategy.settings.paths;
+        D2Palette pallete = settings.pallete;
+        DT1Cache dt1Cache = strategy.dt1Cache;
         DS1Loader loader = new DS1Loader();
         ds1Level = loader.ReadDS1(ds1Content);
-        LevelTypesLoader levelTypes = EditorMain.Settings().levelTypesLoader;
+        LevelTypesLoader levelTypes = settings.levelTypesLoader;
 
         // Find level data using filename including extension
-        MapListLevelData levelData = EditorMain.Settings().mapList.GetLevelData(levelName + PathMapper.DS1_EXT);
+        MapListLevelData levelData = settings.mapList.GetLevelData(levelName + PathMapper.DS1_EXT);
         if (levelData != null)
         {
-            var tileTables = levelTypes.FindTilesForLevel(levelData, dt1Cache, pallete);
+            var tileTables = levelTypes.FindTilesForLevel(pathMapper, levelData, dt1Cache, pallete);
             ds1Level.InitBlockTable(tileTables);
         }
         else

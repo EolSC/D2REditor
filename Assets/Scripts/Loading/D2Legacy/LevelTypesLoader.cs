@@ -13,7 +13,7 @@ namespace Diablo2Editor
         {
             levelTypes = CSVReader.ReadFile(pathToLevelTypes);
         }
-        public List<DT1Data> FindTilesForLevel(MapListLevelData levelData, DT1Cache dt1Cache, D2Palette palettes)
+        public List<DT1Data> FindTilesForLevel(PathMapper pathMapper, MapListLevelData levelData, DT1Cache dt1Cache, D2Palette palettes)
         {
             List<DT1Data> result = new List<DT1Data>();
             if (levelTypes != null && levelTypes.Length >= 3)
@@ -43,7 +43,7 @@ namespace Diablo2Editor
                                         dt1Cache.Get(fileName, ref dt1Data);
                                         if (dt1Data == null)
                                         {
-                                            dt1Data = DT1Loader.ReadDT1DataFromFile(fileName, actPallette);
+                                            dt1Data = DT1Loader.ReadDT1DataFromFile(pathMapper, fileName, actPallette);
                                             dt1Cache.Add(dt1Data);
                                         }
                                         if (dt1Data != null)

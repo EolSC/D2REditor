@@ -16,6 +16,11 @@ namespace Diablo2Editor
     {
         public Dictionary<string, List<LevelPresetDependency>> dependencies = new Dictionary<string, List<LevelPresetDependency>>();
 
+        private LevelLoadingStrategy strategy;
+        public LevelPresetDependencies(LevelLoadingStrategy strategy)
+        {
+            this.strategy = strategy;
+        }
 
         public object GetResource(string resourcePath, DependencyType type)
         {
@@ -25,8 +30,8 @@ namespace Diablo2Editor
                 // Empty path is invalid so let's just quit with no errors
                 return null;
             }
-            var cache = EditorMain.cache;
             object cached = null;
+            var cache = strategy.cache;
             if (cache.Get(resourcePath, ref cached))
             {
                 return cached;
@@ -37,7 +42,7 @@ namespace Diablo2Editor
             {
                 if (res_path == resource.path.ToLower())
                 {
-                    return resource.GetResource(cache);
+                    return resource.GetResource(strategy);
                 }
             }
             Debug.LogError("Resource of type " + type.ToString() + " is not found " + resourcePath);

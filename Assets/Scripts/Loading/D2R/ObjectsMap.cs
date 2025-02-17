@@ -22,10 +22,14 @@ namespace Diablo2Editor
     {
         ObjectIndex[] objectPresets = new ObjectIndex[DS1Consts.ACT_MAX];
         ObjectIndex[] monsterPresets = new ObjectIndex[DS1Consts.ACT_MAX];
+        private string monsterPath;
+        private string objectsPath;
 
-        public ObjectsMap()
+        public ObjectsMap(PathMapper pathMapper)
         {
-            Init();
+            monsterPath = pathMapper.GetMonstersPath(); 
+            objectsPath = pathMapper.GetObjectsPath();
+            Init(pathMapper);
         }
         public string FindObjectPresetName(int act, long type, long index)
         {
@@ -33,15 +37,14 @@ namespace Diablo2Editor
             {
                 Dictionary<long, string> indexData = null;
                 string fileToSearch = null;
-                var pathMapper = EditorMain.Settings().paths;
                 if (type == 1) // npc or enemy
                 {
-                    fileToSearch = pathMapper.GetMonstersPath();
+                    fileToSearch = monsterPath;
                     indexData = monsterPresets[act].data;
                 }
                 if (type == 2) // object
                 {
-                    fileToSearch = pathMapper.GetObjectsPath();
+                    fileToSearch = objectsPath;
                     indexData = objectPresets[act].data;
                 }
 
@@ -68,17 +71,15 @@ namespace Diablo2Editor
             }
             return "";
         }
-        private void Init()
+        private void Init(PathMapper pathMapper)
         {
-            InitObjectPresets();
-            InitMonsterPresets();
+            InitObjectPresets(pathMapper);
+            InitMonsterPresets(pathMapper);
         }
 
-        private void InitMonsterPresets()
+        private void InitMonsterPresets(PathMapper pathMapper)
         {
             PrepareArray(monsterPresets);
-            
-            var pathMapper = EditorMain.Settings().paths;
             // Read files of interest
             string[][] superuniques = CSVReader.ReadFile(pathMapper.GetSuperUniques());
             string[][] monpresets = CSVReader.ReadFile(pathMapper.GetMonPreset());
@@ -166,10 +167,9 @@ namespace Diablo2Editor
             }
         }
 
-        private void InitObjectPresets()
+        private void InitObjectPresets(PathMapper pathMapper)
         {
             PrepareArray(objectPresets);
-            var pathMapper = EditorMain.Settings().paths;
             // Read files of interest
             string[][] objpresets = CSVReader.ReadFile(pathMapper.GetObjPreset());
             string[][] objtxt = CSVReader.ReadFile(pathMapper.GetObjTxt());

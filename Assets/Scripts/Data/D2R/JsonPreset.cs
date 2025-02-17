@@ -17,9 +17,10 @@ namespace Diablo2Editor
         protected bool checkValidComponents = true;
 
 
-        public JsonPreset(GameObject gameObject)
+        public JsonPreset(GameObject gameObject, LevelLoadingStrategy strategy)
         {
             this.gameObject = gameObject;
+            this.dependencies = new LevelPresetDependencies(strategy);
         }
 
         public void SetValid(bool valid)
@@ -41,7 +42,7 @@ namespace Diablo2Editor
             // Mark as valid before deserialization
             SetValid(true);
 
-            dependencies = new LevelPresetDependencies();
+            
             dependencies.Deserialize(json["dependencies"].AsObject);
             entities = new List<LevelEntity>();
             foreach (JSONObject item in json["entities"])

@@ -7,8 +7,8 @@ namespace Diablo2Editor
     public class ObjectPreset : JsonPreset
     {
 
-        public ObjectPreset(GameObject gameObject)
-            :base(gameObject)
+        public ObjectPreset(GameObject gameObject, LevelLoadingStrategy strategy)
+            :base(gameObject, strategy)
         {
             checkValidComponents = false;
         }

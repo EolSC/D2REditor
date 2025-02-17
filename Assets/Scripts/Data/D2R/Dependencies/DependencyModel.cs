@@ -22,11 +22,11 @@ namespace Diablo2Editor
         // TODO: transfer it to editor settings, support different LODS
         public static string lod_level = "_lod0.model";
 
-        protected override void LoadResource()
+        protected override void LoadResource(LevelLoadingStrategy strategy)
         {
-            PathMapper mapper = EditorMain.Settings().paths;
+            var pathMapper = strategy.settings.paths;
             // Find absolute path to model file
-            string full_path = mapper.GetAbsolutePath(path);
+            string full_path = pathMapper.GetAbsolutePath(path);
             // Apply lod level
             full_path = full_path.Replace(".model", lod_level);
             if (File.Exists(full_path))

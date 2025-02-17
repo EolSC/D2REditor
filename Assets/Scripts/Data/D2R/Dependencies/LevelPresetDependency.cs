@@ -27,29 +27,30 @@ namespace Diablo2Editor
             return result;
         }
 
-        protected virtual void LoadResource()
+        protected virtual void LoadResource(LevelLoadingStrategy strategy)
         {
 
         }
 
-        private void TryLoadResource(ResourceCache cache)
+        private void TryLoadResource(LevelLoadingStrategy strategy)
         {
             var res_path = path.ToLower();
+            var cache = strategy.cache;
             object cached = null;
             if (cache.Get(res_path, ref cached))
             {
                 resource = cached;
                 return;
             }
-            LoadResource();
+            LoadResource(strategy);
             cache.AddResource(res_path, resource);
         }
 
-        public object GetResource(ResourceCache cache)
+        public object GetResource(LevelLoadingStrategy strategy)
         {
             if (resource == null)
             {
-                TryLoadResource(cache);
+                TryLoadResource(strategy);
             }
             return resource;
         }

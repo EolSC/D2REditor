@@ -1,6 +1,5 @@
 using Diablo2Editor;
-using SimpleJSON;
-using System.Collections.Generic;
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -14,6 +13,14 @@ using UnityEngine;
 public class LevelContentLoader 
 {
     private static string DEFAULT_LEVEL_NAME = "level";
+    private LevelLoadingStrategy strategy;
+    private ObjectsLoader objectsLoader;
+
+    public LevelContentLoader(LevelLoadingStrategy strategy)
+    {
+        this.strategy = strategy;
+        objectsLoader = new ObjectsLoader(strategy);
+    }
     /*
      * Load level content. This function fully constructs LevelPreset and Ds1Preset within Scene
      */
@@ -21,7 +28,18 @@ public class LevelContentLoader
     {
         GameObject root = new GameObject();
         var component = root.AddComponent<LevelComponent>();
-        return component.Load(context); 
+        bool result = component.Load(context, strategy);
+        if (context.instantiate)
+        {
+            D2RHierarchyLoader drawer = new D2RHierarchyLoader(strategy);
+            drawer.InstantiateContent(root, component, objectsLoader, context.displayProgress);
+        }
+        if (context.displayProgress)
+        {
+            Debug.Log("Level loaded: " + context.name);
+            EditorUtility.ClearProgressBar();
+        }
+        return result;
     }
 
     /*
@@ -49,7 +67,7 @@ public class LevelContentLoader
     private static LevelComponent FindLevel()
     {
         // if level is loaded(it can be only one level)
-        return Object.FindAnyObjectByType<LevelComponent>() as LevelComponent;
+        return UnityEngine.Object.FindAnyObjectByType<LevelComponent>() as LevelComponent;
     }
 
     /*
@@ -57,11 +75,11 @@ public class LevelContentLoader
      */
     public static void ClearScene()
     {
-       LevelComponent[] objects = Object.FindObjectsByType<LevelComponent>(FindObjectsSortMode.InstanceID);
+       LevelComponent[] objects = UnityEngine.Object.FindObjectsByType<LevelComponent>(FindObjectsSortMode.InstanceID);
         foreach (var obj in objects)
         {
             GameObject gameObject = obj.gameObject;
-            Object.DestroyImmediate(gameObject, true);
+            UnityEngine.Object.DestroyImmediate(gameObject, true);
         }
     }
 
@@ -77,4 +95,61 @@ public class LevelContentLoader
         }
         return false;
     }
+
+    public void OpenTestLevel(LevelLoadingContext context)
+    {
+        ClearScene();
+        var path = strategy.settings.developer.testLevel;
+        OpenLevel(path, context);
+    }
+    public void OpenLevel(string path, LevelLoadingContext context)
+    {
+        var paths = strategy.settings.paths;
+        /*
+         * D2R uses hybid level data so we need both ds1 and json preset to load level properly
+         */
+
+        string absolute_path = paths.GetAbsolutePath(path);
+        string fileName = Path.GetFileNameWithoutExtension(absolute_path);
+        string local_path = paths.GetLocalPath(absolute_path);
+        string pathToJson = paths.GetPresetForLevel(local_path);
+        byte[] dsContent = { };
+        string jsonContent = "";
+
+        bool levelExists = File.Exists(absolute_path);
+        bool jsonExists = File.Exists(pathToJson);
+        if (levelExists)
+        {
+
+            dsContent = File.ReadAllBytes(absolute_path);
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("Level not found " + absolute_path);
+        }
+
+        if (jsonExists)
+        {
+
+            jsonContent = File.ReadAllText(pathToJson);
+        }
+        else
+        {
+            UnityEngine.Debug.LogWarning("Preset for level " + absolute_path + " is not found in path " + pathToJson);
+        }
+
+        if (levelExists && jsonExists)
+        {
+            context.ds1Content = dsContent;
+            context.jsonContent = jsonContent;
+            context.name = fileName;
+            // Load preset
+            bool result = LoadLevel(context);
+            if (!result)
+            {
+                throw new Exception("Loading failed: " + path);
+            }
+        }
+    }
+
 }

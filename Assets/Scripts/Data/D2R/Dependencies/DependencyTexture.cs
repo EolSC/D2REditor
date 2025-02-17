@@ -15,15 +15,15 @@ namespace Diablo2Editor
     }
     public class DependencyTexture : LevelPresetDependency
     {
-        private bool NeedLoadTexture(string path)
+        private bool NeedLoadTexture(EditorSettings settings, string path)
         {
-            if (EditorMain.Settings().developer.isUnitTestMode)
+            if (settings.developer.isUnitTestMode)
             {
                 // Skip loading in unit test mode
                 return false;
             }
 
-            TextureLoadMode mode = EditorMain.Settings().common.textureLoadMode;
+            TextureLoadMode mode = settings.common.textureLoadMode;
             switch (mode)
             {
                 default:
@@ -35,18 +35,17 @@ namespace Diablo2Editor
                          return false;
             }
         }
-        protected override void LoadResource()
+        protected override void LoadResource(LevelLoadingStrategy strategy)
         {
-            if(NeedLoadTexture(path))
+            if(NeedLoadTexture(strategy.settings, path))
             {
-                LoadTexture();
+                LoadTexture(strategy);
             }
         }
 
-        public void LoadTexture()
+        public void LoadTexture(LevelLoadingStrategy strategy)
         {
-            PathMapper mapper = EditorMain.Settings().paths;
-            string abs_path = mapper.GetAbsolutePath(this.path);
+            string abs_path = strategy.settings.paths.GetAbsolutePath(this.path);
             if (File.Exists(abs_path))
             {
                 var bytes = File.ReadAllBytes(abs_path);

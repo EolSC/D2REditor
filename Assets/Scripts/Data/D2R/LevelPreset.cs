@@ -19,8 +19,8 @@ namespace Diablo2Editor
         public List<TileBiomeOverride> perTileBiomeOverrides;
         SpecialTiles specialTiles;
 
-        public LevelPreset(GameObject gameObject, JSONObject json, int seed)
-            : base(gameObject)
+        public LevelPreset(GameObject gameObject, LevelLoadingStrategy strategy, JSONObject json, int seed)
+            : base(gameObject, strategy)
         {
             this.seed = seed;
             Deserialize(json);

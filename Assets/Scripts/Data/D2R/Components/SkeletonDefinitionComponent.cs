@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Diablo2Editor
 {
-    public class SkeletonComponent : LevelEntityComponent
+    public class SkeletonDefinitionComponent : LevelEntityComponent
     {
         public string filename;
 

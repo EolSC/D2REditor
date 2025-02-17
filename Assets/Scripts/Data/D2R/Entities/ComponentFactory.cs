@@ -25,13 +25,18 @@ namespace Diablo2Editor
         DecalDefinitionComponent,
         UnitRootComponent,
         UnitPartComponent,
-        SkeletonComponent,
+        SkeletonDefinitionComponent,
         OverrideModelDefinitionComponent,
         AudioEmitterComponent,
         TransformVariationDefinitionComponent,
         ObjectMountPointComponent,
         FadeTargetComponent,
         VisualDataBoxDefinitionComponent,
+        PhysicsClothDefinitionComponent,
+        PhysicsPartialRagdollDefinitionComponent,
+        LevelHeightOffsetComponent,
+        ChangeVisibilityOnDataEventComponent,
+        DefaultAttachmentTransformComponent,
     }
 
     public class ComponentFactory
@@ -55,28 +60,31 @@ namespace Diablo2Editor
             { ComponentTypes.DecalDefinitionComponent, typeof(DecalDefinitionComponent) },
             { ComponentTypes.UnitRootComponent, typeof(UnitRootComponent) },
             { ComponentTypes.UnitPartComponent, typeof(UnitPartComponent) },
-            { ComponentTypes.SkeletonComponent, typeof(SkeletonComponent) },
+            { ComponentTypes.SkeletonDefinitionComponent, typeof(SkeletonDefinitionComponent) },
             { ComponentTypes.OverrideModelDefinitionComponent, typeof(OverrideModelDefinitionComponent) },
             { ComponentTypes.AudioEmitterComponent, typeof(AudioEmitterComponent) },
             { ComponentTypes.TransformVariationDefinitionComponent, typeof(TransformVariationDefinitionComponent) },
             { ComponentTypes.ObjectMountPointComponent, typeof(ObjectMountPointComponent) },
             { ComponentTypes.FadeTargetComponent, typeof(FadeTargetComponent) },
             { ComponentTypes.VisualDataBoxDefinitionComponent, typeof(VisualDataBoxDefinitionComponent) },
+            { ComponentTypes.PhysicsClothDefinitionComponent, typeof(PhysicsClothDefinitionComponent) },
+            { ComponentTypes.PhysicsPartialRagdollDefinitionComponent, typeof(PhysicsPartialRagdollDefinitionComponent) },
+            { ComponentTypes.LevelHeightOffsetComponent, typeof(LevelHeightOffsetComponent) },
+            { ComponentTypes.ChangeVisibilityOnDataEventComponent, typeof(ChangeVisibilityOnDataEventComponent) },
+            { ComponentTypes.DefaultAttachmentTransformComponent, typeof(DefaultAttachmentTransformComponent) },
         };
              
-        public static LevelEntityComponent CreateComponentByType(string type, GameObject gameObject, bool checkMissingComponents)
+        public static LevelEntityComponent CreateComponentByType(string type, GameObject gameObject, ref bool componentValid)
         {
             object componentType;
             if (Enum.TryParse(typeof(ComponentTypes), type, out componentType))
             {
                 ComponentTypes parsedType = (ComponentTypes)componentType;
                 Type typeToCreate = componentTypes[parsedType];
+                componentValid = true;
                 return gameObject.AddComponent(typeToCreate) as LevelEntityComponent;
             }
-            if (checkMissingComponents)
-            {
-                Debug.LogError("Unknown component: " + type);
-            }
+            componentValid = false;
             return gameObject.AddComponent<LevelComponentUnknown>();
         }
     }

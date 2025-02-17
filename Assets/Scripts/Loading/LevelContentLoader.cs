@@ -5,6 +5,8 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
+
+
 /*
  * Performs all the work related to reading source ds1/json.
  * Result of loading is LevelComponent object
@@ -15,11 +17,11 @@ public class LevelContentLoader
     /*
      * Load level content. This function fully constructs LevelPreset and Ds1Preset within Scene
      */
-    public void LoadLevel(string levelName, byte[] ds1Content, string jsonContent, bool instantiate, bool displayProgress, bool loadJson)
+    public bool LoadLevel(LevelLoadingContext context)
     {
         GameObject root = new GameObject();
         var component = root.AddComponent<LevelComponent>();
-        component.Load(levelName, ds1Content, jsonContent, instantiate, displayProgress, loadJson); 
+        return component.Load(context); 
     }
 
     /*

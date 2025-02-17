@@ -39,15 +39,20 @@ public class ContentDrawer
             grid.levelComponent = component;
             CreateLevelObjects(testDS1, component.GetDS1Level());
         }
-
         gameObject.name = component.GetName();
+        UpdateCameraSettings(gameObject);
+    }
+
+    public void FlipRootObject(LevelComponent component)
+    {
+        var d2RData = component.GetD2RLevel();
+
         // Flip hierarchy around X-axis
         // D2 granny models use other coordinate system. To show level in same coordinates
         // as game shows it
         var presetGO = d2RData.gameObject;
         presetGO.transform.localScale = new Vector3(-1, 1, 1);
 
-        UpdateCameraSettings(gameObject);
     }
 
     private void UpdateCameraSettings(GameObject gameObject)

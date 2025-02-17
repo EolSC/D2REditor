@@ -13,7 +13,7 @@ namespace Diablo2Editor
         Vector3 min;
         Vector3 max;
         public int priority = 0;
-        public int targetId = 0;
+        public string targetId;
         public override void Deserialize(JSONObject json)
         {
             base.Deserialize(json);

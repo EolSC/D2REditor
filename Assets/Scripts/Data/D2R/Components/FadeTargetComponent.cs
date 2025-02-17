@@ -4,7 +4,7 @@ namespace Diablo2Editor
 {
     public class FadeTargetComponent : LevelEntityComponent
     {
-        public int targetId = 0;
+        public string targetId;
         public override void Deserialize(JSONObject json)
         {
             base.Deserialize(json);

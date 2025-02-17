@@ -1,5 +1,6 @@
 using SimpleJSON;
 using System.Collections.Generic;
+using Unity.Mathematics;
 
 namespace Diablo2Editor
 {
@@ -9,6 +10,7 @@ namespace Diablo2Editor
     */
     public class JSONCompare
     {
+        private const float DEFAULT_DELTA = 0.00001f;
         public static bool Compare(JSONNode first, JSONNode second)
         {
             if (first.IsObject && second.IsObject)
@@ -86,7 +88,13 @@ namespace Diablo2Editor
 
         private static bool CompareJsonNumbers(JSONNode first, JSONNode second)
         {
-            return first.AsFloat == second.AsFloat;
+
+            return EqualFloat(first.AsFloat, second.AsFloat);
+        }
+
+        private static bool EqualFloat(float float1 , float float2, float delta = DEFAULT_DELTA)
+        {
+            return (float1 + delta >= float2) && (float1 - delta <= float2);
         }
     }
 }

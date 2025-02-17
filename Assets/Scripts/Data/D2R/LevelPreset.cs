@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using SimpleJSON;
+using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
 
 namespace Diablo2Editor
@@ -15,8 +16,8 @@ namespace Diablo2Editor
         public int seed = 0;
         public LevelEntity terrain;
         public string biomeFilename;
-        public List<TileBiomeOverrides> perTileBiomeOverrides;
-        SpecialTile specialTiles;
+        public List<TileBiomeOverride> perTileBiomeOverrides;
+        SpecialTiles specialTiles;
 
         public LevelPreset(GameObject gameObject, JSONObject json, int seed)
             : base(gameObject)
@@ -25,22 +26,63 @@ namespace Diablo2Editor
             Deserialize(json);
         }
 
+        public LevelEntity FindTerrain(JSONObject json)
+        {
+            long id = json["id"];
+            foreach (var entity in this.entities)
+            {
+                if (entity.id == id)
+                {
+                    return entity;
+                }
+            }
+            return null;
+        }
+
         public override void Deserialize(JSONObject json)
         {
             base.Deserialize(json);
+            JSONObject terrain_obj = json["terrain"].AsObject;
+            // Some levels have no terrain, it's not an error
+            if (terrain_obj.Count > 0)
+            {
+                if (entities.Count > 0)
+                {
+                    // If we do have one - find it
+                    terrain = FindTerrain(terrain_obj);
+                    if (terrain == null)
+                    {
+                        Debug.LogError("Terrain component is not found");
+                        SetValid(false);
+                    }
+                }
+                else
+                {
+                    // if we have no entities but do have terrian - load it up
+                    terrain = new LevelEntity(this);
+                    terrain.Deserialize(terrain_obj);
+                }
 
-            terrain = new LevelEntity(this);
-            terrain.Deserialize(json["terrain"].AsObject);
+            }
             biomeFilename = json["biomeFilename"];
-            perTileBiomeOverrides = ISerializable.DeserializeList<TileBiomeOverrides>(json, "perTileBiomeOverrides");
-            specialTiles = new SpecialTile();
+            perTileBiomeOverrides = ISerializable.DeserializeList<TileBiomeOverride>(json, "perTileBiomeOverrides");
+            specialTiles = new SpecialTiles();
             specialTiles.Deserialize(json["specialTiles"].AsObject);
         }
 
         public override JSONObject Serialize()
         {
             JSONObject result = base.Serialize();
-            result["terrain"] = terrain.Serialize();
+            if (terrain != null)
+            {
+                result["terrain"] = terrain.Serialize();
+            }
+            else
+            {
+                // if no terrain on level - just fill it with empty object
+                result["terrain"] = new JSONObject();
+            }
+            
             result["biomeFilename"] = biomeFilename;
             result["perTileBiomeOverrides"] = ISerializable.SerializeList(perTileBiomeOverrides);
             result["specialTiles"] = specialTiles.Serialize();
@@ -51,7 +93,10 @@ namespace Diablo2Editor
         public override void Instantiate()
         {
             base.Instantiate();
-            terrain.Instantiate();
+            if (terrain != null && entities.Count == 0)
+            {
+                terrain.Instantiate();
+            }
         }
     }
 }

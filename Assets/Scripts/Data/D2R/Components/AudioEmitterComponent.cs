@@ -36,7 +36,7 @@ namespace Diablo2Editor
             JSONObject randomDelayObject = new JSONObject();
             randomDelayObject["x"] = ISerializable.SerializeFloat(this.randomDelay.x);
             randomDelayObject["y"] = ISerializable.SerializeFloat(this.randomDelay.y);
-
+            result["randomDelay"] = randomDelayObject;
             result["forceNoRandom"] = forceNoRandom;
 
             return result;

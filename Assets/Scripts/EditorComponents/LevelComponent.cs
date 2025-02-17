@@ -4,8 +4,43 @@ using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
-using static UnityEngine.Mesh;
 
+/*
+ * Data used to load and instantiate the level
+ * Diffrent flags can be used in different scenarios. Default loading 
+ * does instantiating with no json validation test and displays progress
+ */
+public class LevelLoadingContext
+{
+    public string name;
+    public byte[] ds1Content;
+    public string jsonContent;
+    public bool instantiate = true;
+    public bool test = true;
+    public bool loadJson = true;
+    public bool displayProgress = true;
+
+    public static LevelLoadingContext GetUnitTestContext()
+    {
+        var result = new LevelLoadingContext();
+        result.instantiate = false;
+        result.test = true;
+        result.loadJson = true;
+        result.displayProgress = false;
+        return result;
+    }
+
+    public static LevelLoadingContext GetDefaultContext()
+    {
+        var result = new LevelLoadingContext();
+        result.instantiate = true;
+        result.test = true;
+        result.loadJson = true;
+        result.displayProgress = true;
+        return result;
+    }
+
+}
 /*
  * Component storing all level data.
  * Binds D2R + D2Legacy data and GameObject together 
@@ -41,33 +76,39 @@ public class LevelComponent : MonoBehaviour
     }
 
 
-    public void Load(string name, byte[] ds1Content, string jsonContent, bool instantiate = true, bool displayProgress = true, bool loadJson = true)
+    public bool Load(LevelLoadingContext context)
     {
-        this.levelName = name;
-
-        if (displayProgress)
+        bool result = true;
+        this.levelName = context.name;
+        if (context.displayProgress)
         {
             EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.0f);
         }
-        if (loadJson)
+        if (context.loadJson)
         {
-            LoadJsonPreset(jsonContent);
+            LoadJsonPreset(context.jsonContent);
         }
-        if (displayProgress)
+        if (context.displayProgress)
         {
             EditorUtility.DisplayProgressBar("Loading level", "Loading json content...", 0.3f);
         }
 
-        LoadDS1Content(ds1Content);
-        if (instantiate)
+        LoadDS1Content(context.ds1Content);
+        if (context.instantiate)
         {
-            drawer.InstantiateContent(gameObject, this, displayProgress);
+            drawer.InstantiateContent(gameObject, this, context.displayProgress);
         }
-        if (displayProgress)
+        drawer.FlipRootObject(this);
+        if (context.test)
+        {
+            result = Test(context.ds1Content, context.jsonContent);
+        }
+        if (context.displayProgress)
         {
             Debug.Log("Level loaded: " + levelName);
             EditorUtility.ClearProgressBar();
         }
+        return result;
     }
 
     public void Save(string fileName)
@@ -105,6 +146,11 @@ public class LevelComponent : MonoBehaviour
     {
         if ((d2RPreset != null) && (ds1Level != null))
         {
+            if (!d2RPreset.IsValid())
+            {
+                // Fail the test if preset is missing some components
+                return false;
+            }
             JSONNode resultJson = d2RPreset.Serialize();
             JSONNode sourceJson = JSON.Parse(jsonContent);
 

@@ -55,6 +55,8 @@ namespace Diablo2Editor
             this.orientation.w = ISerializable.DeserializeFloat(orientation["w"]);
 
             this.inheritOnlyPosition = obj["inheritOnlyPosition"].AsBool;
+
+            UpdateObjectTransform();
         }
         public override JSONObject Serialize()
         {

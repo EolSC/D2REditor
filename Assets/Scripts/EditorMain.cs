@@ -33,7 +33,8 @@ public class EditorMain : MonoBehaviour
         // Open file dialog
         string absolute_path = EditorUtility.OpenFilePanel("Open Diablo 2 Ressurected level", "", "ds1");
         // Load level with no tests
-        OpenLevel(absolute_path);
+        var context = LevelLoadingContext.GetDefaultContext();
+        OpenLevel(absolute_path, context);
     }
 
     [MenuItem("Diablo Level Editor/Save level...")]
@@ -59,7 +60,9 @@ public class EditorMain : MonoBehaviour
         // Use path from settings without opening Browse dialog
         string path = Settings().developer.testLevel;
         LevelContentLoader.ClearScene();
-        OpenLevel(path, true, true);
+        // Load level with no tests
+        var context = LevelLoadingContext.GetDefaultContext();
+        OpenLevel(path, context);
     }
 
     [MenuItem("Diablo Level Editor/Developer/Reload settings")]
@@ -79,7 +82,7 @@ public class EditorMain : MonoBehaviour
 
         var folders = Settings().developer.unitTestFolders;
         int count = 0;
-
+        bool testResult = true;
         foreach (var folder in folders)
         {
             var testDir = pathMapper.GetAbsolutePath(folder);
@@ -88,7 +91,6 @@ public class EditorMain : MonoBehaviour
             count += folderFiles.Length;
         }
 
-        bool testResult = true;
         if (count > 0)
         {
             float step = 1/(float)count;
@@ -99,6 +101,10 @@ public class EditorMain : MonoBehaviour
                 var testDir = pathMapper.GetAbsolutePath(file);
                 // Search directory
                 testResult = UnitTestOneFolder(testDir, step, ref progress, SearchOption.TopDirectoryOnly);
+                if (!testResult)
+                {
+                    break;
+                }
                 var subdirs = Directory.GetDirectories(testDir);
                 // Then subdirectories
                 foreach (var subdir in subdirs)
@@ -122,8 +128,8 @@ public class EditorMain : MonoBehaviour
         var diffTime = testEndTime - testStartTime;
 
         string resultString = testResult ? "Success. " : "Failure. ";
-        string elapesdTime = "Elapsed time is " + diffTime + " seconds ";
-        string statsString = "Tested " + count + " levels in " + folders.Count + " folders. Test result is " + resultString + elapesdTime;
+        string elapsedTime = "Elapsed time is " + diffTime + " seconds ";
+        string statsString = "Tested " + count + " levels in " + folders.Count + " folders. Test result is " + resultString + elapsedTime;
         UnityEngine.Debug.Log(statsString);
 
     }
@@ -144,6 +150,7 @@ public class EditorMain : MonoBehaviour
     private static bool UnitTestOneFolder(string folder, float step, ref float progress, SearchOption option)
     {
         CleanUpMemory();
+        var loadingContext = LevelLoadingContext.GetUnitTestContext();
 
         bool testResult = true;
         string[] folderFiles =
@@ -160,12 +167,12 @@ public class EditorMain : MonoBehaviour
             try
             {
                 LevelContentLoader.ClearScene();
-                OpenLevel(file, false, false, false, false);
+                OpenLevel(file, loadingContext);
             }
             catch (Exception ex)
             {
                 testResult = false;
-                UnityEngine.Debug.Log("Loading of level " + file + "failed with error " + ex.Message);
+                UnityEngine.Debug.Log("Loading of level " + file + " failed with error " + ex.Message);
             }
             progress += step;
         }
@@ -178,7 +185,7 @@ public static Diablo2Editor.EditorSettings Settings()
     }
 
 
-    private static void OpenLevel(string path, bool instantiate = true, bool test_serialization = false, bool displayProgress = true, bool loadJson = true)
+    private static void OpenLevel(string path, LevelLoadingContext context)
     {
         /*
          * D2R uses hybid level data so we need both ds1 and json preset to load level properly
@@ -214,12 +221,14 @@ public static Diablo2Editor.EditorSettings Settings()
 
         if (levelExists && jsonExists)
         {
+            context.ds1Content = dsContent;
+            context.jsonContent = jsonContent;
+            context.name = fileName;
             // Load preset
-            loader.LoadLevel(fileName, dsContent, jsonContent, instantiate, displayProgress, loadJson);
-            //Perform some tests if they are needed
-            if (test_serialization)
+            bool result = loader.LoadLevel(context);
+            if (!result)
             {
-                loader.TestLevelLoading(dsContent, jsonContent);
+                throw new Exception("Loading failed: " + path);
             }
         }
     }

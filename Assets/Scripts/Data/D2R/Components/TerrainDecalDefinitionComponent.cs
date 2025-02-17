@@ -13,7 +13,7 @@ namespace Diablo2Editor
         public string albedo;
         public string normal;
         public string orm;
-        public int stomp;
+        public float stomp;
         public int snapOptions;
         public float parallaxScale;
         public string biomeName;
@@ -24,7 +24,7 @@ namespace Diablo2Editor
             albedo = json["albedo"];
             normal = json["normal"];
             orm = json["orm"];
-            stomp = json["stomp"];
+            stomp = ISerializable.DeserializeFloat(json["stomp"]);
             snapOptions = json["snapOptions"];
             parallaxScale = ISerializable.DeserializeFloat(json["parallaxScale"]);
             biomeName = json["biomeName"];
@@ -38,7 +38,7 @@ namespace Diablo2Editor
             result["albedo"] = albedo;
             result["normal"] = normal;
             result["orm"] = orm;
-            result["stomp"] = stomp;
+            result["stomp"] = ISerializable.SerializeFloat(stomp);
             result["snapOptions"] = snapOptions;
             result["parallaxScale"] = ISerializable.SerializeFloat(parallaxScale);
             result["biomeName"] = biomeName;

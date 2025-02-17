@@ -13,7 +13,8 @@ namespace Diablo2Editor
         public LevelPresetDependencies dependencies;
         public List<LevelEntity> entities;
         public GameObject gameObject;
-        protected bool checkMissingComponents = true;
+        protected bool valid = true;
+        protected bool checkValidComponents = true;
 
 
         public JsonPreset(GameObject gameObject)
@@ -21,12 +22,25 @@ namespace Diablo2Editor
             this.gameObject = gameObject;
         }
 
-        public bool NeedCheckMissingComponents()
+        public void SetValid(bool valid)
         {
-            return checkMissingComponents;
+            this.valid = valid;
+        }
+
+        public bool IsValid()
+        {
+            return valid;
+        }
+
+        public bool CheckValidComponents()
+        {
+            return checkValidComponents;
         }
         public virtual void Deserialize(JSONObject json)
         {
+            // Mark as valid before deserialization
+            SetValid(true);
+
             dependencies = new LevelPresetDependencies();
             dependencies.Deserialize(json["dependencies"].AsObject);
             entities = new List<LevelEntity>();
@@ -40,8 +54,27 @@ namespace Diablo2Editor
             name = json["name"];
         }
 
+        private void UpdateEntitiesList()
+        {
+            List<LevelEntity> validEntities = new List<LevelEntity>();
+            foreach(var entity in entities)
+            {
+                if (entity.gameObject != null)
+                {
+                    validEntities.Add(entity);
+                }
+                else
+                {
+                    Debug.Log("Game object for entity " + entity.name + "is no longer valid");
+                }
+            }
+            entities = validEntities;
+        }
+
         public virtual JSONObject Serialize()
         {
+            UpdateEntitiesList();
+
             JSONObject result = new JSONObject();
             result["dependencies"] = dependencies.Serialize();
             result["entities"] = ISerializable.SerializeList(entities);

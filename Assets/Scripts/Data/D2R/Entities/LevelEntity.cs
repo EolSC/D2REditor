@@ -37,7 +37,13 @@ namespace Diablo2Editor
             foreach (JSONNode component in components)
             {
                 var component_type = component["type"];
-                var obj = ComponentFactory.CreateComponentByType(component_type, gameObject, preset.NeedCheckMissingComponents());
+                bool valid = true;
+                var obj = ComponentFactory.CreateComponentByType(component_type, gameObject, ref valid);
+                if (preset.CheckValidComponents() && !valid)
+                {
+                    Debug.LogError("Unknown component type: " + component_type);
+                    preset.SetValid(false);
+                }
                 obj.entity = this;
                 obj.Deserialize(component.AsObject);
                 this.components.Add(obj);

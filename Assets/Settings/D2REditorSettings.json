@@ -1,14 +1,10 @@
 {
   "developer": {
-    "testLevel3": "data/global/tiles/act1/barracks/barew.ds1",
+    "testLevel": "data/global/tiles/act3/travincal/travs.ds1",
     "testLevel2": "data/global/tiles/act1/outdoors/tower2.ds1",
-    "testLevel": "data/global/tiles/act2/tomb/tombne3.ds1",
+    "testLevel3": "data/global/tiles/act2/tomb/tombne3.ds1",
     "unitTestFolders": [
-      "data/global/tiles/act1",
-      "data/global/tiles/act2",
-      "data/global/tiles/act3",
-      "data/global/tiles/act4",
-      "data/global/tiles/expansion"
+      "data/global/tiles/act3/travincal"
     ]
   },
   "paths": {

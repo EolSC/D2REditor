@@ -45,24 +45,10 @@ public class D2RHierarchyLoader
             CreateLevelObjects(testDS1, component.GetDS1Level(), objLoader);
         }
         gameObject.name = component.GetName();
-        FlipRootObject(component);
 
         var cameraSettings = strategy.settings.camera;
         UpdateCameraSettings(gameObject, cameraSettings);
     }
-
-    private void FlipRootObject(LevelComponent component)
-    {
-        var d2RData = component.GetD2RLevel();
-
-        // Flip hierarchy around X-axis
-        // D2 granny models use other coordinate system. To show level in same coordinates
-        // as game shows it
-        var presetGO = d2RData.gameObject;
-        presetGO.transform.localScale = new Vector3(-1, 1, 1);
-
-    }
-
     private void UpdateCameraSettings(GameObject gameObject, Diablo2Editor.EditorSettings.CameraSettings camera)
     {
         SceneView.CameraSettings settings = new SceneView.CameraSettings();

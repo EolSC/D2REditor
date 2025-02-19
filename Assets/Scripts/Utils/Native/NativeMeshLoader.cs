@@ -157,7 +157,7 @@ public class NativeMeshLoader
         Diablo2Editor.MeshData meshData = new Diablo2Editor.MeshData();
         var unity_mesh = new Mesh();
         float vertex_scale = NativeGrannyWrapper.GetMeshVertexScale(meshHandle);
-        meshData.localScale = new Vector3(vertex_scale, vertex_scale, vertex_scale);
+        meshData.localScale = new Vector3(-vertex_scale, vertex_scale, vertex_scale);
         meshData.mesh = unity_mesh;
 
         LoadMeshData(meshHandle, unity_mesh);

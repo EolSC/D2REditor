@@ -5,20 +5,21 @@ namespace Diablo2Editor
 {
     public class TransformVariationDefinitionComponent : LevelEntityComponent
     {
-        public UnityEngine.Vector3 position;
-        public UnityEngine.Quaternion orientation;
-        public UnityEngine.Vector3 scale;
-
-        public UnityEngine.Vector3 minRotation;
-        public UnityEngine.Vector3 maxRotation;
-        public UnityEngine.Vector3 rotationIncrement;
-        public UnityEngine.Vector3 minScale;
-        public UnityEngine.Vector3 maxScale;
-        public UnityEngine.Vector3 scaleIncrement;
+        public Vector3 position;
+        public Quaternion orientation;
+        public Vector3 scale;
+            
+        public Vector3 minRotation;
+        public Vector3 maxRotation;
+        public Vector3 rotationIncrement;
+        public Vector3 minScale;
+        public Vector3 maxScale;
+        public Vector3 scaleIncrement;
 
         private void UpdateObjectTransform()
         {
-            gameObject.transform.SetLocalPositionAndRotation(this.position, this.orientation);
+            var pos = new Vector3(-this.position.x, this.position.y, this.position.z);
+            gameObject.transform.SetLocalPositionAndRotation(pos, this.orientation);
             gameObject.transform.localScale = this.scale;
         }
         public override void Instantiate()

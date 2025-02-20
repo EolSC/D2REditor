@@ -28,17 +28,27 @@ public class LevelContentLoader
     {
         GameObject root = new GameObject();
         var component = root.AddComponent<LevelComponent>();
-        bool result = component.Load(context, strategy);
+        bool result = true;
+        component.Load(context, strategy);
+        D2RHierarchyLoader drawer = new D2RHierarchyLoader(strategy);
         if (context.instantiate)
         {
-            D2RHierarchyLoader drawer = new D2RHierarchyLoader(strategy);
             drawer.InstantiateContent(root, component, objectsLoader, context.displayProgress);
+        }
+        else
+        {
+            drawer.FlipRootObject(component);
+        }
+        if (context.test)
+        {
+            result = component.Test(context.ds1Content, context.jsonContent);
         }
         if (context.displayProgress)
         {
             Debug.Log("Level loaded: " + context.name);
             EditorUtility.ClearProgressBar();
         }
+
         return result;
     }
 

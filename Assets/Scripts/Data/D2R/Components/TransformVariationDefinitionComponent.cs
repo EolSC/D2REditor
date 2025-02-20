@@ -18,8 +18,7 @@ namespace Diablo2Editor
 
         private void UpdateObjectTransform()
         {
-            var pos = new Vector3(-this.position.x, this.position.y, this.position.z);
-            gameObject.transform.SetLocalPositionAndRotation(pos, this.orientation);
+            gameObject.transform.SetLocalPositionAndRotation(this.position, this.orientation);
             gameObject.transform.localScale = this.scale;
         }
         public override void Instantiate()

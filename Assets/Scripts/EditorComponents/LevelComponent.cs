@@ -52,10 +52,8 @@ public class LevelComponent : MonoBehaviour
     }
 
 
-    public bool Load(LevelLoadingContext context, LevelLoadingStrategy strategy)
+    public void Load(LevelLoadingContext context, LevelLoadingStrategy strategy)
     {
-
-        bool result = true;
         this.levelName = context.name;
         if (context.displayProgress)
         {
@@ -71,12 +69,6 @@ public class LevelComponent : MonoBehaviour
         }
 
         LoadDS1Content(context.ds1Content, strategy);
-        if (context.test)
-        {
-            result = Test(context.ds1Content, context.jsonContent);
-        }
-
-        return result;
     }
 
     public void Save(string fileName)

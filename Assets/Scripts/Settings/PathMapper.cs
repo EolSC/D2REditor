@@ -76,11 +76,11 @@ namespace Diablo2Editor
         {
             if (settings.IsObject)
             {
-                tilesRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["tilesRoot"]));
-                presetRoot = Path.GetFullPath(Path.Combine(dataRoot, settings["presetRoot"]));
-                palettesPath = Path.GetFullPath(Path.Combine(dataRoot, settings["palettePath"]));
-                monstersPath = Path.GetFullPath(Path.Combine(dataRoot, settings["monstersPath"]));
-                objectsPath = Path.GetFullPath(Path.Combine(dataRoot, settings["objectsPath"]));
+                tilesRoot = settings["tilesRoot"];
+                presetRoot =  settings["presetRoot"];
+                palettesPath = settings["palettePath"];
+                monstersPath = settings["monstersPath"];
+                objectsPath = settings["objectsPath"];
                 levelTypesPath = settings["levelTypes"];
                 levelPresetsPath = settings["levelPresets"];
                 mapListPath = settings["maplistPath"];
@@ -104,6 +104,11 @@ namespace Diablo2Editor
             {
                 Debug.LogError("[PathMapper] Invalid data root: " + dataRoot);
             }
+            if (!Directory.Exists(modRoot))
+            {
+                Debug.LogError("[PathMapper] Invalid mod root: " + modRoot);
+            }
+
         }
 
         /*
@@ -132,6 +137,7 @@ namespace Diablo2Editor
 
         /*
          * Returns path to maplist.csv used to load tiles for ds1
+         * It's project's resource so we don't searh for modRoot or dataRoot
          */
         public string GetPathToMapList()
         {
@@ -177,21 +183,21 @@ namespace Diablo2Editor
 
         public string GetNPCRoot()
         {
-            return npcRoot;
+            return GetAbsolutePath(npcRoot);
         }
 
         public string GetMonsterRoot()
         {
-            return monsterRoot;
+            return GetAbsolutePath(monsterRoot);
         }
         public string GetObjectsRoot()
         {
-            return objectsRoot;
+            return GetAbsolutePath(objectsRoot);
         }
 
         public string GetTilesRoot()
         {
-            return tilesRoot;
+            return GetAbsolutePath(tilesRoot);
         }
 
         /*
@@ -202,8 +208,10 @@ namespace Diablo2Editor
             string fileName = Path.GetFileName(path_to_level);
             string jsonFileName = fileName.Replace(DS1_EXT, JSON_EXT);
             string folder = path_to_level.Replace(fileName, "");
-            string json_path = Path.Combine(dataRoot, folder, jsonFileName);
-            string result = json_path.Replace(tilesRoot, presetRoot);
+            string json_path = Path.Combine(folder, jsonFileName);
+            json_path = ReverseSlashes(json_path);
+            string preset_local_path = json_path.Replace(tilesRoot, presetRoot);
+            string result = GetAbsolutePath(preset_local_path);
             return result;
         }
         /*
@@ -212,6 +220,11 @@ namespace Diablo2Editor
         public string GetLocalPath(string absolute_path)
         {
             return absolute_path.Replace(dataRoot, "");
+        }
+
+        private string ReverseSlashes(string path)
+        {
+            return path.Replace("\\", "/");
         }
     }
 }

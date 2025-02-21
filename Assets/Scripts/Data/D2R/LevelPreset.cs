@@ -26,10 +26,9 @@ namespace Diablo2Editor
             Deserialize(json);
         }
 
-        public LevelEntity FindTerrain(JSONObject json)
+        public LevelEntity FindTerrain(long id, List<LevelEntity> entities)
         {
-            long id = json["id"];
-            foreach (var entity in this.entities)
+            foreach (var entity in entities)
             {
                 if (entity.id == id)
                 {
@@ -43,13 +42,15 @@ namespace Diablo2Editor
         {
             base.Deserialize(json);
             JSONObject terrain_obj = json["terrain"].AsObject;
+            var entities = GetEntities();
             // Some levels have no terrain, it's not an error
             if (terrain_obj.Count > 0)
             {
                 if (entities.Count > 0)
                 {
+                    long id = terrain_obj["id"];
                     // If we do have one - find it
-                    terrain = FindTerrain(terrain_obj);
+                    terrain = FindTerrain(id, entities);
                     if (terrain == null)
                     {
                         Debug.LogError("Terrain component is not found");
@@ -59,7 +60,8 @@ namespace Diablo2Editor
                 else
                 {
                     // if we have no entities but do have terrian - load it up
-                    terrain = new LevelEntity(this);
+                    terrain = gameObject.AddComponent<LevelEntity>();
+                    terrain.SetPreset(this);
                     terrain.Deserialize(terrain_obj);
                 }
 
@@ -73,6 +75,23 @@ namespace Diablo2Editor
         public override JSONObject Serialize()
         {
             JSONObject result = base.Serialize();
+            var entities = GetEntities();
+            // update link to terrian in case it has changed
+            if (terrain)
+            {
+                if (entities.Count > 0)
+                {
+                    long id = terrain.id;
+                    // If we do have one - find it
+                    var newTerrain = FindTerrain(id, entities);
+                    if (terrain != newTerrain)
+                    {
+                        terrain = newTerrain;
+                    }
+                }
+
+            }
+
             if (terrain != null)
             {
                 result["terrain"] = terrain.Serialize();
@@ -93,6 +112,7 @@ namespace Diablo2Editor
         public override void Instantiate()
         {
             base.Instantiate();
+            var entities = GetEntities();
             if (terrain != null && entities.Count == 0)
             {
                 terrain.Instantiate();

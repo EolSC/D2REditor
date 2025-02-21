@@ -11,7 +11,6 @@ namespace Diablo2Editor
         public string type;
         public string name;
         public LevelPresetDependencies dependencies;
-        public List<LevelEntity> entities;
         public GameObject gameObject;
         protected bool valid = true;
         protected bool checkValidComponents = true;
@@ -44,37 +43,36 @@ namespace Diablo2Editor
 
             
             dependencies.Deserialize(json["dependencies"].AsObject);
-            entities = new List<LevelEntity>();
             foreach (JSONObject item in json["entities"])
             {
-                LevelEntity entity = new LevelEntity(this);
+                var entityGO = new GameObject();
+
+                entityGO.transform.SetParent(this.gameObject.transform);
+                LevelEntity entity = entityGO.AddComponent<LevelEntity>();
+                entity.SetPreset(this);
                 entity.Deserialize(item);
-                entities.Add(entity);
             }
             type = json["type"];
             name = json["name"];
         }
 
-        private void UpdateEntitiesList()
+        protected List<LevelEntity> GetEntities()
         {
-            List<LevelEntity> validEntities = new List<LevelEntity>();
-            foreach(var entity in entities)
+            List<LevelEntity> result = new List<LevelEntity>();
+            foreach(Transform child in gameObject.transform)
             {
-                if (entity.gameObject != null)
+                LevelEntity entity = child.gameObject.GetComponent<LevelEntity>();
+                if(entity != null)
                 {
-                    validEntities.Add(entity);
-                }
-                else
-                {
-                    Debug.Log("Game object for entity " + entity.name + "is no longer valid");
+                    result.Add(entity);
                 }
             }
-            entities = validEntities;
+            return result;
         }
 
         public virtual JSONObject Serialize()
         {
-            UpdateEntitiesList();
+            var entities = GetEntities();
 
             JSONObject result = new JSONObject();
             result["dependencies"] = dependencies.Serialize();
@@ -87,6 +85,7 @@ namespace Diablo2Editor
 
         public virtual void Instantiate()
         {
+            var entities = GetEntities();
             foreach (var entity in entities)
             {
                 entity.Instantiate();

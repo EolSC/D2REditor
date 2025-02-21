@@ -8,29 +8,29 @@ namespace Diablo2Editor
     /*
      * Class for any ingame entity contained in json preset.
      */
-    public class LevelEntity : ISerializable
+    public class LevelEntity : MonoBehaviour, ISerializable
     {
         public string type;
-        public string name;
+        public new string name;
         public long id;
         public List<LevelEntityComponent> components;
         public JsonPreset preset;
-        public GameObject gameObject;
 
-        public LevelEntity(JsonPreset parent) {
-            this.preset = parent;
+        public LevelEntity() {
+            
         }
 
+        public void SetPreset(JsonPreset preset)
+        {
+            this.preset = preset;
+        }
 
         public void Deserialize(JSONObject json)
         {
             type = json["type"];
             name = json["name"];
             id = json["id"];
-
-            gameObject = new GameObject();
             gameObject.name = name;
-            gameObject.transform.SetParent(preset.gameObject.transform);
 
             JSONNode components = json["components"];
             this.components = new List<LevelEntityComponent>();

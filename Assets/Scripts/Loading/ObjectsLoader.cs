@@ -23,11 +23,14 @@ public class ObjectsLoader
     public void Load(int act, long type, long id, GameObject gameObject, bool isReloading)
     {
         var actZeroBased = act - 1;
-        var pathMapper = strategy.settings.paths;
         var path = FindObjectPreset(actZeroBased, type, id);
         if (path.Length > 0)
         {
             Load(path, gameObject, isReloading);
+        }
+        else
+        {
+            gameObject.name = "EmptyObject";
         }
     }
 

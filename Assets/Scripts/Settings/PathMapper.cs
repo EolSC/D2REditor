@@ -81,6 +81,9 @@ namespace Diablo2Editor
      */
     public class PathMapper
     {
+        // Path to unit test directory on disc. Usually the same dir with main_folder, 'cuase we 
+        // use vanilla dataset for tests
+        private string unitTestRoot = "";
         // Path to .ds1 tiles in data folder. Remains the same for all users.
         private string tilesRoot = "";
         // Path to .json presets in data folder. Remains the same for all users.
@@ -135,7 +138,8 @@ namespace Diablo2Editor
 
                 var dataRoot = Path.GetFullPath(settings["main_folder"]);
                 var modRoot = Path.GetFullPath(settings["mod_folder"]);
-                
+
+                unitTestRoot = dataRoot;
                 fileSystem.AddFileSystem(dataRoot, 0);
                 fileSystem.AddFileSystem(modRoot, 1);
             }
@@ -178,6 +182,13 @@ namespace Diablo2Editor
            fileSystem.Validate();
         }
 
+        /*
+         * Get a root dir for tests
+         */
+        public string GetUnitTestRoot()
+        {
+            return unitTestRoot;
+        }
         /*
          * Converts local path within data folder to full path.
          */

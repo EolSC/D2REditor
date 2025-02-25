@@ -4,6 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using Diablo2Editor;
+using UnityEngine.WSA;
 
 [TestFixture]
 public class SerializationTest
@@ -83,7 +84,7 @@ public class SerializationTest
         bool testResult = true;
         foreach (var folder in folders)
         {
-            var testDir = pathMapper.GetAbsolutePath(folder);
+            var testDir = Path.Combine(pathMapper.GetUnitTestRoot(), folder);
             string[] folderFiles =
             Directory.GetFiles(testDir, "*.ds1", SearchOption.AllDirectories);
             count += folderFiles.Length;
@@ -96,7 +97,7 @@ public class SerializationTest
 
             foreach (var file in folders)
             {
-                var testDir = pathMapper.GetAbsolutePath(file);
+                var testDir = Path.Combine(pathMapper.GetUnitTestRoot(), file);
                 // Search directory
                 testResult = UnitTestOneFolder(testDir, step, ref progress, SearchOption.TopDirectoryOnly);
                 if (!testResult)

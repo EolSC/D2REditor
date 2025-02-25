@@ -1,20 +1,86 @@
 using SimpleJSON;
-using System.Data;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 namespace Diablo2Editor
 {
+
+    class VirtualFileSystem
+    {
+        SortedDictionary<int, string> fileSystems = new SortedDictionary<int, string>();
+
+        public VirtualFileSystem()
+        {
+        }
+
+        public void AddFileSystem(string root, int priority)
+        {
+            fileSystems.Add(priority, root);
+        }
+
+        public void Clear()
+        {
+            fileSystems.Clear();
+        }
+
+        public string GetAbsolutePath(string path)
+        {
+            // traverse the roots, higher priority first
+            foreach (var priority in fileSystems.Keys.Reverse())
+            {
+                var root = fileSystems[priority];
+                // try to add root to local_path
+                var abs_path = Path.Combine(root, path);
+                // if file found - it's our match
+                // Files in systems with higher priority will overwrite ones with lower
+                if (File.Exists(abs_path))
+                {
+                    // is file
+                    return abs_path;
+                }
+            }
+            return "";
+        }
+
+        public string GetLocalPath(string absolute_path)
+        {
+            // traverse the roots, higher priority first
+            foreach (var priority in fileSystems.Keys.Reverse())
+            {
+                var root = fileSystems[priority];
+                if (absolute_path.StartsWith(root))
+                {
+                    return ReverseSlashes(absolute_path.Replace(root, ""));
+                }
+            }
+            return "";
+        }
+
+        private string ReverseSlashes(string path)
+        {
+            return path.Replace("\\", "/");
+        }
+
+        public bool Validate()
+        {
+            foreach (var root in fileSystems.Values)
+            {
+                if (!Directory.Exists(root))
+                {
+                    Debug.LogError("[PathMapper] Invalid data root: " + root);
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
     /*
      * Stores data related to paths in D2R data directory
      * Handles all path conversions.
      */
     public class PathMapper
     {
-        // Root folder for D2R content folder. It's user-specific setting, must be configured before any work
-        private string dataRoot = "";
-        // Mod root folder for D2R content folder. It's user-specific setting, must be configured before any work
-        private string modRoot = "";
-
         // Path to .ds1 tiles in data folder. Remains the same for all users.
         private string tilesRoot = "";
         // Path to .json presets in data folder. Remains the same for all users.
@@ -26,7 +92,7 @@ namespace Diablo2Editor
         // Path to maplist.csv
         private string mapListPath = "";
         // Palettes directory
-        private string palettesPath = "";
+        private string palettesRoot = "";
         // Path to monsters.json storing all possible monster presets
         private string monstersPath = "";
         // Path to objects.json storing all possible environment objects presets
@@ -50,6 +116,8 @@ namespace Diablo2Editor
         // Path to objects presets folder
         private string objectsRoot = "";
 
+        private VirtualFileSystem fileSystem = new VirtualFileSystem();
+
         // DS1 extension
         // JSON preset extension
         public const string DS1_EXT = ".ds1";
@@ -63,8 +131,13 @@ namespace Diablo2Editor
         {
             if (settings.IsObject)
             {
-                dataRoot = Path.GetFullPath(settings["main_folder"]);
-                modRoot = Path.GetFullPath(settings["mod_folder"]);
+                fileSystem.Clear();
+
+                var dataRoot = Path.GetFullPath(settings["main_folder"]);
+                var modRoot = Path.GetFullPath(settings["mod_folder"]);
+                
+                fileSystem.AddFileSystem(dataRoot, 0);
+                fileSystem.AddFileSystem(modRoot, 1);
             }
             ValidateDataRoot();
         }
@@ -76,9 +149,7 @@ namespace Diablo2Editor
         {
             if (settings.IsObject)
             {
-                tilesRoot = settings["tilesRoot"];
-                presetRoot =  settings["presetRoot"];
-                palettesPath = settings["palettePath"];
+
                 monstersPath = settings["monstersPath"];
                 objectsPath = settings["objectsPath"];
                 levelTypesPath = settings["levelTypes"];
@@ -90,9 +161,13 @@ namespace Diablo2Editor
                 objtxt = settings["objtxt"];
                 monstats = settings["monstats"];
 
+
+                palettesRoot = settings["palettesRoot"];
                 npcRoot = settings["npcRoot"];
                 monsterRoot = settings["monsterRoot"];
                 objectsRoot = settings["objectsRoot"];
+                tilesRoot = settings["tilesRoot"];
+                presetRoot = settings["presetRoot"];
 
             }
             ValidateDataRoot();
@@ -100,15 +175,7 @@ namespace Diablo2Editor
 
         private void ValidateDataRoot()
         {
-            if (!Directory.Exists(dataRoot))
-            {
-                Debug.LogError("[PathMapper] Invalid data root: " + dataRoot);
-            }
-            if (!Directory.Exists(modRoot))
-            {
-                Debug.LogError("[PathMapper] Invalid mod root: " + modRoot);
-            }
-
+           fileSystem.Validate();
         }
 
         /*
@@ -116,8 +183,7 @@ namespace Diablo2Editor
          */
         public string GetAbsolutePath(string local_path)
         {
-            var canonical_path = Path.GetFullPath(Path.Combine(dataRoot, local_path));
-            return canonical_path;
+            return fileSystem.GetAbsolutePath(local_path);
         }
         /*
          * Returns path to Leveltypes.txt used to load tiles for ds1
@@ -142,11 +208,6 @@ namespace Diablo2Editor
         public string GetPathToMapList()
         {
             return Path.GetFullPath(mapListPath);
-        }
-
-        public string GetPalettesPath()
-        {
-            return GetAbsolutePath(palettesPath);
         }
 
         public string GetMonstersPath()
@@ -183,21 +244,26 @@ namespace Diablo2Editor
 
         public string GetNPCRoot()
         {
-            return GetAbsolutePath(npcRoot);
+            return npcRoot;
         }
 
         public string GetMonsterRoot()
         {
-            return GetAbsolutePath(monsterRoot);
+            return monsterRoot;
         }
         public string GetObjectsRoot()
         {
-            return GetAbsolutePath(objectsRoot);
+            return objectsRoot;
         }
 
         public string GetTilesRoot()
         {
-            return GetAbsolutePath(tilesRoot);
+            return tilesRoot;
+        }
+
+        public string GetPalettesRoot()
+        {
+            return palettesRoot;
         }
 
         /*
@@ -209,7 +275,6 @@ namespace Diablo2Editor
             string jsonFileName = fileName.Replace(DS1_EXT, JSON_EXT);
             string folder = path_to_level.Replace(fileName, "");
             string json_path = Path.Combine(folder, jsonFileName);
-            json_path = ReverseSlashes(json_path);
             string preset_local_path = json_path.Replace(tilesRoot, presetRoot);
             string result = GetAbsolutePath(preset_local_path);
             return result;
@@ -219,12 +284,7 @@ namespace Diablo2Editor
         */
         public string GetLocalPath(string absolute_path)
         {
-            return absolute_path.Replace(dataRoot, "");
-        }
-
-        private string ReverseSlashes(string path)
-        {
-            return path.Replace("\\", "/");
+            return fileSystem.GetLocalPath(absolute_path);
         }
     }
 }

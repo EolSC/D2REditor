@@ -28,13 +28,13 @@ namespace Diablo2Editor
             CleanUp();
         }
 
-        public void Load(string palletteDirectory)
+        public void Load(string palletteDirectory, PathMapper pathMapper)
         {
             this.palletteDirectory = palletteDirectory;
-            LoadPalleteFiles();
+            LoadPalleteFiles(pathMapper);
         }
 
-        private void LoadPalleteFiles()
+        private void LoadPalleteFiles(PathMapper pathMapper)
         {
             CleanUp();
 
@@ -42,7 +42,7 @@ namespace Diablo2Editor
             palettes = new NativeArray<Color>[DS1Consts.ACT_MAX];
             for (int i = 0; i < DS1Consts.ACT_MAX; ++i)
             {
-                palettes[i] = LoadPalleteForAct(i);
+                palettes[i] = LoadPalleteForAct(pathMapper, i);
             }
         }
 
@@ -100,16 +100,16 @@ namespace Diablo2Editor
             }
         }
 
-        private NativeArray<Color> LoadPalleteForAct(int act)
+        private NativeArray<Color> LoadPalleteForAct(PathMapper pathMapper, int act)
         {
             NativeArray<Color> result = new NativeArray<Color>(PALLETE_SIZE, Allocator.Persistent);
             string pathToPalette = PAL_PATH_PREFIX + (act + 1);
-            string fullPath = Path.Combine(palletteDirectory, pathToPalette, PAL_FILE_NAME);
-
-            if (File.Exists(fullPath))
+            string local_path = Path.Combine(palletteDirectory, pathToPalette, PAL_FILE_NAME);
+            var abs_path = pathMapper.GetAbsolutePath(local_path);
+            if (File.Exists(abs_path))
             {
 
-                var content = File.ReadAllBytes(fullPath);
+                var content = File.ReadAllBytes(abs_path);
                 for (int i = 0; i < PALLETE_SIZE; i++)
                 {
                     int ridx = 4 * i;

@@ -19,9 +19,11 @@ namespace Diablo2Editor
         public class CommonSettings
         {
             public TextureLoadMode textureLoadMode = TextureLoadMode.All;
+            public int modelLodLevel = 0;
             public void Init(JSONNode node)
             {
                 JSONObject obj = node as JSONObject;
+                modelLodLevel = obj["modelLodLevel"];
                 if (obj != null && obj.IsObject)
                 {
                     object parsedMode;
@@ -118,8 +120,8 @@ namespace Diablo2Editor
             {
                 Debug.Log("Settings file not found at path " + SETTINGS_FILE);
             }
-            var paletteDir = paths.GetPalettesPath();
-            pallete.Load(paletteDir);
+            var paletteDir = paths.GetPalettesRoot();
+            pallete.Load(paletteDir, paths);
             var levelTypesPath = paths.GetPathToLevelTypes();
             levelTypesLoader.Init(levelTypesPath);
 

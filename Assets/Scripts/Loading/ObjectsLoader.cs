@@ -92,18 +92,19 @@ public class ObjectsLoader
             // search objects
             folders.Add(pathMapper.GetObjectsRoot());
         }
-        return GetFullPresetName(presetName, folders);
+        return GetFullPresetName(pathMapper, presetName, folders);
     }
 
-    private string GetFullPresetName(string presetName, List<string> folders)
+    private string GetFullPresetName(PathMapper pathMapper, string presetName, List<string> folders)
     {
 
         foreach (var folder in folders)
         {
             var path = Path.Combine(folder, presetName);
-            if (File.Exists(path))
+            var abs_path = pathMapper.GetAbsolutePath(path);
+            if (File.Exists(abs_path))
             {
-                return path;
+                return abs_path;
             }
         }
         return "";

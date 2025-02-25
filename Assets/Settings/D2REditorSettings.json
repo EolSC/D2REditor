@@ -1,8 +1,8 @@
 {
   "developer": {
-    "testLevel": "data/global/tiles/expansion/mountaintop/mtntop.ds1",
-    "testLevel2": "data/global/tiles/act1/outdoors/tower2.ds1",
-    "testLevel3": "data/global/tiles/act2/tomb/tombne3.ds1",
+    "testLevel3": "data/global/tiles/expansion/mountaintop/mtntop.ds1",
+    "testLevel": "data/global/tiles/act1/barracks/barew.ds1",
+    "testLevel2": "data/global/tiles/act2/tomb/tombne3.ds1",
     "unitTestFolders": [
       "data/global/tiles/act1",
       "data/global/tiles/act2",
@@ -12,11 +12,8 @@
     ]
   },
   "paths": {
-    "presetRoot": "data/hd/env/preset",
-    "tilesRoot": "data/global/tiles",
     "levelTypes": "data/global/excel/lvltypes.txt",
     "levelPresets": "data/global/excel/lvlprest.txt",
-    "palettePath": "data/global/palette",
     "maplistPath": "Assets/Resources/maplist.csv",
     "monstersPath": "data/hd/character/monsters.json",
     "objectsPath": "data/hd/objects/objects.json",
@@ -25,12 +22,17 @@
     "objpreset": "data/global/excel/objpreset.txt",
     "objtxt": "data/global/excel/objects.txt",
     "monstats": "data/global/excel/monstats.txt",
+
+    "presetRoot": "data/hd/env/preset",
+    "tilesRoot": "data/global/tiles",
+    "palettesRoot": "data/global/palette",
     "npcRoot": "data/hd/character/npc",
     "monsterRoot": "data/hd/character/enemy",
     "objectsRoot": "data/hd/objects"
   },
   "common": {
-    "textureLoadMode": "Albedo"
+    "textureLoadMode": "Albedo",
+	"modelLodLevel" : 0
   },
   "camera": {
     "nearClip": 0.01,

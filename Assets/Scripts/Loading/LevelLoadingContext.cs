@@ -15,6 +15,7 @@ namespace Diablo2Editor
         public bool test = true;
         public bool loadJson = true;
         public bool displayProgress = true;
+        public bool clearCache = false;
 
         public static LevelLoadingContext GetUnitTestContext()
         {

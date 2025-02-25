@@ -29,6 +29,11 @@ public class LevelContentLoader
         GameObject root = new GameObject();
         var component = root.AddComponent<LevelComponent>();
         bool result = true;
+        if (context.clearCache)
+        {
+            strategy.cache.Clear();
+            strategy.dt1Cache.Clear();
+        }
         component.Load(context, strategy);
         D2RHierarchyLoader drawer = new D2RHierarchyLoader(strategy);
         if (context.instantiate)

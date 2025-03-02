@@ -69,6 +69,7 @@ namespace Diablo2Editor
             int length = first.Count;
             if (length != second.Count)
             {
+                UnityEngine.Debug.Log("Objects are not equal:" + first.ToString() + " and " + second.ToString());
                 return false;
             }
 
@@ -79,6 +80,7 @@ namespace Diablo2Editor
                 JSONNode b = second[pair.Key];
                 if (!Compare(a, b))
                 {
+                    UnityEngine.Debug.Log("Objects are not equal:" + first.ToString() + " and " + second.ToString());
                     return false;
                 }
             }

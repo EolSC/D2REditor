@@ -236,7 +236,7 @@ public class LevelObjectComponent : MonoBehaviour
             lineRenderer.sharedMaterial.color = Color.green;
         }
 
-        lineRenderer.positionCount = ds1Object.paths.Count + 1;
+        lineRenderer.positionCount = points.Count + 1;
         // First point is object position itself
         var objPos = gameObject.transform.localPosition;
         lineRenderer.SetPosition(0, new Vector3(-objPos.x, objPos.y, objPos.z));

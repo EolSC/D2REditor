@@ -16,7 +16,7 @@ namespace Diablo2Editor
 
         public void AddFileSystem(string root, int priority)
         {
-            fileSystems.Add(priority, root);
+            fileSystems.Add(priority, ReverseSlashes(root));
         }
 
         public void Clear()

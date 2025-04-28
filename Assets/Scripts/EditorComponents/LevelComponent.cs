@@ -2,8 +2,10 @@ using Diablo2Editor;
 using SimpleJSON;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Windows;
 
 public class LevelLoadingStrategy
 {
@@ -81,15 +83,23 @@ public class LevelComponent : MonoBehaviour
         UpdateObjectsData(ds1Level);
         byte[] resultDS1 = saver.SaveDS1(ds1Level);
 
-        string jsonFileName = Path.Combine(path, name_no_ext + PathMapper.JSON_EXT);
+        string jsonPath = path.Replace(@"global\tiles", @"hd\env\preset");
+
+        string jsonFileName = Path.Combine(jsonPath, name_no_ext + PathMapper.JSON_EXT).Replace("\\", "/");
         string ds1FileName = fileName;
+
+        System.IO.Directory.CreateDirectory(Path.GetDirectoryName(jsonFileName));
+        System.IO.Directory.CreateDirectory(Path.GetDirectoryName(ds1FileName));
+
         StringBuilder builder = new StringBuilder();
         resultJson.WriteToStringBuilder(builder, 2, 2, JSONTextMode.Indent);
-        File.WriteAllText(jsonFileName, builder.ToString());
-        File.WriteAllBytes(ds1FileName, resultDS1);
+        System.IO.File.WriteAllText(jsonFileName, builder.ToString());  // Write JSON to file
+        System.IO.File.WriteAllBytes(ds1FileName, resultDS1);           // Write DS1 to file
+
         Debug.Log("Level ds1 saved: " + ds1FileName);
         Debug.Log("Level json saved: " + jsonFileName);
     }
+
 
     private void UpdateObjectsData(DS1Level level)
     {

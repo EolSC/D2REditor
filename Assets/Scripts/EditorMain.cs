@@ -4,10 +4,12 @@ using UnityEditor;
 using UnityEngine;
 using Diablo2Editor;
 
-
 /*
  * Static data. Settings and global classes are here
  */
+
+string editorVersion = "1.0.0";
+
 namespace Diablo2Editor
 {
 

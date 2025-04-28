@@ -136,7 +136,7 @@ public class LevelObjectComponent : MonoBehaviour
     {
         gameObject.transform.localPosition = FromSubtileToPosition(data.x, data.y);
         gameObject.transform.hasChanged = false;
-        if (ds1Object.paths.Count > 0)
+        if (points.Count > 0)
         {
             UpdatePaths();
         }
